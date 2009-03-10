@@ -1,0 +1,23 @@
+<!-- -//NetBeans//DTD DefaultAttributes 1.0//EN -->
+<!-- XML representation of DefaultAttributes -->
+<!-- as for example a module layer. -->
+<!-- See: org.openide.filesystems.DefaultAttributes -->
+<!ELEMENT attributes (fileobject)*>
+<!ATTLIST attributes version CDATA #REQUIRED>
+<!ELEMENT fileobject (attr)*>
+<!ATTLIST fileobject name CDATA #REQUIRED>
+<!ELEMENT attr EMPTY>
+<!ATTLIST attr name CDATA #REQUIRED>
+<!ATTLIST attr bytevalue CDATA #IMPLIED>
+<!ATTLIST attr shortvalue CDATA #IMPLIED>
+<!ATTLIST attr intvalue CDATA #IMPLIED>
+<!ATTLIST attr longvalue CDATA #IMPLIED>
+<!ATTLIST attr floatvalue CDATA #IMPLIED>
+<!ATTLIST attr doublevalue CDATA #IMPLIED>
+<!ATTLIST attr boolvalue CDATA #IMPLIED>
+<!ATTLIST attr charvalue CDATA #IMPLIED>
+<!ATTLIST attr stringvalue CDATA #IMPLIED>
+<!ATTLIST attr methodvalue CDATA #IMPLIED>
+<!ATTLIST attr newvalue CDATA #IMPLIED>
+<!ATTLIST attr serialvalue CDATA #IMPLIED>
+<!ATTLIST attr urlvalue CDATA #IMPLIED>

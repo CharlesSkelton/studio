@@ -1,0 +1,11 @@
+  <!ELEMENT Info (Processor*,Icon?)>
+
+  <!ELEMENT Processor EMPTY>
+  <!ATTLIST Processor
+    class CDATA #REQUIRED
+  >
+
+  <!ELEMENT Icon EMPTY>
+  <!ATTLIST Icon
+    base CDATA #REQUIRED
+  >

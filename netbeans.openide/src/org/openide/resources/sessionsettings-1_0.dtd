@@ -1,0 +1,46 @@
+<!--
+                Sun Public License Notice
+
+The contents of this file are subject to the Sun Public License
+Version 1.0 (the "License"). You may not use this file except in
+compliance with the License. A copy of the License is available at
+http://www.sun.com/
+
+The Original Code is NetBeans. The Initial Developer of the Original
+Code is Sun Microsystems, Inc. Portions Copyright 2001 Sun
+Microsystems, Inc. All Rights Reserved.
+-->
+
+<!--
+-//NetBeans//DTD Session settings 1.0//EN
+Represents session settings
+either a default instance or a serialized bean.
+-->
+
+<!ELEMENT settings      (module?, instanceof*, (instance | serialdata)) >
+<!ATTLIST settings
+          version       (1.0) "1.0"
+>
+
+<!ELEMENT module        EMPTY >
+<!ATTLIST module
+          name          CDATA   #IMPLIED
+          spec          CDATA   #IMPLIED
+          impl          CDATA   #IMPLIED
+>
+
+<!ELEMENT instanceof    EMPTY >
+<!ATTLIST instanceof
+          class         CDATA   #REQUIRED
+>
+
+<!ELEMENT instance      EMPTY >
+<!ATTLIST instance
+          class         CDATA   #REQUIRED
+          method        CDATA   #IMPLIED
+>
+
+<!ELEMENT serialdata    (#PCDATA) >
+<!ATTLIST serialdata
+          class         CDATA   #REQUIRED
+>

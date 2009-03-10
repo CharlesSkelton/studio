@@ -1,0 +1,29 @@
+<!-- -//NetBeans//DTD Filesystem 1.1//EN -->
+<!-- XML representation of a fixed filesystem -->
+<!-- as for example a module layer. -->
+<!-- See: org.openide.filesystems.XMLFileSystem -->
+<!ELEMENT filesystem   (file|folder|attr)*      >
+<!ELEMENT folder       (folder|file|attr)*   >
+<!ELEMENT file         (#PCDATA|attr)*>
+<!ELEMENT attr    EMPTY               >
+<!ATTLIST filesystem                       >
+<!ATTLIST folder
+          name         CDATA #REQUIRED     >
+<!ATTLIST file
+          name         CDATA #REQUIRED
+          url          CDATA #IMPLIED      >
+<!ATTLIST attr
+          name         CDATA #REQUIRED
+          bytevalue    CDATA #IMPLIED
+          shortvalue   CDATA #IMPLIED
+          intvalue     CDATA #IMPLIED
+          longvalue    CDATA #IMPLIED
+          floatvalue   CDATA #IMPLIED
+          doublevalue  CDATA #IMPLIED
+          boolvalue    CDATA #IMPLIED
+          charvalue    CDATA #IMPLIED
+          stringvalue  CDATA #IMPLIED
+          urlvalue     CDATA #IMPLIED
+          methodvalue  CDATA #IMPLIED
+          newvalue     CDATA #IMPLIED
+          serialvalue  CDATA #IMPLIED      >

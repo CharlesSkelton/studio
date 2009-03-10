@@ -1,0 +1,16 @@
+<?xml encoding="UTF-8" ?>
+
+<!-- Optional namespace space prefix -->
+
+<!ENTITY % ns "">
+
+<!ENTITY % catalog "%ns;catalog">
+<!ENTITY % public "%ns;public">
+
+<!ELEMENT %catalog; (%public;)*>
+
+<!ELEMENT %public; EMPTY>
+<!ATTLIST %public;
+    publicId    CDATA #REQUIRED
+    uri         CDATA #REQUIRED
+>
