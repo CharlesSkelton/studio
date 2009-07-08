@@ -47,5 +47,9 @@ public class QErrors {
         map.put("globals","too many global variables (32 max)");
         map.put("locals","too many local variables (24 max)");
         map.put("params","too many parameters (8 max)");
+        map.put("u-fail","cannot apply `u# to data (not unique values), e.g `u#1 1");
+        map.put("s-fail","cannot apply `s# to data (not ascending values) , e.g `s#2 1");
+        map.put("noamend","can't change global state inside an amend");
+        map.put("elim","more than 57 distinct enumerations");
     }
 }
