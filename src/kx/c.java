@@ -568,7 +568,7 @@ public class c {
     return r();
     }
      */
-    public Object k() throws K4Exception,IOException {
+    public synchronized Object k() throws K4Exception,IOException {
         i.readFully(b = new byte[8]);
         int msgType = b[1];
 
