@@ -1,9 +1,8 @@
 /* Studio for kdb+ by Charles Skelton
-   is licensed under a Creative Commons Attribution-Noncommercial-Share Alike 3.0 Germany License
-   http://creativecommons.org/licenses/by-nc-sa/3.0
-   except for the netbeans components which retain their original copyright notice
-*/
-
+is licensed under a Creative Commons Attribution-Noncommercial-Share Alike 3.0 Germany License
+http://creativecommons.org/licenses/by-nc-sa/3.0
+except for the netbeans components which retain their original copyright notice
+ */
 package studio.ui;
 
 import studio.kdb.K;
@@ -13,7 +12,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Writer;
+import java.text.CharacterIterator;
 import java.text.SimpleDateFormat;
+import java.text.StringCharacterIterator;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
@@ -48,29 +49,54 @@ class ExcelExporter {
     System.out.println("written to " + file);
     }
      */
+
     private static SimpleDateFormat formatter = new SimpleDateFormat();
 
-    private static synchronized String sd(String s,java.util.Date x) {
+    private static synchronized String sd(String s, java.util.Date x) {
         formatter.applyPattern(s);
         return formatter.format(x);
     }
 
-    public void exportTableX(final JFrame frame,final JTable table,final File file,final boolean openIt) {
+    public static String escape(String s) {
+        final StringBuilder result = new StringBuilder();
+        final StringCharacterIterator iterator = new StringCharacterIterator(s);
+        char character = iterator.current();
+        while (character != CharacterIterator.DONE) {
+            if (character == '<') {
+                result.append("&lt;");
+            } else if (character == '>') {
+                result.append("&gt;");
+            } else if (character == '\"') {
+                result.append("&quot;");
+            } else if (character == '\'') {
+                result.append("&apos;");
+            } else if (character == '&') {
+                result.append("&amp;");
+            } else {
+                result.append(character);
+            }
+            character = iterator.next();
+        }
+        return result.toString();
+    }
+
+    public void exportTableX(final JFrame frame, final JTable table, final File file, final boolean openIt) {
 
         final TableModel model = table.getModel();
         final String message = "Exporting data to " + file.getAbsolutePath();
         final String note = "0% complete";
         String title = "Studio for kdb+";
-        UIManager.put("ProgressMonitor.progressText",title);
+        UIManager.put("ProgressMonitor.progressText", title);
 
         final int min = 0;
         final int max = 100;
-        final ProgressMonitor pm = new ProgressMonitor(frame,message,note,min,max);
+        final ProgressMonitor pm = new ProgressMonitor(frame, message, note, min, max);
         pm.setMillisToDecideToPopup(100);
         pm.setMillisToPopup(100);
         pm.setProgress(0);
 
         Runnable runner = new Runnable() {
+
             public void run() {
                 try {
                     Writer writer = new BufferedWriter(new PrintWriter(new FileOutputStream(file)));
@@ -94,82 +120,85 @@ class ExcelExporter {
                     writer.write("</ss:Styles>");
 
                     writer.write("<ss:Worksheet ss:Name=\"Sheet1\">\n<ss:Table>\n");
-                    for (int i = 0;i < model.getColumnCount();i++)
+                    for (int i = 0; i < model.getColumnCount(); i++) {
                         writer.write("<ss:Column ss:Width=\"80\"/>");
+                    }
 
                     writer.write("\n<ss:Row>");
-                    for (int i = 0;i < model.getColumnCount();i++) {
+                    for (int i = 0; i < model.getColumnCount(); i++) {
                         writer.write("<ss:Cell><ss:Data ss:Type=\"String\">");
-                        writer.write(model.getColumnName(i));
+                        writer.write(escape(model.getColumnName(i)));
                         writer.write("</ss:Data></ss:Cell>");
                     }
                     writer.write("</ss:Row>\n");
 
                     int maxRow = model.getRowCount();
                     int lastProgress = 0;
-                    for (int i = 0;i < model.getRowCount();i++) {
+                    for (int i = 0; i < model.getRowCount(); i++) {
                         writer.write("<ss:Row>");
 
-                        for (int j = 0;j < model.getColumnCount();j++) {
+                        for (int j = 0; j < model.getColumnCount(); j++) {
 
-                            K.KBase b = (K.KBase) model.getValueAt(i,j);
-                            if (!b.isNull())
-                                if (table.getColumnClass(j) == K.KSymbolVector.class)
-                                    writer.write("<ss:Cell><ss:Data ss:Type=\"String\">" + b.toString(false));
-                                else if (table.getColumnClass(j) == K.KDateVector.class)
+                            K.KBase b = (K.KBase) model.getValueAt(i, j);
+                            if (!b.isNull()) {
+                                if (table.getColumnClass(j) == K.KSymbolVector.class) {
+                                    writer.write("<ss:Cell><ss:Data ss:Type=\"String\">" + escape(b.toString(false)));
+                                } else if (table.getColumnClass(j) == K.KDateVector.class) {
                                     writer.write("<ss:Cell ss:StyleID=\"date\"><ss:Data ss:Type=\"DateTime\">" +
-                                                 sd("yyyy-MM-dd",((K.KDate) b).toDate()));
-                                else if (table.getColumnClass(j) == K.KTimeVector.class)
+                                            sd("yyyy-MM-dd", ((K.KDate) b).toDate()));
+                                } else if (table.getColumnClass(j) == K.KTimeVector.class) {
                                     writer.write("<ss:Cell ss:StyleID=\"time\"><ss:Data ss:Type=\"DateTime\">" +
-                                                 "1899-12-31T" + sd("HH:mm:ss.SSS",((K.KTime) b).toTime()));
-                                else if (table.getColumnClass(j) == K.KTimestampVector.class) {
-                                    char[] cs = sd("yyyy-MM-dd HH:mm:ss.SSS",((K.KTimestamp) b).toTimestamp()).toCharArray();
+                                            "1899-12-31T" + sd("HH:mm:ss.SSS", ((K.KTime) b).toTime()));
+                                } else if (table.getColumnClass(j) == K.KTimestampVector.class) {
+                                    char[] cs = sd("yyyy-MM-dd HH:mm:ss.SSS", ((K.KTimestamp) b).toTimestamp()).toCharArray();
                                     cs[10] = 'T';
                                     writer.write("<ss:Cell ss:StyleID=\"datetime\"><ss:Data ss:Type=\"DateTime\">" + new String(cs));
-                                }
-                                else if (table.getColumnClass(j) == K.KMonthVector.class)
-                                    writer.write("<ss:Cell ss:StyleID=\"month\"><ss:Data ss:Type=\"DateTime\">" + sd("yyyy-MM",((K.Month) b).toDate()));
-                                else if (table.getColumnClass(j) == K.KMinuteVector.class)
+                                } else if (table.getColumnClass(j) == K.KMonthVector.class) {
+                                    writer.write("<ss:Cell ss:StyleID=\"month\"><ss:Data ss:Type=\"DateTime\">" + sd("yyyy-MM", ((K.Month) b).toDate()));
+                                } else if (table.getColumnClass(j) == K.KMinuteVector.class) {
                                     writer.write("<ss:Cell ss:StyleID=\"minute\"><ss:Data ss:Type=\"DateTime\">" +
-                                                 "1899-12-31T" + sd("HH:mm",((K.Minute) b).toDate()));
-                                else if (table.getColumnClass(j) == K.KSecondVector.class)
+                                            "1899-12-31T" + sd("HH:mm", ((K.Minute) b).toDate()));
+                                } else if (table.getColumnClass(j) == K.KSecondVector.class) {
                                     writer.write("<ss:Cell ss:StyleID=\"second\"><ss:Data ss:Type=\"DateTime\">" +
-                                                 "1899-12-31T" + sd("HH:mm:ss",((K.Second) b).toDate()));
-                                else if (table.getColumnClass(j) == K.KBooleanVector.class)
+                                            "1899-12-31T" + sd("HH:mm:ss", ((K.Second) b).toDate()));
+                                } else if (table.getColumnClass(j) == K.KBooleanVector.class) {
                                     writer.write("<ss:Cell><ss:Data ss:Type=\"Boolean\">" + (((K.KBoolean) b).b ? "1" : "0"));
-                                else if (table.getColumnClass(j) == K.KDoubleVector.class)
+                                } else if (table.getColumnClass(j) == K.KDoubleVector.class) {
                                     writer.write("<ss:Cell><ss:Data ss:Type=\"Number\">" + ((K.KDouble) b).d);
-                                else if (table.getColumnClass(j) == K.KFloatVector.class)
+                                } else if (table.getColumnClass(j) == K.KFloatVector.class) {
                                     writer.write("<ss:Cell><ss:Data ss:Type=\"Number\">" + ((K.KFloat) b).f);
-                                else if (table.getColumnClass(j) == K.KLongVector.class)
+                                } else if (table.getColumnClass(j) == K.KLongVector.class) {
                                     writer.write("<ss:Cell><ss:Data ss:Type=\"Number\">" + ((K.KLong) b).j);
-                                else if (table.getColumnClass(j) == K.KIntVector.class)
+                                } else if (table.getColumnClass(j) == K.KIntVector.class) {
                                     writer.write("<ss:Cell><ss:Data ss:Type=\"Number\">" + ((K.KInteger) b).i);
-                                else if (table.getColumnClass(j) == K.KShortVector.class)
+                                } else if (table.getColumnClass(j) == K.KShortVector.class) {
                                     writer.write("<ss:Cell><ss:Data ss:Type=\"Number\">" + ((K.KShort) b).s);
-                                else if (table.getColumnClass(j) == K.KCharacterVector.class)
-                                    writer.write("<ss:Cell><ss:Data ss:Type=\"String\">" + new String(new char[]{((K.KCharacter) b).c}));
-                                else
-                                    writer.write("<ss:Cell><ss:Data ss:Type=\"String\">" + K.decode(b,false));
-                            else
+                                } else if (table.getColumnClass(j) == K.KCharacterVector.class) {
+                                    writer.write("<ss:Cell><ss:Data ss:Type=\"String\">" + escape(new String(new char[]{((K.KCharacter) b).c})));
+                                } else {
+                                    writer.write("<ss:Cell><ss:Data ss:Type=\"String\">" + escape(K.decode(b, false)));
+                                }
+                            } else {
                                 writer.write("<ss:Cell><ss:Data ss:Type=\"String\">");
+                            }
 
                             writer.write("</ss:Data></ss:Cell>");
                         }
 
-                        if (pm.isCanceled())
+                        if (pm.isCanceled()) {
                             break;
-                        else {
+                        } else {
                             final int progress = (100 * i) / maxRow;
                             if (progress > lastProgress) {
                                 lastProgress = progress;
                                 final String note = "" + progress + "% complete";
                                 SwingUtilities.invokeLater(new Runnable() {
-                                                           public void run() {
-                                                               pm.setProgress(progress);
-                                                               pm.setNote(note);
-                                                           }
-                                                       });
+
+                                    public void run() {
+                                        pm.setProgress(progress);
+                                        pm.setNote(note);
+                                    }
+                                });
 
                                 Thread.yield();
                             }
@@ -180,17 +209,16 @@ class ExcelExporter {
                     writer.write("</ss:Table>\n</ss:Worksheet>\n</ss:Workbook>");
                     writer.close();
 
-                    if ((!pm.isCanceled()) && openIt)
+                    if ((!pm.isCanceled()) && openIt) {
                         openTable(file);
-                }
-                catch (Exception e) {
+                    }
+                } catch (Exception e) {
                     JOptionPane.showMessageDialog(null,
-                                                  "\nThere was an error encoding the K types into Excel types.\n\n" + e.getMessage() + "\n\n",
-                                                  "Studio for kdb+",
-                                                  JOptionPane.OK_OPTION,
-                                                  Util.getImage(Config.imageBase + "32x32/error.png"));
-                }
-                finally {
+                            "\nThere was an error encoding the K types into Excel types.\n\n" + e.getMessage() + "\n\n",
+                            "Studio for kdb+",
+                            JOptionPane.OK_OPTION,
+                            Util.getImage(Config.imageBase + "32x32/error.png"));
+                } finally {
                     pm.close();
                 }
             }
@@ -335,17 +363,17 @@ class ExcelExporter {
             String lcOSName = System.getProperty("os.name").toLowerCase();
             boolean MAC_OS_X = lcOSName.startsWith("mac os x");
             Process p = null;
-            if (MAC_OS_X)
+            if (MAC_OS_X) {
                 p = run.exec("open " + file);
-            else
+            } else {
                 run.exec("cmd.exe /c start " + file);
-        }
-        catch (IOException e) {
+            }
+        } catch (IOException e) {
             JOptionPane.showMessageDialog(null,
-                                          "\nThere was an error opening excel.\n\n" + e.getMessage() + "\n\nPerhaps you do not have Excel installed,\nor .xls files are not associated with Excel",
-                                          "Studio for kdb+",
-                                          JOptionPane.OK_OPTION,
-                                          Util.getImage(Config.imageBase + "32x32/error.png"));
+                    "\nThere was an error opening excel.\n\n" + e.getMessage() + "\n\nPerhaps you do not have Excel installed,\nor .xls files are not associated with Excel",
+                    "Studio for kdb+",
+                    JOptionPane.OK_OPTION,
+                    Util.getImage(Config.imageBase + "32x32/error.png"));
 
         }
     }
