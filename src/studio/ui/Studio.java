@@ -26,10 +26,6 @@ import javax.swing.filechooser.FileView;
 import javax.swing.table.TableModel;
 import javax.swing.text.*;
 import javax.swing.undo.UndoManager;
-import javax.help.CSH;
-import javax.help.HelpSetException;
-import javax.help.HelpSet;
-import javax.help.HelpBroker;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
@@ -53,7 +49,6 @@ public class Studio extends JPanel implements Observer,WindowListener {
         Settings.addInitializer(new QSettingsInitializer());
         Settings.reset();
     }
-    static private HelpBroker hb;
     private JTable table;
     private String exportFilename;
     private String lastQuery = null;
@@ -87,7 +82,6 @@ public class Studio extends JPanel implements Observer,WindowListener {
     private UserAction executeAction;
     private UserAction executeCurrentLineAction;
     private UserAction refreshAction;
-    private UserAction helpAction;
     private UserAction aboutAction;
     private UserAction exitAction;
     private UserAction toggleDividerOrientationAction;
@@ -316,7 +310,7 @@ public class Studio extends JPanel implements Observer,WindowListener {
         executeCurrentLineAction.setEnabled(true);
         refreshAction.setEnabled(false);
 
-        helpAction.setEnabled(true);
+//        helpAction.setEnabled(true);
         aboutAction.setEnabled(true);
         exitAction.setEnabled(true);
     }
@@ -1029,41 +1023,6 @@ public class Studio extends JPanel implements Observer,WindowListener {
         return false;
     }
 
-    private void prepareHelp() {
-        /*        try
-        {
-        String home= System.getProperty("user.home");
-        File file= new File( home + "/.studioforkdb/help.jar");
-        ClassPathHacker.addFile(file);
-        }
-        catch( IOException e)
-        {
-        e.printStackTrace();
-        }
-         */
-        try {
-            HelpSet hs = null;
-            ClassLoader loader = this.getClass().getClassLoader();
-
-            URL url = HelpSet.findHelpSet(loader,"help/studio.hs");
-
-            try {
-                hs = new HelpSet(loader,url);
-            }
-            catch (HelpSetException ex) {
-                System.err.println("Error loading");
-                return;
-            }
-
-            hb = hs.createHelpBroker();
-            hb.setLocation(new Point(200,200));
-            hb.enableHelpKey(frame.getRootPane(),"main",hs);
-        }
-        catch (Exception exp) {
-            exp.printStackTrace();
-        }
-    }
-
     private void arrangeAll() {
         int noWins = windowList.size();
 
@@ -1431,22 +1390,6 @@ public class Studio extends JPanel implements Observer,WindowListener {
             }
         };
 
-
-        helpAction = new UserAction("Help",
-                                    Util.getImage(Config.imageBase2 + "help.png"),
-                                    "Help topics",
-                                    new Integer(KeyEvent.VK_T),
-                                    null) {
-            public void actionPerformed(ActionEvent e) {
-                try {
-                    new CSH.DisplayHelpFromSource(hb).actionPerformed(e);
-                }
-                catch (Exception exp) {
-                    exp.printStackTrace();
-                }
-            }
-        };
-
         aboutAction = new UserAction("About",
                                      Util.getImage(Config.imageBase2 + "about.png"),
                                      "About Studio for kdb+",
@@ -1739,7 +1682,6 @@ public class Studio extends JPanel implements Observer,WindowListener {
         menu = new JMenu("Help");
         menu.setMnemonic(KeyEvent.VK_H);
         menu.add(new JMenuItem(codeKxComAction));
-        menu.add(new JMenuItem(helpAction));
         if (!MAC_OS_X)
             menu.add(new JMenuItem(aboutAction));
         menubar.add(menu);
@@ -1863,7 +1805,6 @@ public class Studio extends JPanel implements Observer,WindowListener {
             toolbar.add(replaceAction);
 
             toolbar.addSeparator();
-            toolbar.add(helpAction);
             toolbar.add(codeKxComAction);
 
             for (int j = 0;j < toolbar.getComponentCount();j++) {
@@ -1995,9 +1936,6 @@ public class Studio extends JPanel implements Observer,WindowListener {
                           (int) (Math.max(0,(screenSize.height - frame.getHeight()) / 2.0)));
 
         frame.setIconImage(getImage(Config.imageBase + "32x32/dot-chart.png").getImage());
-
-        if (hb == null)
-            prepareHelp();
 
         //     frame.pack();
         frame.setVisible(true);
