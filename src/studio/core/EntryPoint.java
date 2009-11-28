@@ -9,14 +9,15 @@ package studio.core;
 import studio.kdb.Config;
 import studio.kdb.Lm;
 import studio.ui.ExceptionGroup;
-import studio.ui.LicensePanel;
 import studio.ui.Studio;
 
 import java.util.TimeZone;
 import javax.swing.JOptionPane;
+import javax.swing.UIManager;
+import studio.ui.LicensePanel;
 
 public class EntryPoint {
-    public static void main(String[] args) {
+    public static void main(final String[] args) {
         TimeZone.setDefault(TimeZone.getTimeZone("GMT"));
 
         if (System.getProperty("mrj.version") != null) {
@@ -27,6 +28,15 @@ public class EntryPoint {
             System.setProperty("com.apple.mrj.application.live-resize","true");
             System.setProperty("com.apple.macos.smallTabs","true");
             System.setProperty("com.apple.mrj.application.growbox.intrudes","false");
+        }
+
+        if(Config.getInstance().getLookAndFeel()!=null){
+            try {
+                UIManager.setLookAndFeel(Config.getInstance().getLookAndFeel());
+            } catch (Exception ex) {
+                // go on with default one
+                ex.printStackTrace();
+            }
         }
 
         if (!Config.getInstance().getAcceptedLicense()) {
@@ -47,62 +57,14 @@ public class EntryPoint {
 
             Config.getInstance().setAcceptedLicense(Lm.buildDate);
         }
-//otherwise input has been canceled
-     /*   
-        LicenseInformationDialog license = new LicenseInformationDialog(null);
-        // license.setStartLocation(MainFrame.this);
-        license.setTitle("Studio for kdb+ :: License information");
-        license.setModal(true);
-        license.pack();
-        license.show();
-         */
 
         ThreadGroup exceptionThreadGroup = new ExceptionGroup();
 
         new Thread(exceptionThreadGroup,"Init thread") {
             public void run() {
-                Studio.init();
+                Studio.init(args);
             }
         }.start();
 
-
-    /*        final UncaughtExceptionHandler eh=new UncaughtExceptionHandler()
-    {
-    public void uncaughtException(Thread t,Throwable e)
-    {
-    CharArrayWriter caw=new CharArrayWriter();
-
-    e.printStackTrace(new PrintWriter(caw));
-
-    JOptionPane.showMessageDialog(null,
-    "An uncaught exception occurred\n\nDetails - \n\n"+caw.toString(),
-    "Studio for kdb+",
-    JOptionPane.ERROR_MESSAGE);
-    }
-    };
-
-
-
-    Runnable runner=new Runnable()
-    {
-    public void run()
-    {
-    Thread.setDefaultUncaughtExceptionHandler(eh);
-    Studio.init();
-    }
-    };
-    try
-    {
-    SwingUtilities.invokeAndWait(runner);
-    }
-    catch(InterruptedException ex)
-    {
-    ex.printStackTrace();
-    }
-    catch(InvocationTargetException ex)
-    {
-    ex.printStackTrace();
-    }
-     */
     }
 }
