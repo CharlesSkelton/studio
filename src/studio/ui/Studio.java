@@ -6,9 +6,14 @@
 
 package studio.ui;
 
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
+import java.util.concurrent.ExecutionException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import studio.kdb.*;
+import studio.kdb.K.KBase;
 import studio.utils.OSXAdapter;
-import studio.utils.swing.SwingWorker;
 import javax.swing.event.UndoableEditEvent;
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
@@ -29,8 +34,9 @@ import javax.swing.undo.UndoManager;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
-import java.util.*;
+import java.net.URI;
 import java.net.URL;
+import java.util.*;
 import javax.swing.plaf.basic.BasicSplitPaneUI;
 import org.netbeans.editor.example.QKit;
 import org.netbeans.editor.ext.q.QSettingsInitializer;
@@ -82,6 +88,7 @@ public class Studio extends JPanel implements Observer,WindowListener {
     private UserAction executeAction;
     private UserAction executeCurrentLineAction;
     private UserAction refreshAction;
+    private UserAction subscribeAction;
     private UserAction aboutAction;
     private UserAction exitAction;
     private UserAction toggleDividerOrientationAction;
@@ -102,7 +109,7 @@ public class Studio extends JPanel implements Observer,WindowListener {
 
         title = title.replace('\\','/');
 
-        frame.setTitle(title + (getModified() ? " (not saved) " : "") + " Studio for kdb+ " + Lm.getVersionString());
+        frame.setTitle(title + (getModified() ? " (not saved) " : "") + (server!=null?" @"+server.toString():"") +" Studio for kdb+ " + Lm.getVersionString());
     }
 
     public static class WindowListChangedEvent extends EventObject {
@@ -251,16 +258,19 @@ public class Studio extends JPanel implements Observer,WindowListener {
         UndoManager um = (UndoManager) doc.getProperty(BaseDocument.UNDO_MANAGER_PROP);
         if (um == null) {
             um = new UndoManager() {
+                @Override
                 public void undoableEditHappened(UndoableEditEvent e) {
                     super.undoableEditHappened(e);
                     updateUndoRedoState(this);
                 }
 
+                @Override
                 public synchronized void redo() throws CannotRedoException {
                     super.redo();
                     updateUndoRedoState(this);
                 }
 
+                @Override
                 public synchronized void undo() throws CannotUndoException {
                     super.undo();
                     updateUndoRedoState(this);
@@ -276,8 +286,6 @@ public class Studio extends JPanel implements Observer,WindowListener {
             splitpane.setTopComponent(c);
             splitpane.setDividerLocation(0.5);
         }
-        //  textArea.setSelectionStart(origSelStart);
-        //  textArea.setSelectionEnd(origSelEnd);
 
         saveFileAction.setEnabled(textArea.getDocument().getProperty("filename") != null);
 
@@ -295,16 +303,8 @@ public class Studio extends JPanel implements Observer,WindowListener {
         saveFileAction.setEnabled(true);
         saveAsFileAction.setEnabled(true);
         exportAction.setEnabled(false);
-//        importAction.setEnabled(true);
         chartAction.setEnabled(false);
         openInExcel.setEnabled(false);
-//        undoAction.setEnabled(false);
-        //       redoAction.setEnabled(false);
-        //cutAction.setEnabled(false);
-        //copyAction.setEnabled(false);
-        //pasteAction.setEnabled(true);
-        //findAction.setEnabled(false);
-        //replaceAction.setEnabled(false);
         stopAction.setEnabled(false);
         executeAction.setEnabled(true);
         executeCurrentLineAction.setEnabled(true);
@@ -321,10 +321,12 @@ public class Studio extends JPanel implements Observer,WindowListener {
 
         FileFilter ff =
             new FileFilter() {
+            @Override
                 public String getDescription() {
                     return "q script";
                 }
 
+            @Override
                 public boolean accept(File file) {
                     if (file.isDirectory() || file.getName().endsWith(".q"))
                         return true;
@@ -362,20 +364,6 @@ public class Studio extends JPanel implements Observer,WindowListener {
         return null;
     }
 
-    /*    private void importFromBin( final String filename) throws IOException, c.K4Exception {
-    k4.c reader= new k4.c();
-    reader.i(new File(filename));
-    resultSet=reader.k();
-    reader.close();
-    }
-     */
-    /*    private void exportAsBin( final String filename) throws IOException, c.K4Exception {
-    k4.c writer= new k4.c();
-    writer.o(new File(filename));
-    writer.k(resultSet);
-    writer.close();
-    }
-     */
     private void exportAsExcel(final String filename) {
         new ExcelExporter().exportTableX(frame,table,new File(filename),false);
     }
@@ -396,6 +384,7 @@ public class Studio extends JPanel implements Observer,WindowListener {
         pm.setProgress(0);
 
         Runnable runner = new Runnable() {
+            @Override
             public void run() {
                 if (filename != null) {
                     String lineSeparator = (String) java.security.AccessController.doPrivileged(new sun.security.action.GetPropertyAction("line.separator"));
@@ -436,11 +425,13 @@ public class Studio extends JPanel implements Observer,WindowListener {
                                 if (progress > lastProgress) {
                                     final String note = "" + progress + "% complete";
                                     SwingUtilities.invokeLater(new Runnable() {
-                                                               public void run() {
-                                                                   pm.setProgress(progress);
-                                                                   pm.setNote(note);
-                                                               }
-                                                           });
+
+                                        @Override
+                                        public void run() {
+                                            pm.setProgress(progress);
+                                            pm.setNote(note);
+                                        }
+                                    });
 
                                     Thread.yield();
                                 }
@@ -487,6 +478,7 @@ public class Studio extends JPanel implements Observer,WindowListener {
         pm.setProgress(0);
 
         Runnable runner = new Runnable() {
+            @Override
             public void run() {
                 if (filename != null) {
                     String lineSeparator = (String) java.security.AccessController.doPrivileged(new sun.security.action.GetPropertyAction("line.separator"));
@@ -530,11 +522,13 @@ public class Studio extends JPanel implements Observer,WindowListener {
                                 if (progress > lastProgress) {
                                     final String note = "" + progress + "% complete";
                                     SwingUtilities.invokeLater(new Runnable() {
-                                                               public void run() {
-                                                                   pm.setProgress(progress);
-                                                                   pm.setNote(note);
-                                                               }
-                                                           });
+
+                                        @Override
+                                        public void run() {
+                                            pm.setProgress(progress);
+                                            pm.setNote(note);
+                                        }
+                                    });
 
                                     Thread.yield();
                                 }
@@ -588,10 +582,12 @@ public class Studio extends JPanel implements Observer,WindowListener {
         if (table != null) {
             csvFilter =
                 new FileFilter() {
+                @Override
                     public String getDescription() {
                         return "csv (Comma delimited)";
                     }
 
+                @Override
                     public boolean accept(File file) {
                         if (file.isDirectory() || file.getName().endsWith(".csv"))
                             return true;
@@ -602,10 +598,12 @@ public class Studio extends JPanel implements Observer,WindowListener {
 
             txtFilter =
                 new FileFilter() {
+                @Override
                     public String getDescription() {
                         return "txt (Tab delimited)";
                     }
 
+                @Override
                     public boolean accept(File file) {
                         if (file.isDirectory() || file.getName().endsWith(".txt"))
                             return true;
@@ -616,10 +614,12 @@ public class Studio extends JPanel implements Observer,WindowListener {
 
             xmlFilter =
                 new FileFilter() {
+                @Override
                     public String getDescription() {
                         return "xml";
                     }
 
+                @Override
                     public boolean accept(File file) {
                         if (file.isDirectory() || file.getName().endsWith(".xml"))
                             return true;
@@ -631,10 +631,12 @@ public class Studio extends JPanel implements Observer,WindowListener {
 
             xlsFilter =
                 new FileFilter() {
+                @Override
                     public String getDescription() {
                         return "xls (Microsoft Excel)";
                     }
 
+                @Override
                     public boolean accept(File file) {
                         if (file.isDirectory() || file.getName().endsWith(".xls"))
                             return true;
@@ -648,25 +650,6 @@ public class Studio extends JPanel implements Observer,WindowListener {
             chooser.addChoosableFileFilter(xmlFilter);
             chooser.addChoosableFileFilter(xlsFilter);
         }
-        ;
-
-        /*        FileFilter binFilter =
-        new FileFilter() {
-        public String getDescription() {
-        return "res (result set)";
-        }
-        
-        public boolean accept(File file) {
-        if (file.isDirectory() || file.getName().endsWith(".res")) {
-        return true;
-        } else {
-        return false;
-        }
-        }
-        
-        };
-         */
-        //     chooser.addChoosableFileFilter(binFilter);
 
         if (exportFilename != null) {
             File file = new File(exportFilename);
@@ -682,10 +665,6 @@ public class Studio extends JPanel implements Observer,WindowListener {
                     chooser.setFileFilter(xmlFilter);
                 else if (exportFilename.endsWith(".txt"))
                     chooser.setFileFilter(txtFilter);
-        /*            else {
-        chooser.setFileFilter(binFilter);
-        }
-         */
         }
 
         int option = chooser.showSaveDialog(textArea);
@@ -753,66 +732,6 @@ public class Studio extends JPanel implements Observer,WindowListener {
         }
     }
 
-    /*    private void importFromBinFile() {
-    JFileChooser chooser = new JFileChooser();
-    chooser.setDialogType(JFileChooser.OPEN_DIALOG);
-    chooser.setDialogTitle("Import result set");
-    chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-    
-    FileFilter binFilter =
-    new FileFilter() {
-    public String getDescription() {
-    return "res (result set)";
-    }
-    
-    public boolean accept(File file) {
-    if (file.isDirectory() || file.getName().endsWith(".res")) {
-    return true;
-    } else {
-    return false;
-    }
-    }
-    };
-    
-    chooser.addChoosableFileFilter(binFilter);
-    
-    if (exportFilename != null) {
-    File file = new File(exportFilename);
-    File dir = new File(file.getPath());
-    chooser.setCurrentDirectory(dir);
-    chooser.ensureFileIsVisible(file);
-    }
-    
-    chooser.setFileFilter(binFilter);
-    
-    int option = chooser.showOpenDialog(textArea);
-    
-    if (option == JFileChooser.APPROVE_OPTION) {
-    File sf = chooser.getSelectedFile();
-    File f = chooser.getCurrentDirectory();
-    String dir = f.getAbsolutePath();
-    
-    //            Cursor cursor= frame.getCursor();
-    
-    try {
-    //              frame.setCursor(new java.awt.Cursor(java.awt.Cursor.WAIT_CURSOR));
-    FileFilter ff= chooser.getFileFilter();
-    
-    exportFilename = dir + "/" + sf.getName();
-    
-    importFromBin(exportFilename);
-    } catch (Exception e) {
-    JOptionPane.showMessageDialog(frame,
-    "Error",
-    "An error occurred whilst importing the file.\n Details are: " + e.getMessage(),
-    JOptionPane.ERROR_MESSAGE,
-    getImage(Config.imageBase+"32x32/error.png"));
-    } finally {
-    //            frame.setCursor(cursor);
-    }
-    }
-    }
-     */
     public void newFile() {
         try {
             String filename = (String) textArea.getDocument().getProperty("filename");
@@ -942,10 +861,12 @@ public class Studio extends JPanel implements Observer,WindowListener {
 
         FileFilter ff =
             new FileFilter() {
+            @Override
                 public String getDescription() {
                     return "q script";
                 }
 
+            @Override
                 public boolean accept(File file) {
                     if (file.isDirectory() || file.getName().endsWith(".q"))
                         return true;
@@ -1103,27 +1024,17 @@ public class Studio extends JPanel implements Observer,WindowListener {
             new ReloadQKeywords(server);
             Config.getInstance().setLRUServer(server);
         }
-
+        refreshFrameTitle();
         windowListMonitor.fireMyEvent(new WindowListChangedEvent(this));
     }
 
-    /*  
-    
-    printAction = new StudioAction("Print...",
-    Util.getImage(Config.imageBase2+"print.png"),
-    "Print the document",
-    new Integer(KeyEvent.VK_O),
-    KeyStroke.getKeyStroke(KeyEvent.VK_O,Toolkit.getDefaultToolkit().getMenuShortcutKeyMask())) {
-    public void actionPerformed(ActionEvent e) {
-    PrintUtilities.printComponent(textPane);
-    }
-     */
     private void initActions() {
         newFileAction = new UserAction("New...",
                                        getImage(Config.imageBase2 + "document_new.png"),
                                        "Create a blank script",
                                        new Integer(KeyEvent.VK_N),
                                        null) {
+            @Override
             public void actionPerformed(ActionEvent e) {
                 //   PrintUtilities.printComponent(textArea);
                 newFile();
@@ -1135,6 +1046,7 @@ public class Studio extends JPanel implements Observer,WindowListener {
                                           "Arrange all windows on screen",
                                           new Integer(KeyEvent.VK_A),
                                           null) {
+            @Override
             public void actionPerformed(ActionEvent e) {
                 arrangeAll();
             }
@@ -1146,6 +1058,7 @@ public class Studio extends JPanel implements Observer,WindowListener {
                                                         "Toggle the window divider's orientation",
                                                         new Integer(KeyEvent.VK_C),
                                                         null) {
+            @Override
             public void actionPerformed(ActionEvent e) {
                 toggleDividerOrientation();
             }
@@ -1156,6 +1069,7 @@ public class Studio extends JPanel implements Observer,WindowListener {
                                          "Close current document",
                                          new Integer(KeyEvent.VK_C),
                                          null) {
+            @Override
             public void actionPerformed(ActionEvent e) {
                 quitWindow();
                 if (windowList.size() == 0)
@@ -1168,6 +1082,7 @@ public class Studio extends JPanel implements Observer,WindowListener {
                                         "Open a script",
                                         new Integer(KeyEvent.VK_O),
                                         KeyStroke.getKeyStroke(KeyEvent.VK_O,menuShortcutKeyMask)) {
+            @Override
             public void actionPerformed(ActionEvent e) {
                 openFile();
             }
@@ -1178,6 +1093,7 @@ public class Studio extends JPanel implements Observer,WindowListener {
                                                    "Open a new window",
                                                    new Integer(KeyEvent.VK_N),
                                                    null) {
+            @Override
             public void actionPerformed(ActionEvent e) {
                 new Studio(server,null);
             }
@@ -1188,6 +1104,7 @@ public class Studio extends JPanel implements Observer,WindowListener {
                                           "Edit the server details",
                                           new Integer(KeyEvent.VK_E),
                                           null) {
+            @Override
             public void actionPerformed(ActionEvent e) {
                 Server s = new Server(server);
 
@@ -1221,6 +1138,7 @@ public class Studio extends JPanel implements Observer,WindowListener {
                                          "Configure a new server",
                                          new Integer(KeyEvent.VK_A),
                                          null) {
+            @Override
             public void actionPerformed(ActionEvent e) {
                 AddServerForm f = new AddServerForm(frame);
                 f.setModal(true);
@@ -1245,6 +1163,7 @@ public class Studio extends JPanel implements Observer,WindowListener {
                                             "Remove this server",
                                             new Integer(KeyEvent.VK_R),
                                             null) {
+            @Override
             public void actionPerformed(ActionEvent e) {
                 int choice = JOptionPane.showOptionDialog(frame,
                                                           "Remove server " + server.getName() + " from list?",
@@ -1276,6 +1195,7 @@ public class Studio extends JPanel implements Observer,WindowListener {
                                         "Save the script",
                                         new Integer(KeyEvent.VK_S),
                                         KeyStroke.getKeyStroke(KeyEvent.VK_S,menuShortcutKeyMask)) {
+            @Override
             public void actionPerformed(ActionEvent e) {
                 String filename = (String) textArea.getDocument().getProperty("filename");
                 saveFile(filename,false);
@@ -1287,29 +1207,18 @@ public class Studio extends JPanel implements Observer,WindowListener {
                                           "Save script as",
                                           new Integer(KeyEvent.VK_A),
                                           null) {
+            @Override
             public void actionPerformed(ActionEvent e) {
                 saveAsFile();
             }
         };
-
-        /*        importAction = new UserAction("Import...",
-        getImage(Config.imageBase2+"import1.png"),
-        "Import result set",
-        new Integer(KeyEvent.VK_I),
-        null) {
-        public void actionPerformed(ActionEvent e) {
-        importFromBinFile();
-        tabbedPane.removeAll();
-        processK4Results(resultSet);
-        }
-        };
-         */
 
         exportAction = new UserAction("Export...",
                                       getImage(Config.imageBase2 + "export2.png"),
                                       "Export result set",
                                       new Integer(KeyEvent.VK_E),
                                       null) {
+            @Override
             public void actionPerformed(ActionEvent e) {
                 export();
             }
@@ -1320,6 +1229,7 @@ public class Studio extends JPanel implements Observer,WindowListener {
                                      "Chart current data set",
                                      new Integer(KeyEvent.VK_E),
                                      null) {
+            @Override
             public void actionPerformed(ActionEvent e) {
                 new LineChart((KTableModel) table.getModel());
             //new PriceVolumeChart(table);
@@ -1332,10 +1242,13 @@ public class Studio extends JPanel implements Observer,WindowListener {
                                     "Stop the query",
                                     new Integer(KeyEvent.VK_S),
                                     null) {
+            @Override
             public void actionPerformed(ActionEvent e) {
                 if (worker != null) {
-                    worker.interrupt();
+                    //worker.interrupt();
+                    worker.cancel(true);
                     stopAction.setEnabled(false);
+                    textArea.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
                 }
             }
         };
@@ -1346,6 +1259,7 @@ public class Studio extends JPanel implements Observer,WindowListener {
                                      "Open in Excel",
                                      new Integer(KeyEvent.VK_O),
                                      null) {
+            @Override
             public void actionPerformed(ActionEvent e) {
                 try {
                     File file = File.createTempFile("studioExport",".xls");
@@ -1363,6 +1277,7 @@ public class Studio extends JPanel implements Observer,WindowListener {
                                        "Execute the full or highlighted text as a query",
                                        new Integer(KeyEvent.VK_E),
                                        KeyStroke.getKeyStroke(KeyEvent.VK_E,menuShortcutKeyMask)) {
+            @Override
             public void actionPerformed(ActionEvent e) {
                 executeQuery();
             }
@@ -1374,6 +1289,7 @@ public class Studio extends JPanel implements Observer,WindowListener {
                                                   "Execute the current line as a query",
                                                   new Integer(KeyEvent.VK_ENTER),
                                                   KeyStroke.getKeyStroke(KeyEvent.VK_ENTER,menuShortcutKeyMask)) {
+            @Override
             public void actionPerformed(ActionEvent e) {
                 executeQueryCurrentLine();
             }
@@ -1385,16 +1301,164 @@ public class Studio extends JPanel implements Observer,WindowListener {
                                        "Refresh the result set",
                                        new Integer(KeyEvent.VK_R),
                                        KeyStroke.getKeyStroke(KeyEvent.VK_Y,menuShortcutKeyMask | Event.SHIFT_MASK)) {
+            @Override
             public void actionPerformed(ActionEvent e) {
                 refreshQuery();
             }
         };
+
+        subscribeAction = new UserAction("Subscribe", getImage(Config.imageBase2 + "feed.png"), "Subscribe to realtime table", WIDTH, null) {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+
+                if (server != null) {
+                    final kx.c c = ConnectionPool.getInstance().leaseConnection(server);
+
+                    try {
+                        ConnectionPool.getInstance().checkConnected(c);
+                        final JDialog dialog = new JDialog(frame, true);
+                        SwingWorker worker = new SwingWorker() {
+
+                            @Override
+                            protected Object doInBackground() throws Exception {
+                                try {
+                                    c.k(new K.KCharacterVector(".u.t"));
+                                    return c.getResponse();
+                                } catch (Throwable ex) {
+                                    throw new Exception(ex);
+                                }
+                            }
+
+                            @Override
+                            protected void done() {
+                                dialog.setVisible(false);
+                                dialog.dispose();
+                                try {
+                                    Object res = get();
+                                    if (res instanceof K.KSymbolVector) {
+                                        subscribeFeed(res, c);
+                                    }
+                                } catch (Throwable ex) {
+                                    JOptionPane.showMessageDialog(frame, "Nothing to subscribe for!");
+                                }
+
+                            }
+                        };
+                        JProgressBar pb = new JProgressBar();
+                        pb.setIndeterminate(true);
+                        dialog.add(pb);
+                        worker.execute();
+                        dialog.pack();
+                        dialog.setLocationRelativeTo(null);
+                        //the dialog will be visible until the SwingWorker is done
+                        dialog.setVisible(true);
+                    } catch (Throwable th) {
+
+                        if (c != null) {
+                            ConnectionPool.getInstance().freeConnection(server, c);
+                        }
+                        JOptionPane.showMessageDialog(frame,
+                                      "An Exception occurred\n\nDetails - \n\n" + th.toString(),
+                                      "Studio for kdb+",
+                                      JOptionPane.ERROR_MESSAGE);
+                    }
+                }
+            }
+
+            private void subscribeFeed(Object res, final c c) throws Throwable {
+                K.KSymbolVector tables = (K.KSymbolVector) res;
+                final String table = (String) JOptionPane.showInputDialog(frame, "Select table to subscribe", "Subscribe to table",
+                        JOptionPane.YES_NO_OPTION,
+                        null, (Object[]) tables.getArray(), null);
+                if (table == null) {
+                    return;
+                }
+                final JDialog dialog = new JDialog(frame, true);
+                SwingWorker worker = new SwingWorker() {
+
+                    @Override
+                    protected Object doInBackground() throws Exception {
+                        try {
+                            c.k(new K.KCharacterVector(".u.sub[`" + table + ";`]"));
+                            K.KBase r = c.getResponse();
+                            if (!(r instanceof K.KList)) {
+                                System.out.println(r);
+                                return null;
+                            }
+                            System.out.println("subscribed");
+                            Object data = ((K.KList) r).at(1);
+                            return data;
+                        } catch (Throwable ex) {
+                            throw new Exception(ex);
+                        }
+                    }
+
+                    @Override
+                    protected void done() {
+                        dialog.setVisible(false);
+                        dialog.dispose();
+                        Object data = null;
+                        try {
+                            data = get();
+                        } catch (InterruptedException ex) {
+                            JOptionPane.showMessageDialog(frame, "Error while subscribing!\n" + ex);
+                        } catch (ExecutionException ex) {
+                            JOptionPane.showMessageDialog(frame, "Error while subscribing!\n" + ex);
+                        }
+                        if (data != null && FlipTableModel.isTable(data)) {
+                            QGrid grid = new QGrid((KBase) data);
+                            final SubscribeWorker worker = new SubscribeWorker(grid, c, table);
+                            worker.execute();
+                            JFrame frm = new JFrame();
+                            WindowAdapter closeAdapter = new WindowAdapter() {
+
+                                @Override
+                                public void windowClosing(WindowEvent e) {
+                                    try {
+                                        worker.cancel(true);
+                                        c c = worker.getC();
+                                        c.k(new K.KCharacterVector(".u.del[`" + table + ";.z.w]"));
+                                        System.out.println("unsubscribed:" + c.getResponse());
+                                    } catch (Throwable ex) {
+                                        ex.printStackTrace();
+                                    }
+                                }
+                            };
+                            frame.addWindowListener(closeAdapter);
+                            frm.addWindowListener(closeAdapter);
+                            frm.setTitle(table + "@" + server);
+                            frm.setIconImage(getImage(Config.imageBase + "32x32/dot-chart.png").getImage());
+                            frm.add(grid);
+                            frm.pack();
+                            frm.setVisible(true);
+                        } else {
+                            JOptionPane.showMessageDialog(frame, "Error while subscribing!Invalid response.\n");
+                        }
+
+
+                    }
+                };
+
+                JProgressBar pb = new JProgressBar();
+                pb.setIndeterminate(true);
+                dialog.add(pb);
+                worker.execute();
+                dialog.pack();
+                dialog.setLocationRelativeTo(null);
+                //the dialog will be visible until the SwingWorker is done
+                dialog.setVisible(true);
+
+            }
+        };
+      
 
         aboutAction = new UserAction("About",
                                      Util.getImage(Config.imageBase2 + "about.png"),
                                      "About Studio for kdb+",
                                      new Integer(KeyEvent.VK_E),
                                      null) {
+            @Override
             public void actionPerformed(ActionEvent e) {
                 about();
             }
@@ -1405,6 +1469,7 @@ public class Studio extends JPanel implements Observer,WindowListener {
                                     "Close this window",
                                     new Integer(KeyEvent.VK_X),
                                     null) {
+            @Override
             public void actionPerformed(ActionEvent e) {
                 if (quit())
                     System.exit(0);
@@ -1416,19 +1481,23 @@ public class Studio extends JPanel implements Observer,WindowListener {
                                          "Open code.kx.com",
                                          new Integer(KeyEvent.VK_C),
                                          null) {
+            @Override
             public void actionPerformed(ActionEvent e) {
-                BrowserLaunch.openURL("https://code.kx.com/trac/wiki/Reference/");
+                    try {
+                        Desktop.getDesktop().browse(new URI("https://code.kx.com/trac/wiki/Reference/"));
+                    } catch (Exception ex) {
+                       JOptionPane.showMessageDialog(null, "Error attempting to launch web browser:\n" + ex.getLocalizedMessage());
+                    }
             }
         };
     }
 
     public void about() {
-        HelpDialog help = new HelpDialog(frame);
+        HelpDialog help = new HelpDialog(frame,true);
         Util.centerChildOnParent(help,frame);
-        help.setTitle("About Studio for kdb+");
-        help.setModal(true);
+        // help.setTitle("About Studio for kdb+");
         help.pack();
-        help.show();
+        help.setVisible(true);
     }
 
     public boolean quit() {
@@ -1492,6 +1561,7 @@ public class Studio extends JPanel implements Observer,WindowListener {
         menubar = createMenuBar();
         SwingUtilities.invokeLater(
             new Runnable() {
+            @Override
                 public void run() {
                     if (frame != null) {
                         frame.setJMenuBar(menubar);
@@ -1536,6 +1606,7 @@ public class Studio extends JPanel implements Observer,WindowListener {
                 item.setMnemonic(mnems[i]);
                 item.setIcon(getImage(Config.imageBase2 + "blank.png"));
                 item.addActionListener(new ActionListener() {
+                    @Override
                                        public void actionPerformed(ActionEvent e) {
                                            loadMRUFile(filename,(String) textArea.getDocument().getProperty("filename"));
                                        }
@@ -1577,13 +1648,13 @@ public class Studio extends JPanel implements Observer,WindowListener {
         if (servers.length > 0) {
             JMenu subMenu = new JMenu("Clone");
             subMenu.setIcon(Util.getImage(Config.imageBase2 + "data_copy.png"));
-
+           
             for (int i = 0;i < servers.length;i++) {
                 final Server s = servers[i];
 
                 JMenuItem item = new JMenuItem(s.getName());
-
                 item.addActionListener(new ActionListener() {
+                                        @Override
                                        public void actionPerformed(ActionEvent e) {
                                            Server clone = new Server(s);
                                            clone.setName("Clone of " + clone.getName());
@@ -1594,7 +1665,7 @@ public class Studio extends JPanel implements Observer,WindowListener {
                                            Util.centerChildOnParent(f,frame);
                                            //   f.setStartLocation(frame);
 
-                                           f.show();
+                                           f.setVisible(true);
 
                                            if (f.getResult() == DialogResult.ACCEPTED) {
                                                clone = f.getServer();
@@ -1659,6 +1730,7 @@ public class Studio extends JPanel implements Observer,WindowListener {
 
                 JMenuItem item = new JMenuItem("" + (i + 1) + " " + t);
                 item.addActionListener(new ActionListener() {
+                    @Override
                                        public void actionPerformed(ActionEvent e) {
                                            if (o instanceof Studio) {
                                                JFrame f = ((Studio) o).frame;
@@ -1706,10 +1778,12 @@ public class Studio extends JPanel implements Observer,WindowListener {
                 toolbar.add(new JLabel("Server "));
 
                 JComboBox combo = new JComboBox(names) {
+                    @Override
                     public Dimension getMinimumSize() {
                         return getPreferredSize();
                     }
 
+                    @Override
                     public Dimension getMaximumSize() {
                         return getPreferredSize();
                     }
@@ -1732,6 +1806,7 @@ public class Studio extends JPanel implements Observer,WindowListener {
                 final Observer o = this;
 
                 ActionListener al = new ActionListener() {
+                    @Override
                     public void actionPerformed(ActionEvent e) {
                         String selection = (String) ((JComboBox) e.getSource()).getSelectedItem();
 
@@ -1740,6 +1815,7 @@ public class Studio extends JPanel implements Observer,WindowListener {
                         //  setLanguage(Language.Q);
 
                         SwingUtilities.invokeLater(new Runnable() {
+                            @Override
                                                    public void run() {
                                                        rebuildToolbar();
                                                        toolbar.validate();
@@ -1805,6 +1881,8 @@ public class Studio extends JPanel implements Observer,WindowListener {
             toolbar.add(replaceAction);
 
             toolbar.addSeparator();
+            toolbar.add(subscribeAction);
+            toolbar.addSeparator();
             toolbar.add(codeKxComAction);
 
             for (int j = 0;j < toolbar.getComponentCount();j++) {
@@ -1826,22 +1904,27 @@ public class Studio extends JPanel implements Observer,WindowListener {
     private static class Impl extends FileView implements 
         LocaleSupport.Localizer {
         // FileView implementation
+        @Override
         public String getName(File f) {
             return null;
         }
 
+        @Override
         public String getDescription(File f) {
             return null;
         }
 
+        @Override
         public String getTypeDescription(File f) {
             return null;
         }
 
+        @Override
         public Boolean isTraversable(File f) {
             return null;
         }
 
+        @Override
         public Icon getIcon(File f) {
             if (f.isDirectory())
                 return null;
@@ -1855,6 +1938,7 @@ public class Studio extends JPanel implements Observer,WindowListener {
             bundle = ResourceBundle.getBundle(bundleName);
         }
         // Localizer
+        @Override
         public String getString(String key) {
             return bundle.getString(key);
         }
@@ -1876,6 +1960,7 @@ public class Studio extends JPanel implements Observer,WindowListener {
         registerForMacOSXEvents();
 
         windowListChangedEventListener = new WindowListChangedEventListener() {
+            @Override
             public void WindowListChangedEventOccurred(WindowListChangedEvent evt) {
                 rebuildMenuBar();
                 rebuildToolbar();
@@ -1902,6 +1987,7 @@ public class Studio extends JPanel implements Observer,WindowListener {
             Component divider = ((BasicSplitPaneUI) splitpane.getUI()).getDivider();
 
             divider.addMouseListener(new MouseAdapter() {
+                @Override
                                      public void mouseClicked(MouseEvent event) {
                                          if (event.getClickCount() == 2)
                                              toggleDividerOrientation();
@@ -1927,7 +2013,7 @@ public class Studio extends JPanel implements Observer,WindowListener {
         frame.getContentPane().add(splitpane,BorderLayout.CENTER);
         // frame.setSize(frame.getContentPane().getPreferredSize());
 
-        frame.setDefaultCloseOperation(frame.DO_NOTHING_ON_CLOSE);
+        frame.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
         frame.addWindowListener(this);
         frame.setSize((int) (0.8 * screenSize.width),
                       (int) (0.8 * screenSize.height));
@@ -1959,12 +2045,7 @@ public class Studio extends JPanel implements Observer,WindowListener {
                 // use as delegates for various com.apple.eawt.ApplicationListener methods
                 OSXAdapter.setQuitHandler(new QuitHandler(this),QuitHandler.class.getDeclaredMethod("quit",(Class[]) null));
                 OSXAdapter.setAboutHandler(new AboutHandler(this),AboutHandler.class.getDeclaredMethod("about",(Class[]) null));
-                //      OSXAdapter.setPreferencesHandler(this,getClass().getDeclaredMethod("preferences",(Class[])null));
-         /*       OSXAdapter.setFileHandler(this,getClass().getDeclaredMethod("loadImageFile",new Class[]
-                {
-                String.class
-                }));
-                 */ registeredForMaxOSXEvents = true;
+                registeredForMaxOSXEvents = true;
             }
             catch (Exception e) {
                 System.err.println("Error while loading the OSXAdapter:");
@@ -1972,12 +2053,16 @@ public class Studio extends JPanel implements Observer,WindowListener {
             }
     }
 
-    public static void init() {
+    public static void init(String[] args) {
         try {
             String filename = null;
 
             String[] mruFiles = Config.getInstance().getMRUFiles();
-            if (mruFiles.length > 0) {
+            if(args.length>0){
+                File f=new File(args[0]);
+                if(f.exists())
+                    filename=args[0];
+            } else if (mruFiles.length > 0) {
                 File f = new File(mruFiles[0]);
                 if (f.exists())
                     filename = mruFiles[0];
@@ -2168,9 +2253,10 @@ public class Studio extends JPanel implements Observer,WindowListener {
             K.KBase r = null;
             Throwable exception;
             boolean cancelled = false;
+            long execTime=0;
 
             public void interrupt() {
-                super.interrupt();
+                super.cancel(true);
 
                 cancelled = true;
 
@@ -2179,14 +2265,17 @@ public class Studio extends JPanel implements Observer,WindowListener {
                 cleanup();
             }
 
-            public Object construct() {
+            @Override
+            public Object doInBackground() {
                 try {
                     this.s = server;
                     c = ConnectionPool.getInstance().leaseConnection(s);
                     ConnectionPool.getInstance().checkConnected(c);
                     c.setFrame(frame);
+                    long startTime=System.currentTimeMillis();
                     c.k(new K.KCharacterVector(text));
                     r = c.getResponse();
+                    execTime=System.currentTimeMillis()-startTime;
                 }
                 catch (Throwable e) {
                     exception = e;
@@ -2195,7 +2284,8 @@ public class Studio extends JPanel implements Observer,WindowListener {
                 return null;
             }
 
-            public void finished() {
+            @Override
+            public void done() {
                 if (!cancelled) {
                     if (exception != null)
                         try {
@@ -2249,6 +2339,7 @@ public class Studio extends JPanel implements Observer,WindowListener {
                                                           getImage(Config.imageBase + "32x32/error.png"));
                         }
                     else
+                        Utilities.setStatusText(textArea, "Last execution time:"+execTime+" ms.");
                         try {
                             processK4Results(r);
                         }
@@ -2284,39 +2375,40 @@ public class Studio extends JPanel implements Observer,WindowListener {
             }
         };
 
-        worker.start();
+        worker.execute();
     }
     private SwingWorker worker;
 
+    @Override
     public void windowClosing(WindowEvent e) {
         if (quitWindow())
             if (windowList.size() == 0)
                 System.exit(0);
     }
 
+    @Override
     public void windowClosed(WindowEvent e) {
     }
 
+    @Override
     public void windowOpened(WindowEvent e) {
     }
     // ctrl-alt spacebar to minimize window
+    @Override
     public void windowIconified(WindowEvent e) {
-//        int state = frame.getExtendedState();
-//        state |= Frame.ICONIFIED;
-//        frame.setExtendedState(state);
     }
 
+    @Override
     public void windowDeiconified(WindowEvent e) {
-//        int state = frame.getExtendedState();
-//        state &= ~Frame.ICONIFIED;
-//        frame.setExtendedState(state);
     }
 
+    @Override
     public void windowActivated(WindowEvent e) {
         this.invalidate();
         SwingUtilities.updateComponentTreeUI(this);
     }
 
+    @Override
     public void windowDeactivated(WindowEvent e) {
     }
 
@@ -2341,13 +2433,16 @@ public class Studio extends JPanel implements Observer,WindowListener {
             refreshFrameTitle();
         }
 
+        @Override
         public void changedUpdate(DocumentEvent e) {
         }
 
+        @Override
         public void insertUpdate(DocumentEvent evt) {
             markChanged(evt);
         }
 
+        @Override
         public void removeUpdate(DocumentEvent evt) {
             markChanged(evt);
         }
