@@ -25,11 +25,12 @@ types
 112 dynamic load
  */
 import studio.kdb.K;
-import java.util.LinkedList;
 import javax.swing.*;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 public class c {
     DataInputStream i;
@@ -38,24 +39,12 @@ public class c {
     int j;
     private JFrame frame;
     int J;
-    boolean a;
+    boolean a, v6;
 
     public void setFrame(JFrame frame) {
         this.frame = frame;
     }
-    /*
-    public void i(File f) throws IOException
-    {
-    FileInputStream is= new FileInputStream(f);
-    i=new DataInputStream(is);
-    }
-
-    public void o(File f) throws IOException
-    {
-    FileOutputStream os= new FileOutputStream(f);
-    o=new DataOutputStream(os);
-    }
-     */
+  
 
     void io(Socket s) throws IOException {
         s.setTcpNoDelay(true);
@@ -109,7 +98,8 @@ public class c {
             super(s);
         }
     }
-    java.util.List responses = java.util.Collections.synchronizedList(new LinkedList());
+    BlockingQueue responses=new LinkedBlockingQueue();
+
     boolean closed = true;
 
     public boolean isClosed() {
@@ -117,18 +107,7 @@ public class c {
     }
 
     public K.KBase getResponse() throws Throwable {
-        Object o;
-
-        synchronized (responses) {
-            if (responses.size() == 0)
-                try {
-                    responses.wait();
-                }
-                catch (InterruptedException e) {
-                }
-
-            o = responses.remove(0);
-        }
+        Object o=responses.take();
 
         if (o instanceof Throwable)
             throw (Throwable) o;
@@ -153,10 +132,7 @@ public class c {
                         close();
                     }
 
-                    synchronized (responses) {
-                        responses.add(o);
-                        responses.notify();
-                    }
+                    responses.add(o);
                 }
             }
         };
@@ -167,17 +143,16 @@ public class c {
 
     public void reconnect() throws IOException,K4Exception {
         io(new Socket(host,port));
-
         java.io.ByteArrayOutputStream baos = new ByteArrayOutputStream();
         java.io.DataOutputStream dos = new DataOutputStream(baos);
-        dos.write(up.getBytes());
+        dos.write((up+"\1").getBytes());
         dos.writeByte(0);
         dos.flush();
-        byte[] b = baos.toByteArray();
         o.write(baos.toByteArray());
-
-        if (1 != i.read(new byte[1],0,1))
+        byte[] B=new byte[2+up.getBytes().length];
+        if (1 != i.read(B,0,1))
             throw new K4Exception("Authentication failed");
+        v6=B[0]==1;
         closed = false;
         startReader();
     }
@@ -283,7 +258,7 @@ public class c {
         return new K.FEachLeft(r());
     }
 
-    K.Projection rp() {
+    K.Projection rproj() {
         int n = ri();
         K.KList list = new K.KList(n);
         K.KBase[] array = (K.KBase[]) list.getArray();
@@ -305,6 +280,10 @@ public class c {
         return new K.Second(ri());
     }
 
+    K.Timespan rn() {
+        return new K.Timespan(rj());
+    }
+
     K.KTime rt() {
         return new K.KTime(ri());
     }
@@ -313,8 +292,12 @@ public class c {
         return new K.KDate(ri());
     }
 
-    K.KTimestamp rz() {
-        return new K.KTimestamp(rf());
+    K.KDatetime rz() {
+        return new K.KDatetime(rf());
+    }
+
+    K.KTimestamp rp() {
+        return new K.KTimestamp(rj());
     }
 
     K.KBase r() {
@@ -339,12 +322,16 @@ public class c {
                     return new K.KCharacter(rc());
                 case -11:
                     return rs();
+                case -12:
+                    return rp();
                 case -13:
                     return rm();
                 case -14:
                     return rd();
                 case -15:
                     return rz();
+                case -16:
+                    return rn();
                 case -17:
                     return ru();
                 case -18:
@@ -362,7 +349,7 @@ public class c {
         if (t == 103)
             return rternary();
         if (t == 104)
-            return rp(); // fn projection
+            return rproj(); // fn projection
         if (t == 105)
             return rcomposition();
 
@@ -474,6 +461,15 @@ public class c {
                     array[i] = rs().s;
                 return S;
             }
+            case 12: {
+                K.KTimestampVector P = new K.KTimestampVector(n);
+                P.setAttr(attr);
+                long[] array = (long[]) P.getArray();
+                for (; i < n; i++) {
+                    array[i] = rj();
+                }
+                return P;
+            }
             case 13: {
                 K.KMonthVector M = new K.KMonthVector(n);
                 M.setAttr(attr);
@@ -490,6 +486,23 @@ public class c {
                     array[i] = ri();
                 return D;
             }
+            case 15: {
+                K.KDatetimeVector Z = new K.KDatetimeVector(n);
+                Z.setAttr(attr);
+                double[] array = (double[]) Z.getArray();
+                for (;i < n;i++)
+                    array[i] = rf();
+                return Z;
+            }
+            case 16:{
+                K.KTimespanVector N = new K.KTimespanVector(n);
+                N.setAttr(attr);
+                long[] array = (long[]) N.getArray();
+                for (; i < n; i++) {
+                    array[i] = rj();
+                }
+                return N;
+            }
             case 17: {
                 K.KMinuteVector U = new K.KMinuteVector(n);
                 U.setAttr(attr);
@@ -497,14 +510,6 @@ public class c {
                 for (;i < n;i++)
                     array[i] = ri();
                 return U;
-            }
-            case 15: {
-                K.KTimestampVector Z = new K.KTimestampVector(n);
-                Z.setAttr(attr);
-                double[] array = (double[]) Z.getArray();
-                for (;i < n;i++)
-                    array[i] = rf();
-                return Z;
             }
             case 18: {
                 K.KSecondVector V = new K.KSecondVector(n);
@@ -552,134 +557,112 @@ public class c {
     }
 
 
-    /*
-    public synchronized Object k() throws K4Exception, IOException
-    {
-    i.readFully(b = new byte[8]);
-    a = b[0] == 1;
-    j = 4;
-    i.readFully(b = new byte[ri() - 8]);
-    if (b[0] == -128)
-    {
-    j = 1;
-    throw new K4Exception(rs());
+    public Object k() throws K4Exception,IOException {
+        synchronized(i){
+            i.readFully(b = new byte[8]);
+            int msgType = b[1];
+
+            a = b[0] == 1;
+            boolean c = v6 && b[2] == 1;
+            j = 4;
+
+            final int msgLength = ri() - 8;
+
+            final String message = "Receiving data ...";
+            final String note = "0 of " + (msgLength / 1024) + " kB";
+            String title = "Studio for kdb+";
+            UIManager.put("ProgressMonitor.progressText",title);
+
+            final int min = 0;
+            final int max = msgLength;
+            final ProgressMonitor pm = new ProgressMonitor(frame,message,note,min,max);
+
+            try {
+                pm.setMillisToDecideToPopup(300);
+                pm.setMillisToPopup(100);
+                pm.setProgress(0);
+
+                b = new byte[msgLength];
+                int total = 0;
+                int packetSize = 1 + msgLength / 100;
+                if (packetSize < 8192)
+                    packetSize = 8192;
+
+                while (total < msgLength) {
+                    if (pm.isCanceled())
+                        throw new IOException("Cancelled by user");
+
+                    int remainder = msgLength - total;
+                    if (remainder < packetSize)
+                        packetSize = remainder;
+
+                    total += i.read(b,total,packetSize);
+                    final int _total = total;
+                    final String _note = (total / 1024) + " of " + (msgLength / 1024) + " kB";
+                    SwingUtilities.invokeLater(new Runnable() {
+                                               public void run() {
+                                                   pm.setProgress(_total);
+                                                   pm.setNote(_note);
+                                               }
+                                           });
+                }
+            }
+            finally {
+                pm.close();
+            }
+
+            if (c) {
+                u();
+            } else {
+                j = 0;
+            }
+
+            if (b[0] == -128) {
+                j = 1;
+                throw new K4Exception(rs().toString(true));
+            }
+            return r();
+        }
     }
-    j = 0;
-    return r();
-    }
-     */
-    public synchronized Object k() throws K4Exception,IOException {
-        i.readFully(b = new byte[8]);
-        int msgType = b[1];
 
-        a = b[0] == 1;
-        j = 4;
-
-        final int msgLength = ri() - 8;
-
-        final String message = "Receiving data ...";
-        final String note = "0 of " + (msgLength / 1024) + " kB";
-        String title = "Studio for kdb+";
-        UIManager.put("ProgressMonitor.progressText",title);
-
-        final int min = 0;
-        final int max = msgLength;
-        final ProgressMonitor pm = new ProgressMonitor(frame,message,note,min,max);
-
-        try {
-            pm.setMillisToDecideToPopup(300);
-            pm.setMillisToPopup(100);
-            pm.setProgress(0);
-
-            b = new byte[msgLength];
-            int total = 0;
-            int packetSize = 1 + msgLength / 100;
-            if (packetSize < 8192)
-                packetSize = 8192;
-
-            while (total < msgLength) {
-                if (pm.isCanceled())
-                    throw new IOException("Cancelled by user");
-
-                int remainder = msgLength - total;
-                if (remainder < packetSize)
-                    packetSize = remainder;
-
-                total += i.read(b,total,packetSize);
-                final int _total = total;
-                final String _note = (total / 1024) + " of " + (msgLength / 1024) + " kB";
-                SwingUtilities.invokeLater(new Runnable() {
-                                           public void run() {
-                                               pm.setProgress(_total);
-                                               pm.setNote(_note);
-                                           }
-                                       });
+        private void u() {
+        int n = 0, r = 0, f = 0, s = 8, p = s;
+        short i = 0;
+        j = 0;
+        byte[] dst = new byte[ri()];
+        int d = j;
+        int[] aa = new int[256];
+        while (s < dst.length) {
+            if (i == 0) {
+                f = 0xff & (int) b[d++];
+                i = 1;
+            }
+            if ((f & i) != 0) {
+                r = aa[0xff & (int) b[d++]];
+                dst[s++] = dst[r++];
+                dst[s++] = dst[r++];
+                n = 0xff & (int) b[d++];
+                for (int m = 0; m < n; m++) {
+                    dst[s + m] = dst[r + m];
+                }
+            } else {
+                dst[s++] = b[d++];
+            }
+            while (p < s - 1) {
+                aa[(0xff & (int) dst[p]) ^ (0xff & (int) dst[p + 1])] = p++;
+            }
+            if ((f & i) != 0) {
+                p = s += n;
+            }
+            i *= 2;
+            if (i == 256) {
+                i = 0;
             }
         }
-        finally {
-            pm.close();
-        }
-
-        if (b[0] == -128) {
-            j = 1;
-            throw new K4Exception(rs().toString(true));
-        }
-        j = 0;
-        return r();
+        b = dst;
+        j = 8;
     }
 
-    /*
-    public synchronized K.KBase k() throws K4Exception, IOException
-    { 
-    while( true)
-    {
-    i.readFully(b = new byte[8]);
-    int msgType=b[1];
-
-    a= b[0] == 1;
-    j= 4;
-    int msgSize=ri() - 8;
-
-    if(statusObserver!=null)
-    statusObserver.setMsgSize(msgType,msgSize);
-    b= new byte[msgSize];
-    int total=0;
-    while(total<msgSize)
-    {
-    // check whether -1 can be returned
-    total+=i.read(b,total,msgSize-total);
-    if(statusObserver!=null)
-    statusObserver.setProgress(msgType,total);
-    }
-
-    if (b[0] == -128)
-    {
-    j = 1;
-    throw new K4Exception(rs().s);
-    }
-    j = 0;
-
-    if( msgType == 2)
-    {
-    K.KBase r=r();
-    if(msgHandler != null)
-    {
-    switch(msgType)
-    {
-    case(0):{msgHandler.asyncMessage(r,msgSize);}break;
-    case(1):{msgHandler.syncMessage(r,msgSize);}break;
-    case(2):{msgHandler.responseMessage(r,msgSize);}break;
-    };
-    }
-
-    if(statusObserver!=null)
-    statusObserver.completed(msgType);
-
-    return r;
-    }
-    }
-    }
-     */
     public void k(K.KBase x) throws K4Exception,IOException {
         w(1,x);
     }

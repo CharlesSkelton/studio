@@ -59,7 +59,7 @@ public class LineChart {
         if (table.getColumnCount() > 0) {
             Class klass = table.getColumnClass(0);
 
-            if ((klass == K.KDateVector.class) || (klass == K.KTimeVector.class) || (klass == K.KMonthVector.class) || (klass == K.KMinuteVector.class) || (klass == K.KSecondVector.class) || (klass == K.KTimestampVector.class)) {
+            if ((klass == K.KDateVector.class) || (klass == K.KTimeVector.class) || (klass == K.KMonthVector.class) || (klass == K.KMinuteVector.class) || (klass == K.KSecondVector.class) || (klass == K.KDatetimeVector.class)) {
                 TimeSeriesCollection tsc = new TimeSeriesCollection(tz);
 
                 for (int col = 1;col < table.getColumnCount();col++) {
@@ -96,12 +96,12 @@ public class LineChart {
                                             series.addOrUpdate(ms,((ToDouble) o).toDouble());
                             }
                         }
-                        else if (klass == K.KTimestampVector.class) {
+                        else if (klass == K.KDatetimeVector.class) {
                             series = new TimeSeries(table.getColumnName(col),Millisecond.class);
-                            K.KTimestampVector times = (K.KTimestampVector) table.getColumn(0);
+                            K.KDatetimeVector times = (K.KDatetimeVector) table.getColumn(0);
 
                             for (int row = 0;row < table.getRowCount();row++) {
-                                K.KTimestamp time = (K.KTimestamp) times.at(row);
+                                K.KDatetime time = (K.KDatetime) times.at(row);
                                 Millisecond ms = new Millisecond(time.toTimestamp(),tz);
 
                                 Object o = table.getValueAt(row,col);

@@ -9,6 +9,8 @@ package studio.ui;
 import studio.kdb.DictTableModel;
 import studio.kdb.K;
 import studio.kdb.FlipTableModel;
+import studio.kdb.K.Dict;
+import studio.kdb.K.Flip;
 import studio.kdb.TableHeaderRenderer;
 import studio.kdb.TableRowHeader;
 import java.awt.BorderLayout;
@@ -49,10 +51,17 @@ public class QGrid extends JPanel {
     private UserAction copyExcelFormatAction;
     private TableModel model;
     private JTable table;
+    private final WidthAdjuster wa;
 
     public JTable getTable() {
         return table;
     }
+
+    public WidthAdjuster getWa() {
+        return wa;
+    }
+
+
     public static String newline = System.getProperty("line.separator");
 
     public int getRowCount() {
@@ -83,16 +92,6 @@ public class QGrid extends JPanel {
 
             if (isCellSelected(rowIndex,vColIndex))
                 bg = bgSelCache;
-
-            /*                if (bg == null) {
-            if (rowIndex % 2 == 0)
-            bg= col;
-            else
-            bg= bgCache;
-            }
-             */
-            //      c.setBackground(bg);
-            // c.setForeground(fg);
 
             return c;
         }
@@ -169,24 +168,6 @@ public class QGrid extends JPanel {
 
         table = new MYJTable(model);
 
-        /*
-        {
-        String title = "Frame Title";
-        JFrame frame = new JFrame(title);
-
-        // Create a component to add to the frame
-        JComponent comp = new MatrixView(table);
-
-        frame.getContentPane().add(comp, BorderLayout.CENTER);
-
-        // Show the frame
-        int width = 300;
-        int height = 300;
-        frame.setSize(width, height);
-        frame.setVisible(true);
-        }
-         */
-
         DefaultTableCellRenderer dhr = new TableHeaderRenderer();
         table.getTableHeader().setDefaultRenderer(dhr);
         table.setShowHorizontalLines(true);
@@ -237,7 +218,7 @@ public class QGrid extends JPanel {
                                                     });
 
         }
-        WidthAdjuster wa = new WidthAdjuster(table);
+        wa = new WidthAdjuster(table);
         wa.resizeAllColumns();
 
         scrollPane.setWheelScrollingEnabled(true);
@@ -341,11 +322,22 @@ public class QGrid extends JPanel {
     }
     private boolean scrollToEnd = false;
 
-    public void append(K.Flip flip) {
+    public void append(K.KBase upd) {
         int n = table.getRowCount();
         if (model instanceof FlipTableModel) {
+            K.Flip flip=(Flip) upd;
             ((FlipTableModel) model).append(flip);
             ((AbstractTableModel) model).fireTableRowsInserted(n,table.getRowCount() - n);
+            if (scrollToEnd)
+                table.scrollRectToVisible(new Rectangle(0,
+                                                        table.getRowHeight() * (table.getRowCount()),
+                                                        100,
+                                                        table.getRowHeight()));
+
+        }else if (model instanceof DictTableModel) {
+            K.Dict dict=(Dict) upd;
+            ((DictTableModel) model).upsert(dict);
+            ((AbstractTableModel) model).fireTableRowsInserted(0,table.getRowCount());
             if (scrollToEnd)
                 table.scrollRectToVisible(new Rectangle(0,
                                                         table.getRowHeight() * (table.getRowCount()),
