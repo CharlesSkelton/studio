@@ -96,16 +96,17 @@ public class Config
             save();
         }
     }
-
     
     public synchronized NumberFormat getNumberFormat()
     {
-        if( formatter == null)
+        String key= null;
+
+        if( p != null)
         {
-            formatter= new DecimalFormat( "#.#######");
+            key= p.getProperty( "DecimalFormat","#.#######");
         }
 
-        return formatter;
+        return new DecimalFormat(key);
     }
 
     public static Config getInstance()

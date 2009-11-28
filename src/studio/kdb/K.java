@@ -10,7 +10,6 @@ import java.io.OutputStream;
 import java.lang.reflect.Array;
 import java.sql.Time;
 import java.sql.Timestamp;
-import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -689,7 +688,7 @@ public class K {
             else if (f == Float.NEGATIVE_INFINITY)
                 return "-0we";
             else {
-                String s = new DecimalFormat("#.#######").format(f);
+                String s = Config.getInstance().getNumberFormat().format(f);
                 if (showType) {
                     double epsilon = 1e-9;
                     double diff = f - Math.round(f);
@@ -739,7 +738,7 @@ public class K {
             else if (d == Double.NEGATIVE_INFINITY)
                 return "-0w";
             else {
-                String s = new DecimalFormat("#.#######").format(d);
+                String s = Config.getInstance().getNumberFormat().format(d);
                 if (showType) {
                     double epsilon = 1e-9;
                     double diff = d - Math.round(d);
@@ -1272,6 +1271,7 @@ public class K {
                     w.write(enlist);
 
                 boolean printedP = false;
+                NumberFormat nf= Config.getInstance().getNumberFormat();
                 for (int i = 0;i < getLength();i++) {
                     double d = Array.getDouble(array,i);
                     if (i > 0)
@@ -1293,8 +1293,7 @@ public class K {
                         double diff = d - Math.round(d);
                         if (!((diff < epsilon) && (diff > -epsilon)))
                             printedP = true;
-                        NumberFormat numberFormatter = new DecimalFormat("#.#######");
-                        w.write(numberFormatter.format(d));
+                        w.write(nf.format(d));
                     }
                 }
                 if (!printedP)
@@ -1328,6 +1327,7 @@ public class K {
                     w.write(enlist);
 
                 boolean printedP = false;
+                NumberFormat nf= Config.getInstance().getNumberFormat();
                 for (int i = 0;i < getLength();i++) {
                     float d = Array.getFloat(array,i);
                     if (i > 0)
@@ -1347,8 +1347,7 @@ public class K {
                     else {
                         if (d != ((int) d))
                             printedP = true;
-                        NumberFormat numberFormatter = new DecimalFormat("#.#######");
-                        w.write(numberFormatter.format(d));
+                        w.write(nf.format(d));
                     }
                 }
                 if (!printedP)
