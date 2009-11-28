@@ -7,18 +7,13 @@ package studio.ui;
 import java.util.List;
 import javax.swing.JOptionPane;
 import javax.swing.SwingWorker;
-import javax.swing.table.TableModel;
 import kx.c;
-import studio.kdb.DictTableModel;
-import studio.kdb.K.Dict;
-import studio.kdb.K.Flip;
 import studio.kdb.K.KBase;
 import studio.kdb.K.KList;
-import studio.kdb.KTableModel;
 
 /**
  *
- * @author vidyser
+ * @author svidyuk
  */
 public class SubscribeWorker extends SwingWorker {
 
@@ -41,7 +36,7 @@ public class SubscribeWorker extends SwingWorker {
         try {
             Object r;
             while (!isCancelled()) {
-                r = c.k();
+                r = c.getResponse();
                 System.out.println("recieved response");
                 publish(r);
                 System.out.println("cont listening");
