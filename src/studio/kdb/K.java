@@ -832,14 +832,14 @@ public class K {
         }
     }
 
-    public static class KTimestamp extends KBase {
+    public static class KDatetime extends KBase {
         public String getDataType() {
             return "Timestamp";
         }
         ;
         double time;
 
-        public KTimestamp(double time) {
+        public KDatetime(double time) {
             type = -15;
             this.time = time;
         }
@@ -856,7 +856,7 @@ public class K {
             else if (time == Double.NEGATIVE_INFINITY)
                 return "-0wz";
             else
-                return sd("yyyy.MM.dd HH:mm:ss.SSS",new Timestamp(((long) (.5 + 8.64e7 * (time + 10957)))));
+                return sd("yyyy.MM.dd HH:mm:ss.SSS",toTimestamp());
         }
 
         public void toString(LimitedWriter w,boolean showType) throws IOException {
@@ -868,11 +868,54 @@ public class K {
         }
     }
 
+    public static class KTimestamp extends KBase {
+        public String getDataType() {
+            return "Timestamp";
+        }
+        long time;
+
+        public KTimestamp(long time) {
+            type = -12;
+            this.time = time;
+        }
+
+        public boolean isNull() {
+            return Double.isNaN(time);
+        }
+
+        public String toString(boolean showType) {
+            if (isNull())
+                return "0np";
+            else if (time == Double.POSITIVE_INFINITY)
+                return "0wp";
+            else if (time == Double.NEGATIVE_INFINITY)
+                return "-0wp";
+            else{
+                Timestamp ts=toTimestamp();
+                return sd("yyyy.MM.dd HH:mm:ss.SSS",ts)+String.valueOf(ts.getNanos());
+            }
+        }
+
+        public void toString(LimitedWriter w,boolean showType) throws IOException {
+            w.write(toString(showType));
+        }
+
+        public Timestamp toTimestamp() {
+            long k = 86400000L * 10957;
+            long n = 1000000000L;
+            long d = time < 0 ? (time + 1) / n - 1 : time / n;
+            long ltime=time == Long.MIN_VALUE ? time : (k + 1000 * d);
+            int nanos=(int) (time - n * d);
+            Timestamp ts=new Timestamp(ltime);
+            ts.setNanos(nanos);
+            return ts;
+        }
+    }
     public static class Dict extends KBase {
         public String getDataType() {
             return "Dictionary";
         }
-        ;
+        
         public K.KBase x;
         public K.KBase y;
 
@@ -880,6 +923,21 @@ public class K {
             type = 99;
             x = X;
             y = Y;
+        }
+
+        public void upsert(K.Dict upd){
+            //if dict is not table
+            if(!(x instanceof K.Flip) || !(y instanceof K.Flip))
+                return;
+            //if upd is not table
+            if (!(upd.x instanceof K.Flip) || ! (upd.y instanceof K.Flip))
+                return;
+            Flip cx=(K.Flip)x;
+            Flip cy=(K.Flip)y;
+            Flip updx=(K.Flip)upd.x;
+            Flip updy=(K.Flip)upd.y;
+            cx.append(updx);
+            cy.append(updy);
         }
 
         public void toString(LimitedWriter w,boolean showType) throws IOException {
@@ -1050,20 +1108,37 @@ public class K {
         }
     }
 
-    /*   public static Flip td(KBase X) {
-    if (X.type == 98) return (Flip) X;
-    Dict d = (Dict) X;
-    Flip a = (Flip) d.x,b = (Flip) d.y;
-    int m = n(a.x),n = n(b.x);
-    String[] x = new String[m + n];
-    System.arraycopy(a.x, 0, x, 0, m);
-    System.arraycopy(b.x, 0, x, m, n);
-    Object[] y = new Object[m + n];
-    System.arraycopy(a.y, 0, y, 0, m);
-    System.arraycopy(b.y, 0, y, m, n);
-    return new Flip(new Dict(x, y));
+    public static class Timespan extends KBase {
+
+        public long j;
+
+        public Timespan(long x) {
+            j = x;
+            type=-16;
+        }
+        @Override
+        public String getDataType() {
+            return "Timespan";
+        }
+
+        public String toString(boolean showType) {
+            if (isNull())
+                return "0Nn";
+            else if (j == Long.MAX_VALUE)
+                return "0Wn";
+            else if (j == -Long.MAX_VALUE)
+                return "-0Wn";
+            else
+                return String.valueOf(j);
+        }
+
+        public void toString(LimitedWriter w,boolean showType) throws IOException {
+            w.write(toString(showType));
+        }
+
     }
-     */
+
+
     static String i2(int i) {
         return new java.text.DecimalFormat("00").format(i);
     }
@@ -1524,19 +1599,19 @@ public class K {
         }
     }
 
-    public static class KTimestampVector extends KBaseVector {
+    public static class KDatetimeVector extends KBaseVector {
         public String getDataType() {
             return "Datetime Vector";
         }
         ;
 
-        public KTimestampVector(int length) {
+        public KDatetimeVector(int length) {
             super(double.class,length);
             type = 15;
         }
 
         public KBase at(int i) {
-            return new KTimestamp(Array.getDouble(array,i));
+            return new KDatetime(Array.getDouble(array,i));
         }
 
         public void toString(LimitedWriter w,boolean showType) throws IOException {
@@ -1565,7 +1640,68 @@ public class K {
             }
         }
     }
+    public static class KTimestampVector extends KBaseVector {
+        public String getDataType() {
+            return "Timestamp Vector";
+        }
+        ;
 
+        public KTimestampVector(int length) {
+            super(long.class,length);
+            type = 12;
+        }
+
+        public KBase at(int i) {
+            return new KTimestamp(Array.getLong(array,i));
+        }
+
+        public void toString(LimitedWriter w,boolean showType) throws IOException {
+            w.write(super.toString(showType));
+
+            if (getLength() == 0)
+                w.write("`timestamp$()");
+            else {
+                if (getLength() == 1)
+                    w.write(enlist);
+                for (int i = 0;i < getLength();i++) {
+                    if (i > 0)
+                        w.write(" ");
+                    w.write(at(i).toString(false));
+                }
+            }
+        }
+    }
+        public static class KTimespanVector extends KBaseVector {
+        public String getDataType() {
+            return "Timespan Vector";
+        }
+        ;
+
+        public KTimespanVector(int length) {
+            super(long.class,length);
+            type = 16;
+        }
+
+        public KBase at(int i) {
+            return new Timespan(Array.getLong(array,i));
+        }
+
+        public void toString(LimitedWriter w,boolean showType) throws IOException {
+            w.write(super.toString(showType));
+
+            if (getLength() == 0)
+                w.write("`timespan$()");
+            else {
+                if (getLength() == 1)
+                    w.write(enlist);
+                for (int i = 0;i < getLength();i++) {
+                    if (i > 0)
+                        w.write(" ");
+                    w.write(at(i).toString(false));
+                }
+            }
+        }
+    }
     public static class KSecondVector extends KBaseVector {
         public String getDataType() {
             return "Second Vector";
