@@ -16,6 +16,17 @@ public class DictTableModel extends KTableModel {
     public DictTableModel() {
     }
 
+
+    public void upsert(K.Dict upd){
+        setData(upd);
+//        dict.upsert(upd);
+        if (isSortedAsc()) {
+            asc(sortedByColumn);
+        } else if (isSortedDesc()) {
+            desc(sortedByColumn);
+        }
+    }
+
     public DictTableModel(K.Dict obj) {
         setData(obj);
     }

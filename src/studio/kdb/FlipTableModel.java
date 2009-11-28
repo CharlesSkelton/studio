@@ -11,6 +11,10 @@ public class FlipTableModel extends KTableModel {
 
     public void append(K.Flip f) {
         flip.append(f);
+        if(isSortedAsc())
+            asc(sortedByColumn);
+        else if(isSortedDesc())
+            desc(sortedByColumn);
     }
 
     public void asc(int col) {
@@ -73,12 +77,6 @@ public class FlipTableModel extends KTableModel {
         row = (sortIndex == null) ? row : sortIndex[row];
         K.KBaseVector v = (K.KBaseVector) flip.y.at(col);
         o = v.at(row);
-
-        // if(o instanceof K.KBaseVector)
-        // {
-        //     o= new K.KSymbol(K.decode((K.KBase)o));
-        // }
-
         return o;
     }
 
