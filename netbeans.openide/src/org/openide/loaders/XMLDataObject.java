@@ -2277,5 +2277,13 @@ public class XMLDataObject extends MultiDataObject {
             throw new UnsupportedOperationException("Not supported yet.");
         }
 
+        public DOMConfiguration getDomConfig() {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        public Object setUserData(String key, Object data, UserDataHandler handler) {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
        }
 }
