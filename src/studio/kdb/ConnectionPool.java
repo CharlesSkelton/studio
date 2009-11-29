@@ -143,6 +143,6 @@ public class ConnectionPool {
 
     public void checkConnected(kx.c c) throws IOException,K4Exception {
         if (c.isClosed())
-            c.reconnect();
+            c.reconnect(true);
     }
 }

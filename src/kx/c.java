@@ -141,7 +141,7 @@ public class c {
         t.start();
     }
 
-    public void reconnect() throws IOException,K4Exception {
+    public void reconnect(boolean retry) throws IOException,K4Exception {
         io(new Socket(host,port));
         java.io.ByteArrayOutputStream baos = new ByteArrayOutputStream();
         java.io.DataOutputStream dos = new DataOutputStream(baos);
@@ -151,7 +151,10 @@ public class c {
         o.write(baos.toByteArray());
         byte[] B=new byte[2+up.getBytes().length];
         if (1 != i.read(B,0,1))
-            throw new K4Exception("Authentication failed");
+            if(retry)
+                reconnect(false);
+            else
+                throw new K4Exception("Authentication failed");
         v6=B[0]==1;
         closed = false;
         startReader();
