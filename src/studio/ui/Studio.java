@@ -2339,7 +2339,7 @@ public class Studio extends JPanel implements Observer,WindowListener {
                                                           getImage(Config.imageBase + "32x32/error.png"));
                         }
                     else
-                        Utilities.setStatusText(textArea, "Last execution time:"+execTime+" ms.");
+                        Utilities.setStatusText(textArea, "Last execution time:"+(execTime>0?execTime:"<1")+" mS");
                         try {
                             processK4Results(r);
                         }
