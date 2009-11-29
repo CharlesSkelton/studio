@@ -35,6 +35,8 @@ class QTokenColoringInitializer extends SettingsUtil.TokenColoringInitializer
     private Coloring INTEGER_Coloring;
     private Coloring FLOAT_Coloring;
     private Coloring TIMESTAMP_Coloring;
+    private Coloring TIMESPAN_Coloring;
+    private Coloring DATETIME_Coloring;
     private Coloring DATE_Coloring;
     private Coloring MONTH_Coloring;
     private Coloring MINUTE_Coloring;
@@ -70,6 +72,8 @@ class QTokenColoringInitializer extends SettingsUtil.TokenColoringInitializer
         INTEGER_Coloring=buildColoring("INTEGER",SettingsDefaults.defaultFont,new Color(51,104,255));
         FLOAT_Coloring=buildColoring("FLOAT",SettingsDefaults.defaultFont,new Color(51,104,255));
         TIMESTAMP_Coloring=buildColoring("TIMESTAMP",SettingsDefaults.defaultFont,new Color(184,138,0));
+        TIMESPAN_Coloring=buildColoring("TIMESPAN",SettingsDefaults.defaultFont,new Color(184,138,0));
+        DATETIME_Coloring=buildColoring("DATETIME",SettingsDefaults.defaultFont,new Color(184,138,0));
         DATE_Coloring=buildColoring("DATE",SettingsDefaults.defaultFont,new Color(184,138,0));
         MONTH_Coloring=buildColoring("MONTH",SettingsDefaults.defaultFont,new Color(184,138,0));
         MINUTE_Coloring=buildColoring("MINUTE",SettingsDefaults.defaultFont,new Color(184,138,0));
@@ -113,8 +117,12 @@ class QTokenColoringInitializer extends SettingsUtil.TokenColoringInitializer
                     return INTEGER_Coloring;
                 case QTokenContext.FLOAT_ID:
                     return FLOAT_Coloring;
+                case QTokenContext.DATETIME_ID:
+                    return DATETIME_Coloring;
                 case QTokenContext.TIMESTAMP_ID:
                     return TIMESTAMP_Coloring;
+                case QTokenContext.TIMESPAN_ID:
+                    return TIMESPAN_Coloring;
                 case QTokenContext.DATE_ID:
                     return DATE_Coloring;
                 case QTokenContext.MONTH_ID:
