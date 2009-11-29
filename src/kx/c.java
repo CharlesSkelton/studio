@@ -145,7 +145,7 @@ public class c {
         io(new Socket(host,port));
         java.io.ByteArrayOutputStream baos = new ByteArrayOutputStream();
         java.io.DataOutputStream dos = new DataOutputStream(baos);
-        dos.write((up+"\1").getBytes());
+        dos.write((up+(retry?"\1":"")).getBytes());
         dos.writeByte(0);
         dos.flush();
         o.write(baos.toByteArray());
