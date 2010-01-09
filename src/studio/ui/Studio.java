@@ -6,11 +6,7 @@
 
 package studio.ui;
 
-import java.net.MalformedURLException;
-import java.net.URISyntaxException;
 import java.util.concurrent.ExecutionException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import studio.kdb.*;
 import studio.kdb.K.KBase;
 import studio.utils.OSXAdapter;
@@ -35,7 +31,6 @@ import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
 import java.net.URI;
-import java.net.URL;
 import java.util.*;
 import javax.swing.plaf.basic.BasicSplitPaneUI;
 import org.netbeans.editor.example.QKit;
@@ -1881,8 +1876,8 @@ public class Studio extends JPanel implements Observer,WindowListener {
             toolbar.add(replaceAction);
 
             toolbar.addSeparator();
-            toolbar.add(subscribeAction);
-            toolbar.addSeparator();
+//            toolbar.add(subscribeAction);
+//            toolbar.addSeparator();
             toolbar.add(codeKxComAction);
 
             for (int j = 0;j < toolbar.getComponentCount();j++) {

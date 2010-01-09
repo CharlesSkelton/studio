@@ -6,11 +6,11 @@
   </HEAD>
 <BODY>
 
-<h2>Completion Design View</H2>
+<H2>Completion Design View</H2>
 
 <p>Status: designing...
 
-<h3>Entry Point Handlers</H3>
+<H3>Entry Point Handlers</H3>
 
 <p>User types a character ("UT") :position, character
 <pre>
@@ -41,13 +41,13 @@ UC -> AWT/Swing -> kit.AssistantAction
 </pre>
 
 <p>User invokes kill assistant action
-<pre>
+<PRE>
 UC -> AWT/Swing -> kit.AssistantAction
   cc.hide
 </PRE>
 
 <p>User invokes select assistant action
-<pre>
+<PRE>
 UC -> AWT/Swing -> kit.AssistantAction
   cc.hide
   cc.perform  ??? [order is pending]
@@ -60,7 +60,7 @@ MM -> unknown thread -> cc.DocumentListener
 </pre>
 
 
-<h3>Completion API</H3>
+<H3>Completion API</H3>
 
 <pre>
 + Completion:

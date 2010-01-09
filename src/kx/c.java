@@ -39,7 +39,7 @@ public class c {
     int j;
     private JFrame frame;
     int J;
-    boolean a, v6;
+    boolean a;
 
     public void setFrame(JFrame frame) {
         this.frame = frame;
@@ -155,7 +155,6 @@ public class c {
                 reconnect(false);
             else
                 throw new K4Exception("Authentication failed");
-        v6=B[0]==1;
         closed = false;
         startReader();
     }
@@ -566,7 +565,7 @@ public class c {
             int msgType = b[1];
 
             a = b[0] == 1;
-            boolean c = v6 && b[2] == 1;
+            boolean c = b[2] == 1;
             j = 4;
 
             final int msgLength = ri() - 8;
@@ -628,7 +627,7 @@ public class c {
         }
     }
 
-        private void u() {
+    private void u() {
         int n = 0, r = 0, f = 0, s = 8, p = s;
         short i = 0;
         j = 0;

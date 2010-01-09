@@ -10,6 +10,7 @@ import java.io.OutputStream;
 import java.lang.reflect.Array;
 import java.sql.Time;
 import java.sql.Timestamp;
+import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -834,7 +835,7 @@ public class K {
 
     public static class KDatetime extends KBase {
         public String getDataType() {
-            return "Timestamp";
+            return "Datetime";
         }
         ;
         double time;
@@ -880,16 +881,16 @@ public class K {
         }
 
         public boolean isNull() {
-            return Double.isNaN(time);
+            return time==Long.MIN_VALUE;
         }
 
         public String toString(boolean showType) {
             if (isNull())
-                return "0np";
-            else if (time == Double.POSITIVE_INFINITY)
-                return "0wp";
-            else if (time == Double.NEGATIVE_INFINITY)
-                return "-0wp";
+                return "0Np";
+            else if (time == Long.MAX_VALUE)
+                return "0Wp";
+            else if (time == Long.MAX_VALUE)
+                return "-0Wp";
             else{
                 Timestamp ts=toTimestamp();
                 return sd("yyyy.MM.dd HH:mm:ss.SSS",ts)+String.valueOf(ts.getNanos());
@@ -1121,6 +1122,10 @@ public class K {
             return "Timespan";
         }
 
+        public boolean isNull() {
+            return j == Long.MIN_VALUE;
+        }
+
         public String toString(boolean showType) {
             if (isNull())
                 return "0Nn";
@@ -1128,14 +1133,27 @@ public class K {
                 return "0Wn";
             else if (j == -Long.MAX_VALUE)
                 return "-0Wn";
-            else
-                return String.valueOf(j);
+            else {
+                String s="";
+                long jj=j;
+                if(jj<0)
+                {
+                    jj=-jj;
+                    s="-";
+                }
+                int d=((int)(jj/86400000000000L));
+                if(d!=0)
+                    s+=d+"D";
+                return s+i2((int)((jj%86400000000000L)/3600000000000L))+
+                       ":"+i2((int)((jj%3600000000000L)/60000000000L))+
+                       ":"+i2((int)((jj%60000000000L)/1000000000L))+
+                       "."+new DecimalFormat("000000000").format((int)(jj%1000000000L));
+            }
         }
 
         public void toString(LimitedWriter w,boolean showType) throws IOException {
             w.write(toString(showType));
         }
-
     }
 
 
