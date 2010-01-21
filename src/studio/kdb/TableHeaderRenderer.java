@@ -6,6 +6,7 @@
 
 package studio.kdb;
 
+import javax.swing.border.Border;
 import studio.ui.BlankIcon;
 import studio.ui.ScaledIcon;
 import studio.ui.Util;
@@ -21,9 +22,11 @@ public class TableHeaderRenderer extends DefaultTableCellRenderer {
         setHorizontalAlignment(SwingConstants.RIGHT);
         setVerticalAlignment(SwingConstants.CENTER);
         setOpaque(true);
-        setBorder(UIManager.getBorder("TableHeader.cellBorder"));
+        final Border border = UIManager.getBorder("TableHeader.cellBorder");
+        if (border != null) {
+            setBorder(border);
+        }
         setFont(UIManager.getFont("TableHeader.font"));
-        //setFont(table.getFont());
         setBackground(UIManager.getColor("TableHeader.background"));
         setForeground(UIManager.getColor("TableHeader.foreground"));
     }
@@ -45,7 +48,7 @@ public class TableHeaderRenderer extends DefaultTableCellRenderer {
             column = table.convertColumnIndexToModel(column);
             Icon icon = null;
 
-            Insets insets = getBorder().getBorderInsets(this);
+            Insets insets = getInsets();
             int targetHeight = getFontMetrics(getFont()).getHeight() - insets.bottom - insets.top;
             KTableModel ktm = (KTableModel) table.getModel();
             if (ktm.isSortedDesc()) {
