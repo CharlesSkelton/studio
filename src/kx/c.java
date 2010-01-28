@@ -40,6 +40,7 @@ public class c {
     private JFrame frame;
     int J;
     boolean a;
+    int rxBufferSize;
 
     public void setFrame(JFrame frame) {
         this.frame = frame;
@@ -47,9 +48,11 @@ public class c {
   
 
     void io(Socket s) throws IOException {
+        s.setReceiveBufferSize(1048576);
         s.setTcpNoDelay(true);
         i = new DataInputStream(s.getInputStream());
         o = s.getOutputStream();
+        rxBufferSize=s.getReceiveBufferSize();
     }
 
     public void close() {
@@ -576,7 +579,7 @@ public class c {
 
             final int min = 0;
             final int max = msgLength;
-            final ProgressMonitor pm = new ProgressMonitor(frame,message,note,min,max);
+            ProgressMonitor pm = new ProgressMonitor(frame,message,note,min,max);
 
             try {
                 pm.setMillisToDecideToPopup(300);
@@ -586,8 +589,8 @@ public class c {
                 b = new byte[msgLength];
                 int total = 0;
                 int packetSize = 1 + msgLength / 100;
-                if (packetSize < 8192)
-                    packetSize = 8192;
+                if (packetSize < rxBufferSize)
+                    packetSize = rxBufferSize;
 
                 while (total < msgLength) {
                     if (pm.isCanceled())
