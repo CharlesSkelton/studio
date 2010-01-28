@@ -562,7 +562,6 @@ public class c {
     public Object k() throws K4Exception,IOException {
         synchronized(i){
             i.readFully(b = new byte[8]);
-            int msgType = b[1];
 
             a = b[0] == 1;
             boolean c = b[2] == 1;
@@ -599,14 +598,8 @@ public class c {
                         packetSize = remainder;
 
                     total += i.read(b,total,packetSize);
-                    final int _total = total;
-                    final String _note = (total / 1024) + " of " + (msgLength / 1024) + " kB";
-                    SwingUtilities.invokeLater(new Runnable() {
-                                               public void run() {
-                                                   pm.setProgress(_total);
-                                                   pm.setNote(_note);
-                                               }
-                                           });
+                    pm.setProgress(total);
+                    pm.setNote((total / 1024) + " of " + (msgLength / 1024) + " kB");
                 }
             }
             finally {
