@@ -10,7 +10,6 @@ import org.netbeans.editor.ext.ExtKit;
 import org.netbeans.editor.ext.q.QCompletion;
 import org.netbeans.editor.ext.q.QSyntax;
 import org.netbeans.editor.ext.q.QSyntaxSupport;
-import org.openide.util.HelpCtx;
 
 
 public class QKit extends ExtKit
