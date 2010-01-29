@@ -576,9 +576,7 @@ public class K {
         }
 
         public void serialise(OutputStream o) throws IOException {
-            for (int i = 0;i < s.length();i++)
-                o.write((byte) s.charAt(i));
-            o.write((byte) 0);
+            o.write(s.getBytes("UTF-8"));
         }
     }
 
@@ -1949,10 +1947,10 @@ public class K {
 
         public void serialise(OutputStream o) throws IOException {
             super.serialise(o);
+            byte[]b =new String((char[])array).getBytes("UTF-8");
             write(o,(byte) 0);
-            write(o,getLength());
-            for (int i = 0;i < getLength();i++)
-                write(o,(byte) Array.getChar(array,i));
+            write(o,b.length);
+            o.write(b);
         }
 
         public void toString(LimitedWriter w,boolean showType) throws IOException {

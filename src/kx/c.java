@@ -24,6 +24,8 @@ types
 111 f\:
 112 dynamic load
  */
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import studio.kdb.K;
 import javax.swing.*;
 import java.io.*;
@@ -203,14 +205,18 @@ public class c {
     }
 
     K.KSymbol rs() {
-        int k = j;
-        for (;b[k] != 0;)
-            ++k;
-        char[] s = new char[k - j];
-        for (int i = 0;j < k;)
-            s[i++] = (char) (0xFF & b[j++]);
+        int n=j;
+        for (;b[n] != 0;)
+            ++n;
+        String s=null;
+        try {
+            s = new String(b, j, n-j, "UTF-8");
+        } catch (UnsupportedEncodingException ex) {
+            Logger.getLogger(c.class.getName()).log(Level.WARNING, null, ex);
+        }
+        j=n;
         ++j;
-        return new K.KSymbol(new String(s));
+        return new K.KSymbol(s);
     }
 
     K.UnaryPrimitive rup() {
@@ -451,11 +457,15 @@ public class c {
                 return F;
             }
             case 10: {
-                K.KCharacterVector C = new K.KCharacterVector(n);
-                C.setAttr(attr);
-                char[] array = (char[]) C.getArray();
-                for (;i < n;i++)
-                    array[i] = rc();
+                K.KCharacterVector C=null;
+                try{
+                    char[] array=new String(b,j,n, "UTF-8").toCharArray();
+                    C = new K.KCharacterVector(array);
+                    C.setAttr(attr);
+                }catch(UnsupportedEncodingException e){
+                    Logger.getLogger(c.class.getName()).log(Level.WARNING, null, e);
+                }
+                j+=n;
                 return C;
             }
             case 11: {
