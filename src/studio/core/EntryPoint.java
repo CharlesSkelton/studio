@@ -40,9 +40,9 @@ public class EntryPoint {
             }
         }
 
-      //  studio.ui.I18n.setLocale(Locale.getDefault());
+        studio.ui.I18n.setLocale(Locale.getDefault());
 
-        studio.ui.I18n.setLocale(new Locale("zh", "cn"));
+     //   studio.ui.I18n.setLocale(new Locale("zh", "cn"));
 
         if (!Config.getInstance().getAcceptedLicense()) {
             LicensePanel panel = new LicensePanel();
