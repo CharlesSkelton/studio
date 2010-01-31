@@ -6,6 +6,7 @@
 
 package studio.core;
 
+import java.util.Locale;
 import studio.kdb.Config;
 import studio.kdb.Lm;
 import studio.ui.ExceptionGroup;
@@ -38,6 +39,10 @@ public class EntryPoint {
                 ex.printStackTrace();
             }
         }
+
+      //  studio.ui.I18n.setLocale(Locale.getDefault());
+
+        studio.ui.I18n.setLocale(new Locale("zh", "cn"));
 
         if (!Config.getInstance().getAcceptedLicense()) {
             LicensePanel panel = new LicensePanel();

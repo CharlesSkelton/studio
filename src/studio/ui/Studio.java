@@ -169,7 +169,7 @@ public class Studio extends JPanel implements Observer,WindowListener {
                     copyAction = (BaseKit.CopyAction) actions[i];
                     copyAction.putValue(Action.SHORT_DESCRIPTION,"Copy the selected text to the clipboard");
                     copyAction.putValue(Action.SMALL_ICON,getImage(Config.imageBase2 + "copy.png"));
-                    copyAction.putValue(Action.NAME,"Copy");
+                    copyAction.putValue(Action.NAME,I18n.getString("Copy"));
                     copyAction.putValue(Action.MNEMONIC_KEY,new Integer(KeyEvent.VK_C));
                     copyAction.putValue(Action.ACCELERATOR_KEY,KeyStroke.getKeyStroke(KeyEvent.VK_C,menuShortcutKeyMask));
                 }
@@ -177,7 +177,7 @@ public class Studio extends JPanel implements Observer,WindowListener {
                     cutAction = (BaseKit.CutAction) actions[i];
                     cutAction.putValue(Action.SHORT_DESCRIPTION,"Cut the selected text");
                     cutAction.putValue(Action.SMALL_ICON,getImage(Config.imageBase2 + "cut.png"));
-                    cutAction.putValue(Action.NAME,"Cut");
+                    cutAction.putValue(Action.NAME,I18n.getString("Cut"));
                     cutAction.putValue(Action.MNEMONIC_KEY,new Integer(KeyEvent.VK_T));
                     cutAction.putValue(Action.ACCELERATOR_KEY,KeyStroke.getKeyStroke(KeyEvent.VK_X,menuShortcutKeyMask));
                 }
@@ -185,7 +185,7 @@ public class Studio extends JPanel implements Observer,WindowListener {
                     pasteAction = (BaseKit.PasteAction) actions[i];
                     pasteAction.putValue(Action.SHORT_DESCRIPTION,"Paste text from the clipboard");
                     pasteAction.putValue(Action.SMALL_ICON,getImage(Config.imageBase2 + "paste.png"));
-                    pasteAction.putValue(Action.NAME,"Paste");
+                    pasteAction.putValue(Action.NAME,I18n.getString("Paste"));
                     pasteAction.putValue(Action.MNEMONIC_KEY,new Integer(KeyEvent.VK_P));
                     pasteAction.putValue(Action.ACCELERATOR_KEY,KeyStroke.getKeyStroke(KeyEvent.VK_V,menuShortcutKeyMask));
                 }
@@ -193,7 +193,7 @@ public class Studio extends JPanel implements Observer,WindowListener {
                     findAction = actions[i];
                     findAction.putValue(Action.SHORT_DESCRIPTION,"Find text in the document");
                     findAction.putValue(Action.SMALL_ICON,getImage(Config.imageBase2 + "find.png"));
-                    findAction.putValue(Action.NAME,"Find...");
+                    findAction.putValue(Action.NAME,I18n.getString("Find"));
                     findAction.putValue(Action.MNEMONIC_KEY,new Integer(KeyEvent.VK_F));
                     findAction.putValue(Action.ACCELERATOR_KEY,KeyStroke.getKeyStroke(KeyEvent.VK_F,menuShortcutKeyMask));
                 }
@@ -201,7 +201,7 @@ public class Studio extends JPanel implements Observer,WindowListener {
                     replaceAction = actions[i];
                     replaceAction.putValue(Action.SHORT_DESCRIPTION,"Replace text in the document");
                     replaceAction.putValue(Action.SMALL_ICON,getImage(Config.imageBase2 + "replace.png"));
-                    replaceAction.putValue(Action.NAME,"Replace...");
+                    replaceAction.putValue(Action.NAME,I18n.getString("Replace"));
                     replaceAction.putValue(Action.MNEMONIC_KEY,new Integer(KeyEvent.VK_R));
                     replaceAction.putValue(Action.ACCELERATOR_KEY,KeyStroke.getKeyStroke(KeyEvent.VK_R,menuShortcutKeyMask));
                 }
@@ -209,7 +209,7 @@ public class Studio extends JPanel implements Observer,WindowListener {
                     selectAllAction = (BaseKit.SelectAllAction) actions[i];
                     selectAllAction.putValue(Action.SHORT_DESCRIPTION,"Select all text in the document");
                     selectAllAction.putValue(Action.SMALL_ICON,null);
-                    selectAllAction.putValue(Action.NAME,"Select All");
+                    selectAllAction.putValue(Action.NAME,I18n.getString("SelectAll"));
                     selectAllAction.putValue(Action.MNEMONIC_KEY,new Integer(KeyEvent.VK_A));
                     selectAllAction.putValue(Action.ACCELERATOR_KEY,KeyStroke.getKeyStroke(KeyEvent.VK_A,menuShortcutKeyMask));
                 }
@@ -217,7 +217,7 @@ public class Studio extends JPanel implements Observer,WindowListener {
                     undoAction = (ActionFactory.UndoAction) actions[i];
                     undoAction.putValue(Action.SHORT_DESCRIPTION,"Undo the last change to the document");
                     undoAction.putValue(Action.SMALL_ICON,getImage(Config.imageBase2 + "undo.png"));
-                    undoAction.putValue(Action.NAME,"Undo");
+                    undoAction.putValue(Action.NAME,I18n.getString("Undo"));
                     undoAction.putValue(Action.MNEMONIC_KEY,new Integer(KeyEvent.VK_U));
                     undoAction.putValue(Action.ACCELERATOR_KEY,KeyStroke.getKeyStroke(KeyEvent.VK_Z,menuShortcutKeyMask));
                 }
@@ -225,7 +225,7 @@ public class Studio extends JPanel implements Observer,WindowListener {
                     redoAction = (ActionFactory.RedoAction) actions[i];
                     redoAction.putValue(Action.SHORT_DESCRIPTION,"Redo the last change to the document");
                     redoAction.putValue(Action.SMALL_ICON,getImage(Config.imageBase2 + "redo.png"));
-                    redoAction.putValue(Action.NAME,"Redo");
+                    redoAction.putValue(Action.NAME,I18n.getString("Redo"));
                     redoAction.putValue(Action.MNEMONIC_KEY,new Integer(KeyEvent.VK_R));
                     redoAction.putValue(Action.ACCELERATOR_KEY,KeyStroke.getKeyStroke(KeyEvent.VK_Y,menuShortcutKeyMask));
                 }
@@ -1027,7 +1027,7 @@ public class Studio extends JPanel implements Observer,WindowListener {
     }
 
     private void initActions() {
-        newFileAction = new UserAction("New...",
+        newFileAction = new UserAction(I18n.getString("New"),
                                        getImage(Config.imageBase2 + "document_new.png"),
                                        "Create a blank script",
                                        new Integer(KeyEvent.VK_N),
@@ -1039,7 +1039,7 @@ public class Studio extends JPanel implements Observer,WindowListener {
             }
         };
 
-        arrangeAllAction = new UserAction("Arrange All",
+        arrangeAllAction = new UserAction(I18n.getString("ArrangeAll"),
                                           getImage(Config.imageBase2 + "blank.png"),
                                           "Arrange all windows on screen",
                                           new Integer(KeyEvent.VK_A),
@@ -1051,7 +1051,7 @@ public class Studio extends JPanel implements Observer,WindowListener {
         };
 
 
-        toggleDividerOrientationAction = new UserAction("Toggle divider orientation",
+        toggleDividerOrientationAction = new UserAction(I18n.getString("ToggleDividerOrientation"),
                                                         getImage(Config.imageBase2 + "blank.png"),
                                                         "Toggle the window divider's orientation",
                                                         new Integer(KeyEvent.VK_C),
@@ -1062,7 +1062,7 @@ public class Studio extends JPanel implements Observer,WindowListener {
             }
         };
 
-        closeFileAction = new UserAction("Close",
+        closeFileAction = new UserAction(I18n.getString("Close"),
                                          getImage(Config.imageBase2 + "blank.png"),
                                          "Close current document",
                                          new Integer(KeyEvent.VK_C),
@@ -1075,7 +1075,7 @@ public class Studio extends JPanel implements Observer,WindowListener {
             }
         };
 
-        openFileAction = new UserAction("Open...",
+        openFileAction = new UserAction(I18n.getString("Open"),
                                         getImage(Config.imageBase2 + "folder.png"),
                                         "Open a script",
                                         new Integer(KeyEvent.VK_O),
@@ -1086,7 +1086,7 @@ public class Studio extends JPanel implements Observer,WindowListener {
             }
         };
 
-        openFileInNewWindowAction = new UserAction("New window",
+        openFileInNewWindowAction = new UserAction(I18n.getString("NewWindow"),
                                                    getImage(Config.imageBase2 + "blank.png"),
                                                    "Open a new window",
                                                    new Integer(KeyEvent.VK_N),
@@ -1097,7 +1097,7 @@ public class Studio extends JPanel implements Observer,WindowListener {
             }
         };
 
-        editServerAction = new UserAction("Edit...",
+        editServerAction = new UserAction(I18n.getString("Edit"),
                                           getImage(Config.imageBase2 + "server_information.png"),
                                           "Edit the server details",
                                           new Integer(KeyEvent.VK_E),
@@ -1131,7 +1131,7 @@ public class Studio extends JPanel implements Observer,WindowListener {
         };
 
 
-        addServerAction = new UserAction("Add...",
+        addServerAction = new UserAction(I18n.getString("Add"),
                                          getImage(Config.imageBase2 + "server_add.png"),
                                          "Configure a new server",
                                          new Integer(KeyEvent.VK_A),
@@ -1156,7 +1156,7 @@ public class Studio extends JPanel implements Observer,WindowListener {
             }
         };
 
-        removeServerAction = new UserAction("Remove",
+        removeServerAction = new UserAction(I18n.getString("Remove"),
                                             getImage(Config.imageBase2 + "server_delete.png"),
                                             "Remove this server",
                                             new Integer(KeyEvent.VK_R),
@@ -1188,7 +1188,7 @@ public class Studio extends JPanel implements Observer,WindowListener {
         };
 
 
-        saveFileAction = new UserAction("Save",
+        saveFileAction = new UserAction(I18n.getString("Save"),
                                         getImage(Config.imageBase2 + "disks.png"),
                                         "Save the script",
                                         new Integer(KeyEvent.VK_S),
@@ -1200,7 +1200,7 @@ public class Studio extends JPanel implements Observer,WindowListener {
             }
         };
 
-        saveAsFileAction = new UserAction("Save As...",
+        saveAsFileAction = new UserAction(I18n.getString("SaveAs"),
                                           getImage(Config.imageBase2 + "save_as.png"),
                                           "Save script as",
                                           new Integer(KeyEvent.VK_A),
@@ -1211,7 +1211,7 @@ public class Studio extends JPanel implements Observer,WindowListener {
             }
         };
 
-        exportAction = new UserAction("Export...",
+        exportAction = new UserAction(I18n.getString("Export"),
                                       getImage(Config.imageBase2 + "export2.png"),
                                       "Export result set",
                                       new Integer(KeyEvent.VK_E),
@@ -1222,7 +1222,7 @@ public class Studio extends JPanel implements Observer,WindowListener {
             }
         };
 
-        chartAction = new UserAction("Chart",
+        chartAction = new UserAction(I18n.getString("Chart"),
                                      Util.getImage(Config.imageBase2 + "chart.png"),
                                      "Chart current data set",
                                      new Integer(KeyEvent.VK_E),
@@ -1235,7 +1235,7 @@ public class Studio extends JPanel implements Observer,WindowListener {
         };
 
 
-        stopAction = new UserAction("Stop",
+        stopAction = new UserAction(I18n.getString("Stop"),
                                     getImage(Config.imageBase2 + "stop.png"),
                                     "Stop the query",
                                     new Integer(KeyEvent.VK_S),
@@ -1252,7 +1252,7 @@ public class Studio extends JPanel implements Observer,WindowListener {
         };
 
 
-        openInExcel = new UserAction("Open in Excel",
+        openInExcel = new UserAction(I18n.getString("OpenInExcel"),
                                      getImage(Config.imageBase + "excel_icon.gif"),
                                      "Open in Excel",
                                      new Integer(KeyEvent.VK_O),
@@ -1270,7 +1270,7 @@ public class Studio extends JPanel implements Observer,WindowListener {
         };
 
 
-        executeAction = new UserAction("Execute",
+        executeAction = new UserAction(I18n.getString("Execute"),
                                        Util.getImage(Config.imageBase2 + "table_sql_run.png"),
                                        "Execute the full or highlighted text as a query",
                                        new Integer(KeyEvent.VK_E),
@@ -1282,7 +1282,7 @@ public class Studio extends JPanel implements Observer,WindowListener {
         };
 
 
-        executeCurrentLineAction = new UserAction("ExecuteCurrentLine",
+        executeCurrentLineAction = new UserAction(I18n.getString("ExecuteCurrentLine"),
                                                   Util.getImage(Config.imageBase2 + "element_run.png"),
                                                   "Execute the current line as a query",
                                                   new Integer(KeyEvent.VK_ENTER),
@@ -1294,7 +1294,7 @@ public class Studio extends JPanel implements Observer,WindowListener {
         };
 
 
-        refreshAction = new UserAction("Refresh",
+        refreshAction = new UserAction(I18n.getString("Refresh"),
                                        getImage(Config.imageBase2 + "refresh.png"),
                                        "Refresh the result set",
                                        new Integer(KeyEvent.VK_R),
@@ -1451,7 +1451,7 @@ public class Studio extends JPanel implements Observer,WindowListener {
         };
       
 
-        aboutAction = new UserAction("About",
+        aboutAction = new UserAction(I18n.getString("About"),
                                      Util.getImage(Config.imageBase2 + "about.png"),
                                      "About Studio for kdb+",
                                      new Integer(KeyEvent.VK_E),
@@ -1462,7 +1462,7 @@ public class Studio extends JPanel implements Observer,WindowListener {
             }
         };
 
-        exitAction = new UserAction("Exit",
+        exitAction = new UserAction(I18n.getString("Exit"),
                                     getImage(Config.imageBase2 + "blank.png"),
                                     "Close this window",
                                     new Integer(KeyEvent.VK_X),
@@ -1574,7 +1574,7 @@ public class Studio extends JPanel implements Observer,WindowListener {
 
     private JMenuBar createMenuBar() {
         JMenuBar menubar = new JMenuBar();
-        JMenu menu = new JMenu("File");
+        JMenu menu = new JMenu(I18n.getString("File"));
         menu.setMnemonic(KeyEvent.VK_F);
         menu.add(new JMenuItem(newFileAction));
         menu.add(new JMenuItem(openFileAction));
@@ -1619,7 +1619,7 @@ public class Studio extends JPanel implements Observer,WindowListener {
         }
         menubar.add(menu);
 
-        menu = new JMenu("Edit");
+        menu = new JMenu(I18n.getString("Edit"));
         menu.setMnemonic(KeyEvent.VK_E);
         menu.add(new JMenuItem(undoAction));
         menu.add(new JMenuItem(redoAction));
@@ -1636,7 +1636,7 @@ public class Studio extends JPanel implements Observer,WindowListener {
 //        menu.add(new JMenuItem(editFontAction));
         menubar.add(menu);
 
-        menu = new JMenu("Server");
+        menu = new JMenu(I18n.getString("Server"));
         menu.setMnemonic(KeyEvent.VK_S);
         menu.add(new JMenuItem(addServerAction));
         menu.add(new JMenuItem(editServerAction));
@@ -1644,7 +1644,7 @@ public class Studio extends JPanel implements Observer,WindowListener {
 
         Server[] servers = Config.getInstance().getServers();
         if (servers.length > 0) {
-            JMenu subMenu = new JMenu("Clone");
+            JMenu subMenu = new JMenu(I18n.getString("Clone"));
             subMenu.setIcon(Util.getImage(Config.imageBase2 + "data_copy.png"));
            
             for (int i = 0;i < servers.length;i++) {
@@ -1684,7 +1684,7 @@ public class Studio extends JPanel implements Observer,WindowListener {
 
         menubar.add(menu);
 
-        menu = new JMenu("Query");
+        menu = new JMenu(I18n.getString("Query"));
         menu.setMnemonic(KeyEvent.VK_Q);
         menu.add(new JMenuItem(executeCurrentLineAction));
         menu.add(new JMenuItem(executeAction));
@@ -1692,7 +1692,7 @@ public class Studio extends JPanel implements Observer,WindowListener {
         menu.add(new JMenuItem(refreshAction));
         menubar.add(menu);
 
-        menu = new JMenu("Window");
+        menu = new JMenu(I18n.getString("Window"));
         menu.setMnemonic(KeyEvent.VK_W);
 
         menu.add(new JMenuItem(toggleDividerOrientationAction));
@@ -1749,7 +1749,7 @@ public class Studio extends JPanel implements Observer,WindowListener {
             }
         }
         menubar.add(menu);
-        menu = new JMenu("Help");
+        menu = new JMenu(I18n.getString("Help"));
         menu.setMnemonic(KeyEvent.VK_H);
         menu.add(new JMenuItem(codeKxComAction));
         if (!MAC_OS_X)
@@ -1773,7 +1773,7 @@ public class Studio extends JPanel implements Observer,WindowListener {
             String[] names = Config.getInstance().getServerNames();
 
             if ((names != null) && (names.length > 0)) {
-                toolbar.add(new JLabel("Server "));
+                toolbar.add(new JLabel(I18n.getString("Server")));
 
                 JComboBox combo = new JComboBox(names) {
                     @Override
@@ -2197,7 +2197,7 @@ public class Studio extends JPanel implements Observer,WindowListener {
                 TabPanel frame = new TabPanel("Table [" + grid.getRowCount() + " rows] ",
                                               getImage(Config.imageBase2 + "table.png"),
                                               grid);
-                frame.setTitle("Table [" + grid.getRowCount() + " rows] ");
+                frame.setTitle(I18n.getString("Table")+" [" + grid.getRowCount() + " "+I18n.getString("rows")+"] ");
 //                frame.setBackground( Color.white);
 
                 tabbedPane.addTab(frame.getTitle(),frame.getIcon(),frame.getComponent());
@@ -2229,7 +2229,7 @@ public class Studio extends JPanel implements Observer,WindowListener {
                                               getImage(Config.imageBase2 + "console.png"),
                                               scrollpane);
 
-                frame.setTitle("Console View ");
+                frame.setTitle(I18n.getString("ConsoleView"));
 
                 tabbedPane.addTab(frame.getTitle(),frame.getIcon(),frame.getComponent());
             }
