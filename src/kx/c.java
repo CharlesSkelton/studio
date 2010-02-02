@@ -291,8 +291,8 @@ public class c {
         return new K.Second(ri());
     }
 
-    K.Timespan rn() {
-        return new K.Timespan(rj());
+    K.KTimespan rn() {
+        return new K.KTimespan(rj());
     }
 
     K.KTime rt() {

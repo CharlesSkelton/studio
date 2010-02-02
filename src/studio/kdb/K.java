@@ -20,6 +20,7 @@ import java.util.Map;
 
 public class K {
     private static SimpleDateFormat formatter = new SimpleDateFormat();
+    private static DecimalFormat nsFormatter=new DecimalFormat("000000000");
 
     static {
         formatter.setTimeZone(java.util.TimeZone.getTimeZone("GMT"));
@@ -867,6 +868,7 @@ public class K {
         }
     }
 
+
     public static class KTimestamp extends KBase {
         public String getDataType() {
             return "Timestamp";
@@ -891,7 +893,7 @@ public class K {
                 return "-0Wp";
             else{
                 Timestamp ts=toTimestamp();
-                return sd("yyyy.MM.dd HH:mm:ss.SSS",ts)+String.valueOf(ts.getNanos());
+                return sd("yyyy.MM.dd HH:mm:ss.",ts)+nsFormatter.format(ts.getNanos());
             }
         }
 
@@ -1068,6 +1070,7 @@ public class K {
     }
 
     public static class Second extends KBase {
+        @Override
         public String getDataType() {
             return "Second";
         }
@@ -1079,10 +1082,12 @@ public class K {
             i = x;
         }
 
+        @Override
         public boolean isNull() {
             return i == Integer.MIN_VALUE;
         }
 
+        @Override
         public String toString(boolean showType) {
             if (isNull())
                 return "0Nv";
@@ -1094,6 +1099,7 @@ public class K {
                 return new Minute(i / 60).toString() + ':' + i2(i % 60);
         }
 
+        @Override
         public void toString(LimitedWriter w,boolean showType) throws IOException {
             w.write(toString(showType));
         }
@@ -1107,11 +1113,9 @@ public class K {
         }
     }
 
-    public static class Timespan extends KBase {
-
+    public static class KTimespan extends KBase {
         public long j;
-
-        public Timespan(long x) {
+        public KTimespan(long x) {
             j = x;
             type=-16;
         }
@@ -1120,10 +1124,12 @@ public class K {
             return "Timespan";
         }
 
+        @Override
         public boolean isNull() {
             return j == Long.MIN_VALUE;
         }
 
+        @Override
         public String toString(boolean showType) {
             if (isNull())
                 return "0Nn";
@@ -1145,13 +1151,15 @@ public class K {
                 return s+i2((int)((jj%86400000000000L)/3600000000000L))+
                        ":"+i2((int)((jj%3600000000000L)/60000000000L))+
                        ":"+i2((int)((jj%60000000000L)/1000000000L))+
-                       "."+new DecimalFormat("000000000").format((int)(jj%1000000000L));
+                       "."+nsFormatter.format((int)(jj%1000000000L));
             }
         }
 
+        @Override
         public void toString(LimitedWriter w,boolean showType) throws IOException {
             w.write(toString(showType));
         }
+        public Time toTime(){return new Time((j/1000000));}
     }
 
 
@@ -1699,7 +1707,7 @@ public class K {
         }
 
         public KBase at(int i) {
-            return new Timespan(Array.getLong(array,i));
+            return new KTimespan(Array.getLong(array,i));
         }
 
         public void toString(LimitedWriter w,boolean showType) throws IOException {

@@ -21,13 +21,10 @@ import org.jfree.data.xy.XYSeriesCollection;
 
 import javax.swing.*;
 import java.util.TimeZone;
-import java.util.HashMap;
-import java.util.Map;
 import studio.kdb.Config;
 
 public class LineChart {
     public ChartPanel chartPanel;
-    private Map seriesMap = new HashMap();
     JFrame frame = null;
 
     public LineChart(KTableModel table) {
@@ -59,7 +56,7 @@ public class LineChart {
         if (table.getColumnCount() > 0) {
             Class klass = table.getColumnClass(0);
 
-            if ((klass == K.KDateVector.class) || (klass == K.KTimeVector.class) || (klass == K.KMonthVector.class) || (klass == K.KMinuteVector.class) || (klass == K.KSecondVector.class) || (klass == K.KDatetimeVector.class)) {
+            if ((klass == K.KTimestampVector.class) ||(klass == K.KTimespanVector.class) || (klass == K.KDateVector.class) || (klass == K.KTimeVector.class) || (klass == K.KMonthVector.class) || (klass == K.KMinuteVector.class) || (klass == K.KSecondVector.class) || (klass == K.KDatetimeVector.class)) {
                 TimeSeriesCollection tsc = new TimeSeriesCollection(tz);
 
                 for (int col = 1;col < table.getColumnCount();col++) {
@@ -87,6 +84,36 @@ public class LineChart {
                             K.KTimeVector times = (K.KTimeVector) table.getColumn(0);
                             for (int row = 0;row < table.getRowCount();row++) {
                                 K.KTime time = (K.KTime) times.at(row);
+                                Millisecond ms = new Millisecond(time.toTime(),tz);
+
+                                Object o = table.getValueAt(row,col);
+                                if (o instanceof K.KBase)
+                                    if (!((K.KBase) o).isNull())
+                                        if (o instanceof ToDouble)
+                                            series.addOrUpdate(ms,((ToDouble) o).toDouble());
+                            }
+                        }
+                        else if (klass == K.KTimestampVector.class) {
+                            series = new TimeSeries(table.getColumnName(col),Day.class);
+                            K.KTimestampVector dates = (K.KTimestampVector) table.getColumn(0);
+
+                            for (int row = 0;row < dates.getLength();row++) {
+                                K.KTimestamp date = (K.KTimestamp) dates.at(row);
+                                Day day = new Day(new java.util.Date(date.toTimestamp().getTime()),tz);
+
+                                Object o = table.getValueAt(row,col);
+                                if (o instanceof K.KBase)
+                                    if (!((K.KBase) o).isNull())
+                                        if (o instanceof ToDouble)
+                                            series.addOrUpdate(day,((ToDouble) o).toDouble());
+                            }
+                        }
+                        else if (klass == K.KTimespanVector.class) {
+                            series = new TimeSeries(table.getColumnName(col),Millisecond.class);
+
+                            K.KTimespanVector times = (K.KTimespanVector) table.getColumn(0);
+                            for (int row = 0;row < table.getRowCount();row++) {
+                                K.KTimespan time = (K.KTimespan) times.at(row);
                                 Millisecond ms = new Millisecond(time.toTime(),tz);
 
                                 Object o = table.getValueAt(row,col);
