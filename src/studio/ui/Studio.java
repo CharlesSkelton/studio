@@ -100,10 +100,7 @@ public class Studio extends JPanel implements Observer,WindowListener {
         String s = (String) textArea.getDocument().getProperty("filename");
         if (s == null)
             s = "Script" + myScriptNumber;
-        String title = s;
-
-        title = title.replace('\\','/');
-
+        String title = s.replace('\\','/');
         frame.setTitle(title + (getModified() ? " (not saved) " : "") + (server!=null?" @"+server.toString():"") +" Studio for kdb+ " + Lm.getVersionString());
     }
 
@@ -281,8 +278,6 @@ public class Studio extends JPanel implements Observer,WindowListener {
             splitpane.setTopComponent(c);
             splitpane.setDividerLocation(0.5);
         }
-
-        saveFileAction.setEnabled(textArea.getDocument().getProperty("filename") != null);
 
         rebuildToolbar();
         rebuildMenuBar();
