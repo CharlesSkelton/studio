@@ -808,7 +808,7 @@ public class Studio extends JPanel implements Observer,WindowListener {
 
         try {
             InputStreamReader isr = new InputStreamReader(new FileInputStream(aFile),
-						          "UTF8");
+						          "UTF-8");
             BufferedReader input = new BufferedReader(isr);
             try {
 
@@ -923,7 +923,7 @@ public class Studio extends JPanel implements Observer,WindowListener {
                 if (null == textArea.getDocument().getProperty("filename"))
                     return saveAsFile();
 
-            textArea.write(new BufferedWriter(new OutputStreamWriter(new FileOutputStream(filename), "UTF8")));
+            textArea.write(new BufferedWriter(new OutputStreamWriter(new FileOutputStream(filename), "UTF-8")));
             textArea.getDocument().putProperty("filename",filename);
             windowListMonitor.fireMyEvent(new WindowListChangedEvent(this));
             setModified(false);

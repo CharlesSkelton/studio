@@ -57,6 +57,16 @@ public class Config
         return f;
     }
 
+    public String getEncoding()
+    {
+        String s="UTF-8";
+
+        if( p != null)
+            s= p.getProperty("encoding","UTF-8");
+
+        return s;//"GBK";
+    }
+
     public void setFont(Font f)
     {
         if( p != null)

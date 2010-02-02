@@ -577,7 +577,7 @@ public class K {
         }
 
         public void serialise(OutputStream o) throws IOException {
-            o.write(s.getBytes("UTF-8"));
+            o.write(s.getBytes(Config.getInstance().getEncoding()));
         }
     }
 
@@ -1955,7 +1955,7 @@ public class K {
 
         public void serialise(OutputStream o) throws IOException {
             super.serialise(o);
-            byte[]b =new String((char[])array).getBytes("UTF-8");
+            byte[]b =new String((char[])array).getBytes(Config.getInstance().getEncoding());
             write(o,(byte) 0);
             write(o,b.length);
             o.write(b);

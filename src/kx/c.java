@@ -33,6 +33,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+import studio.kdb.Config;
 
 public class c {
     DataInputStream i;
@@ -210,7 +211,7 @@ public class c {
             ++n;
         String s=null;
         try {
-            s = new String(b, j, n-j, "UTF-8");
+            s = new String(b, j, n-j, Config.getInstance().getEncoding());
         } catch (UnsupportedEncodingException ex) {
             Logger.getLogger(c.class.getName()).log(Level.WARNING, null, ex);
         }
@@ -459,7 +460,7 @@ public class c {
             case 10: {
                 K.KCharacterVector C=null;
                 try{
-                    char[] array=new String(b,j,n, "UTF-8").toCharArray();
+                    char[] array=new String(b,j,n, Config.getInstance().getEncoding()).toCharArray();
                     C = new K.KCharacterVector(array);
                     C.setAttr(attr);
                 }catch(UnsupportedEncodingException e){
