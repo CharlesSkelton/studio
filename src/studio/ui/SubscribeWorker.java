@@ -31,14 +31,13 @@ public class SubscribeWorker extends SwingWorker {
         return c;
     }
 
-    @Override
     protected Object doInBackground() throws Exception {
         try {
             Object r;
             while (!isCancelled()) {
                 r = c.getResponse();
                 System.out.println("recieved response");
-                publish(r);
+  //              publish(r);
                 System.out.println("cont listening");
             }
         } catch (Throwable ex) {
@@ -47,9 +46,8 @@ public class SubscribeWorker extends SwingWorker {
         return null;
     }
 
-    @Override
     protected void process(List chunks) {
-        for (Object next : chunks) {
+/*        for (Object next : chunks) {
             if (next instanceof KList) {
                 KBase update = ((KList) next).at(2);
                 grid.append(update);
@@ -58,9 +56,8 @@ public class SubscribeWorker extends SwingWorker {
                 System.out.println("error while processing result:" + next);
             }
         }
-    }
+*/    }
 
-    @Override
     protected void done() {
         if(isCancelled()) return;
         JOptionPane.showMessageDialog(null, "Error while subscribing table", "Subscribing " + tableName, JOptionPane.WARNING_MESSAGE);

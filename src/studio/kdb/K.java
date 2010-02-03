@@ -191,8 +191,6 @@ public class K {
     }
 
     public static class Fscan extends Adverb {
-        private KBase o;
-
         public Fscan(KBase o) {
             super(o);
             type = 108;
@@ -403,7 +401,7 @@ public class K {
             this.name = name;
         }
 
-        public short getType() {
+        public int getType() {
             return type;
         }
 
@@ -411,7 +409,6 @@ public class K {
             this.type = type;
         }
         private String name;
-        private short type;
         private String context;
     }
 
@@ -1070,7 +1067,6 @@ public class K {
     }
 
     public static class Second extends KBase {
-        @Override
         public String getDataType() {
             return "Second";
         }
@@ -1082,12 +1078,10 @@ public class K {
             i = x;
         }
 
-        @Override
         public boolean isNull() {
             return i == Integer.MIN_VALUE;
         }
 
-        @Override
         public String toString(boolean showType) {
             if (isNull())
                 return "0Nv";
@@ -1099,7 +1093,6 @@ public class K {
                 return new Minute(i / 60).toString() + ':' + i2(i % 60);
         }
 
-        @Override
         public void toString(LimitedWriter w,boolean showType) throws IOException {
             w.write(toString(showType));
         }
@@ -1119,17 +1112,14 @@ public class K {
             j = x;
             type=-16;
         }
-        @Override
         public String getDataType() {
             return "Timespan";
         }
 
-        @Override
         public boolean isNull() {
             return j == Long.MIN_VALUE;
         }
 
-        @Override
         public String toString(boolean showType) {
             if (isNull())
                 return "0Nn";
@@ -1155,7 +1145,6 @@ public class K {
             }
         }
 
-        @Override
         public void toString(LimitedWriter w,boolean showType) throws IOException {
             w.write(toString(showType));
         }
