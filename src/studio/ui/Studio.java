@@ -6,9 +6,7 @@
 
 package studio.ui;
 
-import java.util.concurrent.ExecutionException;
 import studio.kdb.*;
-import studio.kdb.K.KBase;
 import studio.utils.OSXAdapter;
 import javax.swing.event.UndoableEditEvent;
 import javax.swing.undo.CannotRedoException;
@@ -30,11 +28,12 @@ import javax.swing.undo.UndoManager;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
-import java.net.URI;
 import java.util.*;
 import javax.swing.plaf.basic.BasicSplitPaneUI;
 import org.netbeans.editor.example.QKit;
 import org.netbeans.editor.ext.q.QSettingsInitializer;
+import studio.utils.BrowserLaunch;
+import studio.utils.SwingWorker;
 
 public class Studio extends JPanel implements Observer,WindowListener {
     static {
@@ -83,7 +82,6 @@ public class Studio extends JPanel implements Observer,WindowListener {
     private UserAction executeAction;
     private UserAction executeCurrentLineAction;
     private UserAction refreshAction;
-    private UserAction subscribeAction;
     private UserAction aboutAction;
     private UserAction exitAction;
     private UserAction toggleDividerOrientationAction;
@@ -1205,8 +1203,7 @@ public class Studio extends JPanel implements Observer,WindowListener {
                                     null) {
             public void actionPerformed(ActionEvent e) {
                 if (worker != null) {
-                    //worker.interrupt();
-                    worker.cancel(true);
+                    worker.interrupt();
                     stopAction.setEnabled(false);
                     textArea.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
                 }
@@ -1267,152 +1264,6 @@ public class Studio extends JPanel implements Observer,WindowListener {
             }
         };
 
-/*        subscribeAction = new UserAction("Subscribe", getImage(Config.imageBase2 + "feed.png"), "Subscribe to realtime table", WIDTH, null) {
-
-            
-            public void actionPerformed(ActionEvent e) {
-
-                if (server != null) {
-                    final kx.c c = ConnectionPool.getInstance().leaseConnection(server);
-
-                    try {
-                        ConnectionPool.getInstance().checkConnected(c);
-                        final JDialog dialog = new JDialog(frame, true);
-                        SwingWorker worker = new SwingWorker() {
-
-                            
-                            protected Object doInBackground() throws Exception {
-                                try {
-                                    c.k(new K.KCharacterVector(".u.t"));
-                                    return c.getResponse();
-                                } catch (Throwable ex) {
-                                    throw new Exception(ex);
-                                }
-                            }
-
-                            
-                            protected void done() {
-                                dialog.setVisible(false);
-                                dialog.dispose();
-                                try {
-                                    Object res = get();
-                                    if (res instanceof K.KSymbolVector) {
-                                        subscribeFeed(res, c);
-                                    }
-                                } catch (Throwable ex) {
-                                    JOptionPane.showMessageDialog(frame, "Nothing to subscribe for!");
-                                }
-
-                            }
-                        };
-                        JProgressBar pb = new JProgressBar();
-                        pb.setIndeterminate(true);
-                        dialog.add(pb);
-                        worker.execute();
-                        dialog.pack();
-                        dialog.setLocationRelativeTo(null);
-                        //the dialog will be visible until the SwingWorker is done
-                        dialog.setVisible(true);
-                    } catch (Throwable th) {
-
-                        if (c != null) {
-                            ConnectionPool.getInstance().freeConnection(server, c);
-                        }
-                        JOptionPane.showMessageDialog(frame,
-                                      "An Exception occurred\n\nDetails - \n\n" + th.toString(),
-                                      "Studio for kdb+",
-                                      JOptionPane.ERROR_MESSAGE);
-                    }
-                }
-            }
-
-            private void subscribeFeed(Object res, final c c) throws Throwable {
-                K.KSymbolVector tables = (K.KSymbolVector) res;
-                final String table = (String) JOptionPane.showInputDialog(frame, "Select table to subscribe", "Subscribe to table",
-                        JOptionPane.YES_NO_OPTION,
-                        null, (Object[]) tables.getArray(), null);
-                if (table == null) {
-                    return;
-                }
-                final JDialog dialog = new JDialog(frame, true);
-                SwingWorker worker = new SwingWorker() {
-
-                    
-                    protected Object doInBackground() throws Exception {
-                        try {
-                            c.k(new K.KCharacterVector(".u.sub[`" + table + ";`]"));
-                            K.KBase r = c.getResponse();
-                            if (!(r instanceof K.KList)) {
-                                System.out.println(r);
-                                return null;
-                            }
-                            System.out.println("subscribed");
-                            Object data = ((K.KList) r).at(1);
-                            return data;
-                        } catch (Throwable ex) {
-                            throw new Exception(ex);
-                        }
-                    }
-
-                    
-                    protected void done() {
-                        dialog.setVisible(false);
-                        dialog.dispose();
-                        Object data = null;
-                        try {
-                            data = get();
-                        } catch (InterruptedException ex) {
-                            JOptionPane.showMessageDialog(frame, "Error while subscribing!\n" + ex);
-                        } catch (ExecutionException ex) {
-                            JOptionPane.showMessageDialog(frame, "Error while subscribing!\n" + ex);
-                        }
-                        if (data != null && FlipTableModel.isTable(data)) {
-                            QGrid grid = new QGrid((KBase) data);
-                            final SubscribeWorker worker = new SubscribeWorker(grid, c, table);
-                            worker.execute();
-                            JFrame frm = new JFrame();
-                            WindowAdapter closeAdapter = new WindowAdapter() {
-
-                                
-                                public void windowClosing(WindowEvent e) {
-                                    try {
-                                        worker.cancel(true);
-                                        c c = worker.getC();
-                                        c.k(new K.KCharacterVector(".u.del[`" + table + ";.z.w]"));
-                                        System.out.println("unsubscribed:" + c.getResponse());
-                                    } catch (Throwable ex) {
-                                        ex.printStackTrace();
-                                    }
-                                }
-                            };
-                            frame.addWindowListener(closeAdapter);
-                            frm.addWindowListener(closeAdapter);
-                            frm.setTitle(table + "@" + server);
-                            frm.setIconImage(getImage(Config.imageBase + "32x32/dot-chart.png").getImage());
-                            frm.add(grid);
-                            frm.pack();
-                            frm.setVisible(true);
-                        } else {
-                            JOptionPane.showMessageDialog(frame, "Error while subscribing!Invalid response.\n");
-                        }
-
-
-                    }
-                };
-
-                JProgressBar pb = new JProgressBar();
-                pb.setIndeterminate(true);
-                dialog.add(pb);
-                worker.execute();
-                dialog.pack();
-                dialog.setLocationRelativeTo(null);
-                //the dialog will be visible until the SwingWorker is done
-                dialog.setVisible(true);
-
-            }
-        };
-      
-*/
         aboutAction = new UserAction(I18n.getString("About"),
                                      Util.getImage(Config.imageBase2 + "about.png"),
                                      "About Studio for kdb+",
@@ -1444,7 +1295,7 @@ public class Studio extends JPanel implements Observer,WindowListener {
             
             public void actionPerformed(ActionEvent e) {
                     try {
-                        Desktop.getDesktop().browse(new URI("https://code.kx.com/trac/wiki/Reference/"));
+                        BrowserLaunch.openURL("https://code.kx.com/trac/wiki/Reference/");
                     } catch (Exception ex) {
                        JOptionPane.showMessageDialog(null, "Error attempting to launch web browser:\n" + ex.getLocalizedMessage());
                     }
@@ -1453,7 +1304,7 @@ public class Studio extends JPanel implements Observer,WindowListener {
     }
 
     public void about() {
-        HelpDialog help = new HelpDialog(frame,true);
+        HelpDialog help = new HelpDialog(frame);
         Util.centerChildOnParent(help,frame);
         // help.setTitle("About Studio for kdb+");
         help.pack();
@@ -1841,8 +1692,6 @@ public class Studio extends JPanel implements Observer,WindowListener {
             toolbar.add(replaceAction);
 
             toolbar.addSeparator();
-//            toolbar.add(subscribeAction);
-//            toolbar.addSeparator();
             toolbar.add(codeKxComAction);
 
             for (int j = 0;j < toolbar.getComponentCount();j++) {
@@ -2202,7 +2051,7 @@ public class Studio extends JPanel implements Observer,WindowListener {
     }
     Server server = null;
 
-    public void executeK4Query(final String text) {
+      public void executeK4Query(final String text) {
         final Cursor cursor = textArea.getCursor();
 
         textArea.setCursor(new java.awt.Cursor(java.awt.Cursor.WAIT_CURSOR));
@@ -2214,9 +2063,8 @@ public class Studio extends JPanel implements Observer,WindowListener {
             Throwable exception;
             boolean cancelled = false;
             long execTime=0;
-
             public void interrupt() {
-                super.cancel(true);
+                super.interrupt();
 
                 cancelled = true;
 
@@ -2225,8 +2073,7 @@ public class Studio extends JPanel implements Observer,WindowListener {
                 cleanup();
             }
 
-            
-            public Object doInBackground() {
+            public Object construct() {
                 try {
                     this.s = server;
                     c = ConnectionPool.getInstance().leaseConnection(s);
@@ -2244,8 +2091,7 @@ public class Studio extends JPanel implements Observer,WindowListener {
                 return null;
             }
 
-            
-            public void done() {
+            public void finished() {
                 if (!cancelled) {
                     if (exception != null)
                         try {
@@ -2299,8 +2145,8 @@ public class Studio extends JPanel implements Observer,WindowListener {
                                                           getImage(Config.imageBase + "32x32/error.png"));
                         }
                     else
-                        Utilities.setStatusText(textArea, "Last execution time:"+(execTime>0?""+execTime:"<1")+" mS");
                         try {
+                            Utilities.setStatusText(textArea, "Last execution time:"+(execTime>0?""+execTime:"<1")+" mS");
                             processK4Results(r);
                         }
                         catch (Exception e) {
@@ -2335,10 +2181,9 @@ public class Studio extends JPanel implements Observer,WindowListener {
             }
         };
 
-        worker.execute();
+        worker.start();
     }
     private SwingWorker worker;
-
     
     public void windowClosing(WindowEvent e) {
         if (quitWindow())

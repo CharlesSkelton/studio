@@ -31,13 +31,12 @@ import javax.swing.*;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
+import java.util.LinkedList;
 import studio.kdb.Config;
 
 public class c {
-    DataInputStream i;
-    OutputStream o;
+    DataInputStream inputStream;
+    OutputStream outputStream;
     byte[] b, B;
     int j;
     private JFrame frame;
@@ -53,31 +52,31 @@ public class c {
     void io(Socket s) throws IOException {
         s.setReceiveBufferSize(1048576);
         s.setTcpNoDelay(true);
-        i = new DataInputStream(s.getInputStream());
-        o = s.getOutputStream();
+        inputStream = new DataInputStream(s.getInputStream());
+        outputStream = s.getOutputStream();
         rxBufferSize=s.getReceiveBufferSize();
     }
 
     public void close() {
         try {
             // this will force k() to break out i hope
-            if (i != null)
+            if (inputStream != null)
                 try {
-                    i.close();
+                    inputStream.close();
                 }
                 catch (IOException e) {
                 }
                 finally {
-                    i = null;
+                    inputStream = null;
                 }
-            if (o != null)
+            if (outputStream != null)
                 try {
-                    o.close();
+                    outputStream.close();
                 }
                 catch (IOException e) {
                 }
                 finally {
-                    o = null;
+                    outputStream = null;
                 }
         }        // synchronized(this)
         finally {
@@ -91,8 +90,8 @@ public class c {
 
     public c(Socket s) throws IOException {
         io(s);
-        i.read(b = new byte[99]);
-        o.write(b,0,1);
+        inputStream.read(b = new byte[99]);
+        outputStream.write(b,0,1);
     }
 
     public c(ServerSocket s) throws IOException {
@@ -104,7 +103,7 @@ public class c {
             super(s);
         }
     }
-    BlockingQueue responses=new LinkedBlockingQueue();
+    private final java.util.List responses = java.util.Collections.synchronizedList(new LinkedList());
 
     boolean closed = true;
 
@@ -113,15 +112,26 @@ public class c {
     }
 
     public K.KBase getResponse() throws Throwable {
-        Object o=responses.take();
+        Object obj;
 
-        if (o instanceof Throwable)
-            throw (Throwable) o;
+        synchronized (responses) {
+            if (responses.size() == 0)
+                try {
+                    responses.wait();
+                }
+                catch (InterruptedException e) {
+                }
 
-        return (K.KBase) o;
+            obj = responses.remove(0);
+        }
+
+        if (obj instanceof Throwable)
+            throw (Throwable) obj;
+
+        return (K.KBase) obj;
     }
 
-    private void startReader() {
+  private void startReader() {
         Runnable runner = new Runnable() {
             public void run() {
                 while (!closed) {
@@ -138,7 +148,10 @@ public class c {
                         close();
                     }
 
-                    responses.add(o);
+                    synchronized (responses) {
+                        responses.add(o);
+                        responses.notify();
+                    }
                 }
             }
         };
@@ -154,9 +167,9 @@ public class c {
         dos.write((up+(retry?"\1":"")).getBytes());
         dos.writeByte(0);
         dos.flush();
-        o.write(baos.toByteArray());
-        byte[] B=new byte[2+up.getBytes().length];
-        if (1 != i.read(B,0,1))
+        outputStream.write(baos.toByteArray());
+        byte[] bytes=new byte[2+up.getBytes().length];
+        if (1 != inputStream.read(bytes,0,1))
             if(retry)
                 reconnect(false);
             else
@@ -561,9 +574,9 @@ public class c {
         int msgSize = 8 + dosBody.size();
         K.write(dosHeader,msgSize);
         byte[] b = baosHeader.toByteArray();
-        o.write(b);
+        outputStream.write(b);
         b = baosBody.toByteArray();
-        o.write(b);
+        outputStream.write(b);
     }
 
     public static class K4Exception extends Exception {
@@ -574,8 +587,8 @@ public class c {
 
 
     public Object k() throws K4Exception,IOException {
-        synchronized(i){
-            i.readFully(b = new byte[8]);
+        synchronized(inputStream){
+            inputStream.readFully(b = new byte[8]);
 
             a = b[0] == 1;
             boolean c = b[2] == 1;
@@ -611,7 +624,7 @@ public class c {
                     if (remainder < packetSize)
                         packetSize = remainder;
 
-                    total += i.read(b,total,packetSize);
+                    total += inputStream.read(b,total,packetSize);
                     pm.setProgress(total);
                     pm.setNote((total / 1024) + " of " + (msgLength / 1024) + " kB");
                 }

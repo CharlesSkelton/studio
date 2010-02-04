@@ -58,7 +58,7 @@ class ExcelExporter {
     }
 
     public static String escape(String s) {
-        final StringBuilder result = new StringBuilder();
+        final StringBuffer result = new StringBuffer();
         final StringCharacterIterator iterator = new StringCharacterIterator(s);
         char character = iterator.current();
         while (character != CharacterIterator.DONE) {

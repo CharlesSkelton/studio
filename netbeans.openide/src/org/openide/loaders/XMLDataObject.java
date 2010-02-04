@@ -1,11 +1,11 @@
 /*
  *                 Sun Public License Notice
- * 
+ *
  * The contents of this file are subject to the Sun Public License
  * Version 1.0 (the "License"). You may not use this file except in
  * compliance with the License. A copy of the License is available at
  * http://www.sun.com/
- * 
+ *
  * The Original Code is NetBeans. The Initial Developer of the Original
  * Code is Sun Microsystems, Inc. Portions Copyright 1997-2003 Sun
  * Microsystems, Inc. All Rights Reserved.
@@ -45,17 +45,17 @@ import org.openide.nodes.CookieSet;
 import org.openide.windows.CloneableOpenSupport;
 import org.openide.nodes.FilterNode;
 
-/** 
+/**
  * Object that provides main functionality for xml documents.
  * These objects are recognized by the <code>xml</code> extension and
- * <code>text/xml</code> MIME type. 
+ * <code>text/xml</code> MIME type.
  * <p>
- * It is declaratively extensible by an {@link Environment}. 
+ * It is declaratively extensible by an {@link Environment}.
  * The <code>Environment</code> is assigned to document instances using a provider
  * registered by DOCTYPE's public ID in the system filesystem under
  * <code>xml/lookups/{Transformed-DOCTYPE}</code> where the DOCTYPE transformation
  * is the same as that defined for {@link EntityCatalog} registrations.
- * 
+ *
  * @see XMLUtil
  * @see EntityCatalog
  *
@@ -64,8 +64,8 @@ import org.openide.nodes.FilterNode;
 public class XMLDataObject extends MultiDataObject {
      /** generated Serialized Version UID */
     static final long serialVersionUID = 8757854986453256578L;
-    
-   /** Public ID of xmlinfo dtd. 
+
+   /** Public ID of xmlinfo dtd.
     * @deprecated replaced with Lookup
     */
     public static final String XMLINFO_DTD_PUBLIC_ID_FORTE = "-//Forte for Java//DTD xmlinfo//EN"; // NOI18N
@@ -76,7 +76,7 @@ public class XMLDataObject extends MultiDataObject {
     /** Mime type of XML documents. */
     public static final String MIME = "text/xml";  //NOI18N
     //public static final String MIME2 = "application/xml"; //NOI18N
-    
+
     /** PROP_DOCUMENT not parsed yet. Constant for getStatus method. */
     public static final int STATUS_NOT     = 0;
     /** PROP_DOCUMENT parsed ok. Constant for getStatus method. */
@@ -85,51 +85,51 @@ public class XMLDataObject extends MultiDataObject {
     public static final int STATUS_WARNING = 2;
     /** PROP_DOCUMENT parsed with errors. Constant for getStatus method. */
     public static final int STATUS_ERROR   = 3;
-    
+
     /** property name of DOM document property */
     public static final String PROP_DOCUMENT = "document"; //??? it is not bound well // NOI18N
 
-    /** property name of info property 
+    /** property name of info property
      * @deprecated info is not supported anymore. Replaced with lookup.
      */
     public static final String PROP_INFO = "info"; // NOI18N
 
     /** Default XML parser error handler */
     private static ErrorPrinter errorHandler = new ErrorPrinter();
-        
+
     /**
      * Chain of resolvers contaning all EntityResolvers registred by a user.
      */
     private static XMLEntityResolverChain chainingEntityResolver;
-    
+
     /** map of DTD publicID => Info. */
     private static HashMap infos = new HashMap();
     // the lock can be seamlesly shared by all instances
     private static Object emgrLock = new Object ();
-    
-    
-    
-    
-    
-    // 
+
+
+
+
+
+    //
     // Instance variables
-    // 
-    
-    
+    //
+
+
     /** the XML document we delegate to */
     private DelDoc doc;
-    
+
 
     /** the result of parsing */
     private int status;  //??? why it is not a bound property?
                          // it if often out-of date (e.g. garbage collection)
 
-    /** @deprecated EditorCookie provided by subclass support 
+    /** @deprecated EditorCookie provided by subclass support
      * need to prevail build in cookies.
      */
     private EditorCookie editor = null;
 
-    /** 
+    /**
      * Task body triggered by file change (primaryFile() or xmlinfo) parsing document
      * for extension (info) assigment information (xmlinfo or public id)
      */
@@ -137,10 +137,10 @@ public class XMLDataObject extends MultiDataObject {
 
     /* Lazy initialized. For logging and debugging. */
     private ErrorManager err;
-               
-    /** 
+
+    /**
      * Create new XMLDataObject. It is usually called by a loader.
-     * A user can get existing XMLDataObject by calling {@link DataObject#find(FileObject) 
+     * A user can get existing XMLDataObject by calling {@link DataObject#find(FileObject)
      * <code>DataObject.find(FileObject f)</code>} instead.
      *
      * @param fo the primary file object, never <code>null</code>
@@ -150,7 +150,7 @@ public class XMLDataObject extends MultiDataObject {
     public XMLDataObject (FileObject fo, MultiFileLoader loader)
     throws DataObjectExistsException {
         super (fo, loader);
-        
+
         fo.addFileChangeListener (WeakListener.fileChange (getIP (), fo));
 
         status = STATUS_NOT;
@@ -161,14 +161,14 @@ public class XMLDataObject extends MultiDataObject {
         // In new model subclasses should directly provide its CookieSet.Factory that
         // uses last prevails order instead of old CookieSet first prevails order.
         // It completely prevails over this factory :-)
-        
+
         CookieSet.Factory factory = new CookieSet.Factory() {
             public Node.Cookie createCookie(Class klass) {
                 if (klass.isAssignableFrom(EditorCookie.class)
-                   || klass.isAssignableFrom(OpenCookie.class) 
-                   || klass.isAssignableFrom(CloseCookie.class) 
+                   || klass.isAssignableFrom(OpenCookie.class)
+                   || klass.isAssignableFrom(CloseCookie.class)
                    || klass.isAssignableFrom(PrintCookie.class) ) {
-                
+
                     if (editor == null) editor = createEditorCookie();  // the first pass
                     if (editor == null) return null;                    //??? gc unfriendly
 
@@ -178,15 +178,15 @@ public class XMLDataObject extends MultiDataObject {
                 }
             }
         };
-                
+
         CookieSet cookies = getCookieSet();
-        // EditorCookie.class must be synchronized with 
+        // EditorCookie.class must be synchronized with
         // XMLEditor.Env->findCloneableOpenSupport
         cookies.add(EditorCookie.class, factory);
         cookies.add(OpenCookie.class, factory);
         cookies.add(CloseCookie.class, factory);
         cookies.add(PrintCookie.class, factory);
-        
+
         // set info for this file
         //getIP ().resolveInfo ();        #16045
     }
@@ -207,7 +207,7 @@ public class XMLDataObject extends MultiDataObject {
 
 
 
-     /** If the Info associated with this data object (if any) provides 
+     /** If the Info associated with this data object (if any) provides
     * a subclass of Node, then this object is created to represent the
     * XML data object, otherwise DataNode is created.
     *
@@ -217,7 +217,7 @@ public class XMLDataObject extends MultiDataObject {
     protected Node createNodeDelegate () {  //??? what about interaction with Looks
         XMLNode xn = new XMLNode (this);
         // netbeans.core.nodes.description
-        xn.setShortDescription (NbBundle.getMessage ( 
+        xn.setShortDescription (NbBundle.getMessage (
                                         XMLDataObject.class, "HINT_XMLDataObject")); // NOI18N
         return xn;
     }
@@ -255,8 +255,8 @@ public class XMLDataObject extends MultiDataObject {
         return new HelpCtx (XMLDataObject.class);
     }
 
-    /**     
-     * Cookies from assigned Environment are not placed into 
+    /**
+     * Cookies from assigned Environment are not placed into
      * protected CookieSet and can be obtained only by invoking this method.
      * <p>
      * Cookie order for Info environments are handled  consistently with
@@ -268,16 +268,16 @@ public class XMLDataObject extends MultiDataObject {
         getIP ().waitFinished();
 
         Node.Cookie cake = (Node.Cookie)getIP ().lookupCookie (cls);
-        
+
         if (cake instanceof InstanceCookie) {
             cake = originCookie ((InstanceCookie)cake, cls);
         }
-        
+
         if (cake == null) {
             cake = super.getCookie (cls);
         }
-        
-        
+
+
         return cake;
     }
 
@@ -305,11 +305,11 @@ public class XMLDataObject extends MultiDataObject {
     }
 
     private void notifyEx(Exception e) {
-        ErrorManager emgr = ErrorManager.getDefault();        
+        ErrorManager emgr = ErrorManager.getDefault();
         emgr.annotate(e, "Cannot resolve following class in xmlinfo."); // NOI18N
         emgr.notify(e);
     }
-    
+
     /** Allows subclasses to provide their own editor cookie.
      * @return an editor cookie to be used as a result of <code>getCookie(EditorCookie.class)</code>
      *
@@ -318,7 +318,7 @@ public class XMLDataObject extends MultiDataObject {
     protected EditorCookie createEditorCookie () {
         return new XMLEditorSupport (this);
     }
-    
+
     // Vertical CookieManager
     private final void addSaveCookie (SaveCookie save) {
         getCookieSet ().add (save);
@@ -329,7 +329,7 @@ public class XMLDataObject extends MultiDataObject {
 
     //??? we ahould add it into class comment to make it public
     // or should we introduce second layer XMLDataObject extending this one
-    // and having documented this functionality  (we cannot because of 
+    // and having documented this functionality  (we cannot because of
     // so this huge DataObject will survive createEditorCookie())
     /*
      * Really simple implementation of OpenCookie, EditorCookie, PrintCookie,
@@ -364,12 +364,12 @@ public class XMLDataObject extends MultiDataObject {
                 getDataObject ().setModified (false);
             }
         }
-        
+
         //!!! it also stays for SaveCookie however does not understand
         // encoding declared in XML header => need to be rewritten.
         private static class XMLEditorEnv extends DataEditorSupport.Env {
             private static final long serialVersionUID = 6593415381104273008L;
-            
+
             public XMLEditorEnv (DataObject obj) {
                 super (obj);
             }
@@ -389,7 +389,7 @@ public class XMLDataObject extends MultiDataObject {
 
     /** Creates w3c's document for the xml file. Either returns cached reference
     * or parses the file and creates new document.
-    * 
+    *
     * @return the parsed document
     * @exception SAXException if there is a parsing error
     * @exception IOException if there is an I/O error
@@ -405,7 +405,7 @@ public class XMLDataObject extends MultiDataObject {
             return d;
         }
     }
-    
+
     /** Clears the document. Called when the document file is changed.
      */
     final void clearDocument () {
@@ -415,8 +415,8 @@ public class XMLDataObject extends MultiDataObject {
         firePropertyChange (PROP_DOCUMENT, null, null);
     }
 
-    /** 
-     * @return one of STATUS_XXX constants representing PROP_DOCUMENT state. 
+    /**
+     * @return one of STATUS_XXX constants representing PROP_DOCUMENT state.
      */
     public final int getStatus () {
         return status;
@@ -441,7 +441,7 @@ public class XMLDataObject extends MultiDataObject {
         if ((info != null) && info.equals (ii)) return;
 
         // update properties and caches
-        
+
         Info prevInfo = info;
         info = ii;
 
@@ -505,17 +505,17 @@ public class XMLDataObject extends MultiDataObject {
             if (err == null) {
                 err = ErrorManager.getDefault ().getInstance(
                     "org.openide.loaders.XMLDataObject[" + getPrimaryFile().getPath() + "]" // NOI18N
-                ); 
+                );
             }
         }
-    
+
         return err;
     }
-    
+
     // ~~~~~~~~~~~~~~~~~~~~ Start of Utilities ~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // ~~~~~~~~~~~~~~~~~~ To be replaced by XMLUtil ~~~~~~~~~~~~~~~~~~~~~~
-    
-    
+
+
     /** Provides access to internal XML parser.
     * This method takes URL. After successful finish the
     * document tree is returned. Used non validating parser.
@@ -566,14 +566,14 @@ public class XMLDataObject extends MultiDataObject {
     * @throws SAXException annotated if thrown due to configuration problem
     * @throws FactoryConfigurationError
     * @return org.w3c.dom.Document
-    * @deprecated Use {@link XMLUtil#parse(InputSource, boolean, boolean, ErrorHandler, EntityResolver) XMLUtil} instead.     
+    * @deprecated Use {@link XMLUtil#parse(InputSource, boolean, boolean, ErrorHandler, EntityResolver) XMLUtil} instead.
     */
     public static Document parse (URL url, ErrorHandler eh, boolean validate) throws IOException, SAXException {
-        
+
         DocumentBuilder builder = XMLDataObjectImpl.makeBuilder(validate);
         builder.setErrorHandler(eh);
         builder.setEntityResolver(getChainingEntityResolver());
-        
+
         return builder.parse (new InputSource(url.toExternalForm()));
 
     }
@@ -583,7 +583,7 @@ public class XMLDataObject extends MultiDataObject {
      * @deprecated Use {@link XMLUtil#createXMLReader() XMLUtil} instead.
      * It will create a SAX XMLReader that is SAX Parser replacement.
      * You will have to replace DocumentHandler by ContentHandler
-     * besause XMLReader accepts just ContentHandler. 
+     * besause XMLReader accepts just ContentHandler.
      * <p>Alternatively if not interested in new callbacks defined by
      * SAX 2.0 you can wrap returned XMLReader into XMLReaderAdapter
      * that implements Parser.
@@ -591,28 +591,28 @@ public class XMLDataObject extends MultiDataObject {
     public static Parser createParser () {
         return createParser (false);
     }
-   
-    
+
+
     /** Factory SAX parser that can be used to parse XML files.
      * The factory is created according to javax.xml.parsers.SAXParserFactory property.
      * The parser has set entity resolver to system entity resolver chain.
      * @param validate if true validating parser is returned
-     * @throws FactoryConfigurationError 
+     * @throws FactoryConfigurationError
      * @return sax parser or null if no parser can be created
      * @deprecated Use {@link XMLUtil#createXMLReader(boolean,boolean ) Util} instead
      * setting ns to false.
      * For more details see {@link #createParser() createParser}
      */
     public static Parser createParser (boolean validate) {
-        
+
         Parser parser = XMLDataObjectImpl.makeParser(validate);
         parser.setEntityResolver(getChainingEntityResolver());
         return parser;
-        
+
     }
 
 
-    /** 
+    /**
      * Creates empty DOM Document using JAXP factoring.
      * @return Document or null on problems with JAXP factoring
      * @deprecated Replaced with {@link XMLUtil#createDocument(String,String,String,String) XMLUtil}
@@ -628,9 +628,9 @@ public class XMLDataObject extends MultiDataObject {
      * </pre>
      */
     public static Document createDocument() {
-        
+
         deprecated();
-        
+
         try {
             return XMLDataObjectImpl.makeBuilder(false).newDocument();
         } catch (IOException ex) {
@@ -640,8 +640,8 @@ public class XMLDataObject extends MultiDataObject {
         }
     }
 
-    /** 
-     * Writes DOM Document to writer. 
+    /**
+     * Writes DOM Document to writer.
      *
      * @param doc DOM Document to be written
      * @param writer OutoutStreamWriter preffered otherwise
@@ -656,19 +656,19 @@ public class XMLDataObject extends MultiDataObject {
         deprecated();
 
         // WARNING: back compatability code
-        
+
         //use reflection to access "friendly" implementation in other package
-        
+
         final String FAILURE = "org.openide.xml.XMLUtilImpl.write() invocation failed.";  //NOI18N
-        
+
         try {
             Class clzz = Class.forName("org.openide.xml.XMLUtilImpl");  //NOI18N
 
             Method impl = clzz.getDeclaredMethod("write", new Class[] {//NOI18N
                 Document.class, Object.class, String.class
-            }); 
+            });
             impl.setAccessible(true);
-            impl.invoke(null, new Object[] {doc, writer, null});                    
+            impl.invoke(null, new Object[] {doc, writer, null});
 
         } catch (IllegalAccessException ex) {
             throw new IOException(FAILURE);
@@ -692,32 +692,32 @@ public class XMLDataObject extends MultiDataObject {
     }
 
     /**
-     * Write Document into OutputStream using given encoding. 
-     * It is a shortcut for writing configurations etc. It guarantee 
+     * Write Document into OutputStream using given encoding.
+     * It is a shortcut for writing configurations etc. It guarantee
      * just that data will be written. Structure and indentation
      * may change.
      *
      * @param doc DOM Document to be written
-     * @param out data sink     
+     * @param out data sink
      * @param enc - XML defined encoding name (i.e. IANA defined, one of UTF-8, UNICODE, ASCII).
      * @deprecated Moved to {@link XMLUtil#write(Document, OutputStream, String) XMLUtil}.
      */
     public static void write(Document doc, OutputStream out, String enc) throws IOException {
         XMLUtil.write(doc, out, enc);
     }
-    
-    
-    /** 
-     * Creates SAX InputSource for specified URL 
+
+
+    /**
+     * Creates SAX InputSource for specified URL
      * @deprecated Deprecated as it was a workaround method. Replace
      * with <code>new InputSource(url.toExternalForm())</code>.
      */
-    public static org.xml.sax.InputSource createInputSource (URL url) throws IOException {                
+    public static org.xml.sax.InputSource createInputSource (URL url) throws IOException {
         return new InputSource(url.toExternalForm());
     }
 
     /**
-     * Registers the given public ID as corresponding to a particular 
+     * Registers the given public ID as corresponding to a particular
      * URI, typically a local copy.  This URI will be used in preference
      * to ones provided as system IDs in XML entity declarations.  This
      * mechanism would most typically be used for Document Type Definitions
@@ -734,12 +734,12 @@ public class XMLDataObject extends MultiDataObject {
      *             instead.
      */
     public static void registerCatalogEntry (String publicId, String uri) {
-        
-        if (publicId == null) 
+
+        if (publicId == null)
             throw new IllegalArgumentException("null public ID is not allowed."); //NOI18N
 
         XMLDataObjectImpl.registerCatalogEntry(publicId, uri);
-        
+
     }
 
     /**
@@ -766,7 +766,7 @@ public class XMLDataObject extends MultiDataObject {
      *             instead.
      */
     public static void registerCatalogEntry (String publicId, String resourceName, ClassLoader loader) {
-        if (publicId == null) 
+        if (publicId == null)
             throw new IllegalArgumentException("null public ID is not allowed."); //NOI18N
 
         XMLDataObjectImpl.registerCatalogEntry(publicId, "nbres:/" + resourceName);  //NOI18N
@@ -779,7 +779,7 @@ public class XMLDataObject extends MultiDataObject {
      *
      * <P>Every created parser use global entity resolver and then chain.
      *
-     * @deprecated EntityResolver is a parser user responsibility. 
+     * @deprecated EntityResolver is a parser user responsibility.
      *             Every time set a EntityResolver to an XML parser you use.
      *             The OpenIDE now defines a system {@link EntityCatalog}.
      *
@@ -801,7 +801,7 @@ public class XMLDataObject extends MultiDataObject {
      *
      * @param resolver non null resolver to be removed
      * @return removed resolver instance or null if not present
-     */    
+     */
     public static final EntityResolver removeEntityResolver(EntityResolver resolver) {
         return getChainingEntityResolver().removeEntityResolver(resolver);
     }
@@ -810,22 +810,22 @@ public class XMLDataObject extends MultiDataObject {
     /** Accessor method for chaining entity resolver implementation. */
     private static synchronized XMLEntityResolverChain getChainingEntityResolver() {
 
-        if (chainingEntityResolver == null) {                    
+        if (chainingEntityResolver == null) {
             chainingEntityResolver = new XMLEntityResolverChain();
             chainingEntityResolver.addEntityResolver(getSystemResolver());
         }
-        
+
         return chainingEntityResolver;
-        
+
     }
-    
+
     /** Lazy initialized system resolver. */
-    private static EntityResolver getSystemResolver() {        
+    private static EntityResolver getSystemResolver() {
         return  EntityCatalog.getDefault();
     }
-    
+
     /**
-     * Registers new Info to particular XML document content type as 
+     * Registers new Info to particular XML document content type as
      * recognized by DTD public id. The registration is valid until IDE JVM termination.
      *
      * @param publicId used as key
@@ -833,7 +833,7 @@ public class XMLDataObject extends MultiDataObject {
      *
      * @deprecated Register an {@link Environment} via lookup, see
      * {@link XMLDataObject some details}.
-     */    
+     */
     public static void registerInfo (String publicId, Info info) {  //!!! to be replaced by lookup
         synchronized (infos) {
             if (info == null) {
@@ -859,17 +859,17 @@ public class XMLDataObject extends MultiDataObject {
         }
     }
 
-    
+
     // ~~~~~~~~~~~~~~~~~~~ PRIVATE AREA ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // dangerous, enter on your own risk
-    
+
     // WARNING - wormhole called via reflection from core layer,
     // do not delete, rename, etc.
     /** Used for creating RuntimeCatalog instance */
     private static EntityCatalog createEntityCatalog() {
         return XMLDataObjectImpl.createEntityCatalog();
     }
-    
+
     /*
      * Guess from stack trace who calls deprecated method and print it.
      */
@@ -885,20 +885,20 @@ public class XMLDataObject extends MultiDataObject {
         while (stack.indexOf("XMLDataObject", start + 1 )>0) { // NOI18N
             start = end;
             end = stack.indexOf("\n", start + 1); // NOI18N
-        }        
+        }
 
         String line =  stack.substring(start + 1, end).trim();
 
         System.out.println("Warning: deprecated method called " + line); // NOI18N
     }
-    
+
     /**
      * Default ErrorHandler reporting to log.
      */
     static class ErrorPrinter implements org.xml.sax.ErrorHandler {
-        
+
         private void message (final String level, final org.xml.sax.SAXParseException e) {
-            
+
             final String msg = NbBundle.getMessage(
                 XMLDataObject.class,
                 "PROP_XmlMessage",  //NOI18N
@@ -910,7 +910,7 @@ public class XMLDataObject extends MultiDataObject {
                     "" + e.getColumnNumber() // NOI18N
                 }
             );
-                
+
             ErrorManager.getDefault().log(msg);
         }
 
@@ -926,8 +926,8 @@ public class XMLDataObject extends MultiDataObject {
             message (NbBundle.getMessage(XMLDataObject.class, "PROP_XmlFatalError"), e); //NOI18N
         }
     } // end of inner class ErrorPrinter
-    
-    
+
+
     //~~~~~~~~~~~~~~~~~~~~~~~~ PARSER ----------------------------------
 
     // internally stops documet parsing when looking for public id
@@ -936,50 +936,50 @@ public class XMLDataObject extends MultiDataObject {
     }
 
     // static fields that that are logically a part of InfoParser
-    
+
     private static final StopSaxException STOP = new StopSaxException();
-    
+
     /** We are guaranteed to be executed in one thread let reuse parser, etc. */
     private static XMLReader sharedParserImpl = null;
-   
+
     static {
         try {
-            sharedParserImpl = XMLUtil.createXMLReader();        
+            sharedParserImpl = XMLUtil.createXMLReader();
             sharedParserImpl.setEntityResolver(new EmptyEntityResolver());
         } catch (SAXException ex) {
             ErrorManager err = ErrorManager.getDefault();
             err.annotate(ex, "System does not contain JAXP 1.1 compliant parser!"); // NOI18N
-            err.notify(err.ERROR, ex);            
+            err.notify(err.ERROR, ex);
         }
-        
-        
-        //initialize stuff possibly needed by libs that do not use 
+
+
+        //initialize stuff possibly needed by libs that do not use
         //JAXP but SAX 2 directly
         try {
             final Properties props = System.getProperties();
             final String SAX2_KEY = "org.xml.sax.driver";  //NOI18N
             if (props.getProperty(SAX2_KEY) == null) {
-                props.put(SAX2_KEY, sharedParserImpl.getClass().getName());                
+                props.put(SAX2_KEY, sharedParserImpl.getClass().getName());
             }
         } catch (RuntimeException ex) {
             //ignore it (we did the best efford)
         }
     }
-    
+
     /** A template to ask lookup for */
     private static final Lookup.Template TEMPLATE = new Lookup.Template (Node.Cookie.class);
     /** a string to signal null value for parsedId */
     private static final String NULL = ""; // NOI18N
-   
+
     /**
      * It simulates null that forbiden by SAX specs.
      */
     private static class NullHandler extends DefaultHandler implements LexicalHandler {
 
         static final NullHandler INSTANCE = new NullHandler();
-        
+
         NullHandler() {}
-        
+
         // LexicalHandler
 
         public void startDTD(String root, String pID, String sID) throws SAXException {
@@ -1004,7 +1004,7 @@ public class XMLDataObject extends MultiDataObject {
         }
     }
 
-    /** 
+    /**
      * Parser that parses XML document header to get some hints from it (such as DOCTYPE public ID.
      * It is named as InfoParser for historical reasons as it originally parsed
      * a coupled file (with xmlinfo extension) that contained IDE related metadata.
@@ -1013,32 +1013,32 @@ public class XMLDataObject extends MultiDataObject {
      */
     private final class InfoParser extends DefaultHandler
     implements FileChangeListener, LexicalHandler, LookupListener {
-            
+
         /** the result of parsing the IDE */
         private String parsedId;
-        
+
         /** Lookup associated with this document.
          */
         private Lookup lookup;
-        
+
         /** result used for this lookup */
         private Lookup.Result result;
-        
+
         private ThreadLocal QUERY = new ThreadLocal ();
-        
+
         InfoParser() {}
-        
+
         //~~~~~~~~~~~~~~~~~~~~~ Task body and control of queue ~~~~~~~~~~~~~~~~~~~
-        
+
         /** Getter for public ID of the document.
          */
         public String getPublicId () {
             waitFinished ();
             return parsedId == NULL ? null : parsedId;
         }
-        
+
         /** Does lookup for specific cookie. It also
-         * calls lookup on the result of Node.Cookie.class query and that is why it 
+         * calls lookup on the result of Node.Cookie.class query and that is why it
          * initializes the listeners to notify changes made on the data object.
          *
          * @param class to look for
@@ -1051,17 +1051,17 @@ public class XMLDataObject extends MultiDataObject {
                     public Class instanceClass () {
                         return clazz;
                     }
-                    
+
                     public Object instanceCreate () throws IOException {
                         throw new IOException ("Cyclic reference, sorry: " + clazz);
                     }
-                    
+
                     public String instanceName () {
                         return clazz.getName ();
                     }
                 };
             }
-            
+
             Object previous = QUERY.get ();
             try {
                 QUERY.set (clazz);
@@ -1079,7 +1079,7 @@ public class XMLDataObject extends MultiDataObject {
                 QUERY.set (previous);
             }
         }
-           
+
         /*
          * Find out DTD public ID.
          * Info is then assigned according to it from registry.
@@ -1091,7 +1091,7 @@ public class XMLDataObject extends MultiDataObject {
             FileObject myFileObject = getPrimaryFile();
             String previousID;
             String newID = null;
-            
+
             URL url = null;
             InputStream in = null;
             try {
@@ -1103,16 +1103,16 @@ public class XMLDataObject extends MultiDataObject {
 
             synchronized (this) {
                 previousID = parsedId;
-                
+
                 if (parsedId != null) {
                     // ok, has already been parsed
                     return;
                 }
-                
+
                 try {
                     if (!myFileObject.isValid())
                         return;
-                    
+
                     parsedId = NULL;
                     try {
                         in =  myFileObject.getInputStream();
@@ -1126,11 +1126,11 @@ public class XMLDataObject extends MultiDataObject {
                         // we use one shared parser instance, so we must protect
                         // its integrity
                         //
-                        synchronized (sharedParserImpl) {                    
+                        synchronized (sharedParserImpl) {
 
                             configureParser(parser, false, this);
                             parser.setContentHandler(this);
-                            parser.setErrorHandler(this);                    
+                            parser.setErrorHandler(this);
 
                             InputSource input =  new InputSource(url.toExternalForm());
                             input.setByteStream(in);
@@ -1156,7 +1156,7 @@ public class XMLDataObject extends MultiDataObject {
                         // somebody have deleted the file meanwhile, because I do not lock?
                         emgr().notify(emgr().INFORMATIONAL, ex);
                     } finally {
-                        
+
                         // such small memory leak can complicate profiling a lot
                         // on the other hand it might cause performance regression
                         // guard it by dedicated property
@@ -1167,15 +1167,15 @@ public class XMLDataObject extends MultiDataObject {
                             try {
                                 parser.setProperty("http://xml.org/sax/properties/lexical-handler", NullHandler.INSTANCE);  //NOI18N
                             } catch (SAXException ignoreIt) {
-                            }                        
+                            }
 
                             try {
                                 // Crimson requires it to release old properties and handlers
-                                parser.parse((InputSource)null);  
+                                parser.parse((InputSource)null);
                             } catch (Exception ignoreIt) {
                             }
                         }
-                        
+
                         parser = null;
                     }
 
@@ -1186,11 +1186,11 @@ public class XMLDataObject extends MultiDataObject {
                         emgr().notify(emgr().INFORMATIONAL, ex);
                     }
                 }
-            
+
             }
-            
+
             // out of any synchronized blocks udpate the lookup
-            // because it can call into unknown places via its 
+            // because it can call into unknown places via its
             // Environment.findForOne
 
             if (newID != null) {
@@ -1198,14 +1198,14 @@ public class XMLDataObject extends MultiDataObject {
             }
         }
 
-        
+
         /** Updates the ID.
          */
         private void updateLookup (String previousID, String id) {
             if (previousID != null && previousID.equals (id)) {
                 return;
             }
-            
+
             Lookup newLookup;
 
             // no lock here, because createInfoLookup & findForOne can call
@@ -1221,7 +1221,7 @@ public class XMLDataObject extends MultiDataObject {
                     newLookup = Lookup.EMPTY;
                 }
             }
-            
+
             synchronized (this) {
                 // just one update of lookup in this InfoParser
                 Lookup.Result prevRes = result;
@@ -1246,7 +1246,7 @@ public class XMLDataObject extends MultiDataObject {
             try {
                 parser.setFeature("http://xml.org/sax/features/validation", validation);  //NOI18N
             } catch (SAXException sex) {
-                emgr().log("Warning: XML parser does not support validation feature.");  //NOI18N                    
+                emgr().log("Warning: XML parser does not support validation feature.");  //NOI18N
             }
 
             try {
@@ -1258,7 +1258,7 @@ public class XMLDataObject extends MultiDataObject {
         }
 
 
-        
+
         // ~~~~~~~~~~ ERROR REPORTING ~~~~~~~~~~~~~~~~~~~~~~
 
         public void warning (Throwable ex) {
@@ -1271,7 +1271,7 @@ public class XMLDataObject extends MultiDataObject {
                 emgr.annotate(ex, annotation);
             emgr.notify(ErrorManager.INFORMATIONAL, ex);  //do not show until in debug mode
         }
-        
+
         // LexicalHandler
 
         public void startDTD(String root, String pID, String sID) throws SAXException {
@@ -1292,7 +1292,7 @@ public class XMLDataObject extends MultiDataObject {
         public void startCDATA() throws SAXException {
         }
 
-        public void endCDATA() throws SAXException {                
+        public void endCDATA() throws SAXException {
         }
 
         public void comment(char[] ch, int start, int length) throws SAXException {
@@ -1315,17 +1315,17 @@ public class XMLDataObject extends MultiDataObject {
 
         public void startElement(String uri, String lName, String qName, Attributes atts) throws org.xml.sax.SAXException {
             // no DTD present
-            stop(); 
+            stop();
         }
 
         private void stop() throws SAXException {
             throw STOP;
         }
 
-        
+
         //~~~~~~~~~~~~~~~~~~ FS LISTENER ~~~~~~~~~~~~~~~~~
         //listening at parent folder
-        
+
         public void fileFolderCreated (FileEvent fe) {
             // not interesting
         }
@@ -1368,18 +1368,18 @@ public class XMLDataObject extends MultiDataObject {
         public void fileAttributeChanged (FileAttributeEvent fe) {
             // not interested in
         }
-        
+
         /** A change in lookup.
          */
         public void resultChanged(org.openide.util.LookupEvent lookupEvent) {
             XMLDataObject.this.firePropertyChange (DataObject.PROP_COOKIE, null, null);
-            
+
             Node n = XMLDataObject.this.getNodeDelegateOrNull ();
             if (n instanceof XMLNode) {
                 ((XMLNode)n).update ();
             }
         }
-        
+
     } // end of InfoParser
 
 
@@ -1392,12 +1392,12 @@ public class XMLDataObject extends MultiDataObject {
             return ret;
         }
     }
-    
-    
-    
+
+
+
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~ private Loader ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    
-        
+
+
     /** The DataLoader for XmlDataObjects.
      */
     static final class Loader extends MultiFileLoader {
@@ -1430,14 +1430,14 @@ public class XMLDataObject extends MultiDataObject {
                            SystemAction.get(PropertiesAction.class)
                        };
         }
-        
+
         /** Get the default display name of this loader.
         * @return default display name
         */
         protected String defaultDisplayName () {
             return NbBundle.getMessage (XMLDataObject.class, "PROP_XmlLoader_Name");
         }
-        
+
         /** For a given file finds a primary file.
         * @param fo the file to find primary file for
         *
@@ -1453,7 +1453,7 @@ public class XMLDataObject extends MultiDataObject {
              * always be recognized as text/xml mime type
             if (XML_EXT.equals(fo.getExt())) {
                 return fo;
-            }            
+            }
              */
             /** JST: Removed JSP should handle this in better way
             if ("tld".equals(fo.getExt())) { // NOI18N
@@ -1461,9 +1461,9 @@ public class XMLDataObject extends MultiDataObject {
             }
             */
             // not recognized
-            return null;            
+            return null;
         }
-        
+
         /** Creates the right data object for given primary file.
         * It is guaranteed that the provided file is realy primary file
         * returned from the method findPrimaryFile.
@@ -1499,7 +1499,7 @@ public class XMLDataObject extends MultiDataObject {
     }
 
     // ~~~~~~~~~~~~~~~~~~~~~~ extension support via info ~~~~~~~~~~~~~~~~~~~~~~~~
-    
+
     // i would like to throw it away sometimes in future and replace it by better one
 
     /** This class has to be implemented by all processors in the
@@ -1516,8 +1516,8 @@ public class XMLDataObject extends MultiDataObject {
         */
         public void attachTo (XMLDataObject xmlDO);
     }
-    
-    
+
+
     /** @deprecated use Lookup
      * Representation of xmlinfo file holding container of Processors.
      */
@@ -1541,8 +1541,8 @@ public class XMLDataObject extends MultiDataObject {
             return ii;
         }
 
-        /** Add processor class to info. 
-        * The class should be public and either implement the Processor 
+        /** Add processor class to info.
+        * The class should be public and either implement the Processor
         * interface or should
         * have public constructor with one argument (DataObject or XMLDataObject).
         *
@@ -1556,21 +1556,21 @@ public class XMLDataObject extends MultiDataObject {
                     Class[] params = arr[i].getParameterTypes();
                     if (params.length == 1) {
                         if (
-                            params[0] == DataObject.class || 
-                            params[0] == XMLDataObject.class 
+                            params[0] == DataObject.class ||
+                            params[0] == XMLDataObject.class
                         ) {
                             arr = null;
                             break;
                         }
                     }
                 }
-                
+
                 if (arr != null) {
                     // no suitable constructor
                     throw new IllegalArgumentException();
                 }
             }
-            
+
             processors.add (proc);
         }
 
@@ -1618,19 +1618,19 @@ public class XMLDataObject extends MultiDataObject {
                                                 new Object [] { InfoParser.TAG_INFO }));
              */
         }
-        
+
         public boolean equals (Object obj) {
             if (obj == null) return false;
             if (obj instanceof Info == false) return false;
-            
+
             Info i = (Info) obj;
-            
-            return ((iconBase != null && iconBase.equals(i.iconBase)) || (i.iconBase == iconBase)) 
+
+            return ((iconBase != null && iconBase.equals(i.iconBase)) || (i.iconBase == iconBase))
                     && processors.equals(i.processors);
         }
     } // end of inner class Info
-    
-    
+
+
     /** A method for backward compatibility to create a lookup from data object and info
      * @param obj xml data object
      * @param info the info that should be associated
@@ -1639,28 +1639,28 @@ public class XMLDataObject extends MultiDataObject {
         return new InfoLkp (obj, info);
     }
 
-    
-    /** A backward compatibility class that converts the content of 
+
+    /** A backward compatibility class that converts the content of
      * an Info object into a Lookup class.
      */
     private static final class InfoLkp extends AbstractLookup {
         public final Info info;
-        
+
         public InfoLkp (XMLDataObject obj, Info info) {
             this.info = info;
-            
+
             Iterator it = info.processorClasses ();
             ArrayList arr = new ArrayList (info.processors.size ());
             while (it.hasNext ()) {
                 Class c = (Class)it.next ();
                 arr.add (new InfoPair (obj, c));
             }
-            
+
             setPairs (arr);
         }
-        
+
         /** A pair that receives a class and can create its instance either
-         * using default constructor or by passing data object into one 
+         * using default constructor or by passing data object into one
          * argument constructor.
          */
         private static final class InfoPair extends AbstractLookup.Pair {
@@ -1668,7 +1668,7 @@ public class XMLDataObject extends MultiDataObject {
             private Class clazz;
             /** XMLDataObject associated or object created */
             private Object obj;
-            
+
             /** For use by subclasses. */
             protected InfoPair (XMLDataObject obj, Class c) {
                 this.obj = obj;
@@ -1706,12 +1706,12 @@ public class XMLDataObject extends MultiDataObject {
                     // already created an object
                     return obj;
                 }
-                
+
                 // after this method the obj or null will contain the created object
                 // instead of reference to XMLDataObject
                 XMLDataObject xmlDataObject = (XMLDataObject)obj;
                 obj = null;
-                
+
                 // the clazz will be null to signal, that an instance
                 // of object has been created
                 Class next = clazz;
@@ -1735,8 +1735,8 @@ public class XMLDataObject extends MultiDataObject {
                             Class[] params = arr[i].getParameterTypes();
                             if (params.length == 1) {
                                 if (
-                                    params[0] == DataObject.class || 
-                                    params[0] == XMLDataObject.class 
+                                    params[0] == DataObject.class ||
+                                    params[0] == XMLDataObject.class
                                 ) {
                                     obj = arr[i].newInstance(
                                         new Object[] { xmlDataObject }
@@ -1754,7 +1754,7 @@ public class XMLDataObject extends MultiDataObject {
                 } catch (IllegalAccessException e) {
                     xmlDataObject.notifyEx(e);
                 }
-                
+
                 return obj;
             }
 
@@ -1766,7 +1766,7 @@ public class XMLDataObject extends MultiDataObject {
                 return temp != null ? temp : obj.getClass ();
             }
 
-            /** A persistent indentifier of the item. Can be stored and use 
+            /** A persistent indentifier of the item. Can be stored and use
              * in next run of the system.
              *
              * @return a string id of the item
@@ -1774,7 +1774,7 @@ public class XMLDataObject extends MultiDataObject {
             public String getId () {
                 return "Info[" + getType ().getName (); // NOI18N
             }
-            
+
             /** The best display name is probably the name of type...
              */
             public String getDisplayName () {
@@ -1782,7 +1782,7 @@ public class XMLDataObject extends MultiDataObject {
             }
         }
     }
-    
+
 
     /** Computes correct node for given XMLDataObject.
      */
@@ -1798,8 +1798,8 @@ public class XMLDataObject extends MultiDataObject {
             return n;
         }
     }
-        
-    
+
+
     /** Node that delegates either to data node or to a node provided by
      * the data object itself.
      */
@@ -1808,15 +1808,15 @@ public class XMLDataObject extends MultiDataObject {
             this (obj.findNode ());
         }
         private XMLNode (Node del) {
-            super (del, new FilterNode.Children (del));            
+            super (del, new FilterNode.Children (del));
             //setShortDescription("XML FILE");
         }
         private void update () {
             changeOriginal (XMLDataObject.this.findNode (), true);
         }
-        
+
     }
-    
+
     /** A special delegator that adds InstanceCookie.Origin to objects that miss it
      */
     private static class ICDel extends Object implements InstanceCookie.Origin, InstanceCookie.Of {
@@ -1865,11 +1865,11 @@ public class XMLDataObject extends MultiDataObject {
                 }
             }
         }
-        
+
         public int hashCode () {
             return 2 * obj.hashCode () + ic.hashCode ();
         }
-        
+
         public boolean equals (Object obj) {
             if (obj instanceof ICDel) {
                 ICDel d = (ICDel)obj;
@@ -1877,27 +1877,27 @@ public class XMLDataObject extends MultiDataObject {
             }
             return false;
         }
-    } // end of ICDel    
-    
+    } // end of ICDel
+
     /** Delegating DOM document that provides fast implementation of
      * DocumentType and getPublicID methods.
      */
     private final class DelDoc implements Document, DocumentType {
         /** PROP_DOCUMENT property holder, a DOM created from 'xml' file
-        * Weaker reference to org.w3c.dom.Document 
+        * Weaker reference to org.w3c.dom.Document
         */
-        
+
         public org.w3c.dom.Node renameNode(org.w3c.dom.Node arg0, String arg1, String arg2) throws DOMException {
             throw new UnsupportedOperationException("Not supported yet.");
         }
-        
+
         private Reference xmlDocument;
 
         DelDoc() {}
 
         /** Creates w3c's document for the xml file. Either returns cached reference
         * or parses the file and creates new document.
-        * 
+        *
         * @param force really create the document if it does not exists yet?
         * @return the parsed document or null if not forced
         */
@@ -1907,7 +1907,7 @@ public class XMLDataObject extends MultiDataObject {
                 if (doc instanceof Document) {
                     return (Document)doc;
                 }
-                
+
                 if (!force) {
                     return null;
                 }
@@ -1922,149 +1922,149 @@ public class XMLDataObject extends MultiDataObject {
                 } catch (IOException e) {
                     emgr ().notify (ErrorManager.INFORMATIONAL, e);
                 }
-                
+
                 status = STATUS_ERROR;
                 Document d = XMLUtil.createDocument("brokenDocument", null, null, null); // NOI18N
-                
+
                 xmlDocument = new SoftReference (d);
-                
+
                 // fire property change, because the document is errornous
                 firePropertyChange (PROP_DOCUMENT, null, null);
-                
+
                 return d;
             }
         }
-        
+
         /** The document to delegate to.
          */
         private final Document getDocumentImpl () {
             return getDocumentImpl (true);
         }
-        
-        
-        
-        
+
+
+
+
         public org.w3c.dom.Node getFirstChild() {
             return getDocumentImpl ().getFirstChild ();
         }
-        
+
         public org.w3c.dom.NamedNodeMap getAttributes() {
             return getDocumentImpl ().getAttributes ();
         }
-        
+
         public org.w3c.dom.Attr createAttribute(java.lang.String str) throws org.w3c.dom.DOMException {
             return getDocumentImpl ().createAttribute (str);
         }
-        
+
         public org.w3c.dom.Element getElementById(java.lang.String str) {
             return getDocumentImpl ().getElementById (str);
         }
-        
+
         public org.w3c.dom.Node getPreviousSibling() {
             return getDocumentImpl ().getPreviousSibling ();
         }
-        
+
         public boolean hasAttributes() {
             return getDocumentImpl ().hasAttributes ();
         }
-        
+
         public org.w3c.dom.Element createElement(java.lang.String str) throws org.w3c.dom.DOMException {
             return getDocumentImpl ().createElement (str);
         }
-        
+
         public org.w3c.dom.Node insertBefore(org.w3c.dom.Node node, org.w3c.dom.Node node1) throws org.w3c.dom.DOMException {
             return getDocumentImpl ().insertBefore (node, node1);
         }
-        
+
         public org.w3c.dom.DOMImplementation getImplementation() {
             return getDocumentImpl ().getImplementation ();
         }
-        
+
         public org.w3c.dom.Element createElementNS(java.lang.String str, java.lang.String str1) throws org.w3c.dom.DOMException {
             return getDocumentImpl ().createElementNS (str, str1);
         }
-        
+
         public org.w3c.dom.DocumentFragment createDocumentFragment() {
             return getDocumentImpl ().createDocumentFragment ();
         }
-        
+
         public org.w3c.dom.Node getParentNode() {
             return getDocumentImpl ().getParentNode ();
         }
-        
+
         public org.w3c.dom.Node getNextSibling() {
             return getDocumentImpl ().getNextSibling ();
         }
-        
-        
+
+
         public org.w3c.dom.NodeList getElementsByTagNameNS(java.lang.String str, java.lang.String str1) {
             return getDocumentImpl ().getElementsByTagNameNS (str, str1);
         }
-        
+
         public org.w3c.dom.Attr createAttributeNS(java.lang.String str, java.lang.String str1) throws org.w3c.dom.DOMException {
             return getDocumentImpl ().createAttributeNS (str, str1);
         }
-        
+
         public java.lang.String getNodeName() {
             return getDocumentImpl ().getNodeName ();
         }
-        
+
         public void setPrefix(java.lang.String str) throws org.w3c.dom.DOMException {
             getDocumentImpl ().setPrefix (str);
         }
-        
+
         public org.w3c.dom.ProcessingInstruction createProcessingInstruction(java.lang.String str, java.lang.String str1) throws org.w3c.dom.DOMException {
             return getDocumentImpl ().createProcessingInstruction (str, str1);
         }
-        
+
         public org.w3c.dom.NodeList getElementsByTagName(java.lang.String str) {
             return getDocumentImpl ().getElementsByTagName (str);
         }
-        
+
         public org.w3c.dom.Element getDocumentElement() {
             return getDocumentImpl ().getDocumentElement ();
         }
-        
+
         public org.w3c.dom.Node getLastChild() {
             return getDocumentImpl ().getLastChild ();
         }
-        
+
         public org.w3c.dom.DocumentType getDoctype() {
             return this;
         }
-        
+
         public java.lang.String getNamespaceURI() {
             return getDocumentImpl ().getNamespaceURI ();
         }
-        
+
         public java.lang.String getPrefix() {
             return getDocumentImpl ().getPrefix ();
         }
-        
+
         public boolean isSupported(java.lang.String str, java.lang.String str1) {
             return getDocumentImpl ().isSupported (str, str1);
         }
-        
+
         public org.w3c.dom.CDATASection createCDATASection(java.lang.String str) throws org.w3c.dom.DOMException {
             return getDocumentImpl ().createCDATASection (str);
         }
-        
+
         public org.w3c.dom.EntityReference createEntityReference(java.lang.String str) throws org.w3c.dom.DOMException {
             return getDocumentImpl ().createEntityReference (str);
         }
-        
+
         public short getNodeType() {
             return getDocumentImpl ().getNodeType ();
         }
-        
+
         public org.w3c.dom.Document getOwnerDocument() {
             return getDocumentImpl ().getOwnerDocument ();
         }
-        
+
         public void normalize() {
             getDocumentImpl ().normalize ();
         }
-        
+
         public org.w3c.dom.NodeList getChildNodes() {
             return getDocumentImpl ().getChildNodes ();
         }
@@ -2072,43 +2072,43 @@ public class XMLDataObject extends MultiDataObject {
         public org.w3c.dom.Node removeChild(org.w3c.dom.Node node) throws org.w3c.dom.DOMException {
             return getDocumentImpl ().removeChild (node);
         }
-        
+
         public org.w3c.dom.Text createTextNode(java.lang.String str) {
             return getDocumentImpl ().createTextNode (str);
         }
-        
+
         public boolean hasChildNodes() {
             return getDocumentImpl ().hasChildNodes ();
         }
-        
+
         public org.w3c.dom.Node appendChild(org.w3c.dom.Node node) throws org.w3c.dom.DOMException {
             return getDocumentImpl ().appendChild (node);
         }
-        
+
         public org.w3c.dom.Comment createComment(java.lang.String str) {
             return getDocumentImpl ().createComment (str);
         }
-        
+
         public java.lang.String getLocalName() {
             return getDocumentImpl ().getLocalName ();
         }
-        
+
         public org.w3c.dom.Node cloneNode(boolean param) {
             return getDocumentImpl ().cloneNode (param);
         }
-        
+
         public org.w3c.dom.Node replaceChild(org.w3c.dom.Node node, org.w3c.dom.Node node1) throws org.w3c.dom.DOMException {
             return getDocumentImpl ().replaceChild (node, node1);
         }
-        
+
         public void setNodeValue(java.lang.String str) throws org.w3c.dom.DOMException {
             getDocumentImpl ().setNodeValue (str);
         }
-        
+
         public java.lang.String getNodeValue() throws org.w3c.dom.DOMException {
             return getDocumentImpl ().getNodeValue ();
         }
-        
+
         public org.w3c.dom.Node importNode(org.w3c.dom.Node node, boolean param) throws org.w3c.dom.DOMException {
             return getDocumentImpl ().importNode (node, param);
         }
@@ -2116,9 +2116,9 @@ public class XMLDataObject extends MultiDataObject {
         // DOM3 only methods ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
         private void dom3() {
-            throw new DOMException(DOMException.NOT_SUPPORTED_ERR, "DOM3 feature");  //!!! DOM3 Document only            
+            throw new DOMException(DOMException.NOT_SUPPORTED_ERR, "DOM3 feature");  //!!! DOM3 Document only
         }
-        
+
         public org.w3c.dom.Node adoptNode(org.w3c.dom.Node source) throws DOMException {
             dom3();
             return null;
@@ -2128,11 +2128,11 @@ public class XMLDataObject extends MultiDataObject {
             dom3();
             return null;
         }
-        
+
         public void setEncoding(String encoding) {
             dom3();
         }
-        
+
         public boolean getStandalone() {
             dom3();
             return false;
@@ -2160,24 +2160,24 @@ public class XMLDataObject extends MultiDataObject {
             dom3();
         }
 
-        
-        
+
+
         //
         // Implementation of DocumentType
         //
-        
+
         public java.lang.String getName() {
             return getDocumentImpl ().getDoctype ().getName ();
         }
-        
+
         public org.w3c.dom.NamedNodeMap getEntities() {
             return getDocumentImpl ().getDoctype ().getEntities ();
         }
-        
+
         public java.lang.String getInternalSubset() {
             return getDocumentImpl ().getDoctype ().getInternalSubset ();
         }
-                
+
         public java.lang.String getPublicId() {
             Document d = getDocumentImpl (false);
             if (d != null) {
@@ -2187,11 +2187,11 @@ public class XMLDataObject extends MultiDataObject {
                 return getIP ().getPublicId ();
             }
         }
-        
+
         public java.lang.String getSystemId() {
             return getDocumentImpl ().getDoctype ().getSystemId ();
         }
-        
+
         public org.w3c.dom.NamedNodeMap getNotations() {
             return getDocumentImpl ().getDoctype ().getNotations ();
         }
@@ -2274,14 +2274,6 @@ public class XMLDataObject extends MultiDataObject {
         }
 
         public Object getUserData(String arg0) {
-            throw new UnsupportedOperationException("Not supported yet.");
-        }
-
-        public DOMConfiguration getDomConfig() {
-            throw new UnsupportedOperationException("Not supported yet.");
-        }
-
-        public Object setUserData(String key, Object data, UserDataHandler handler) {
             throw new UnsupportedOperationException("Not supported yet.");
         }
 
