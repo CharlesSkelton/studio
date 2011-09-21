@@ -690,7 +690,7 @@ public class K {
                     double epsilon = 1e-9;
                     double diff = f - Math.round(f);
                     if ((diff < epsilon) && (diff > -epsilon))
-                        s += "f";
+                        s += "e";
                 }
                 return s;
             }
