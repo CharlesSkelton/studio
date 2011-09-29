@@ -97,13 +97,15 @@ public class K {
     }
 
     public static class BinaryPrimitive extends Primitive {
+        private static String[]ops={":","+","-","*","%","&","|","^","=","<",">","$",",","#","_","~","!","?","@",".","0:","1:","2:","in","within","like","bin","ss","insert","wsum","wavg","div","xexp","setenv"};
+        
         public String getDataType() {
             return "Binary Primitive";
         }
         ;
 
         public BinaryPrimitive(int i) {
-            super(i);
+            super(ops,i);
             type = 102;
         }
 
@@ -233,30 +235,16 @@ public class K {
             return "Primitive";
         }
         ;
-        // .:'(:;+;-;*;%;&;|;^;$;<;>;,;#;_;~;!;?;@;.;=)
-        private static Map map = new HashMap();
-
-        public static void init(char[] ops,int[] values) {
-            for (int i = 0;i < values.length;i++)
-                map.put(new Integer(values[i]),new Character(ops[i]));
-        }
         private int primitive;
-        private char charVal = ' ';
-
-
-        static {
-            init(":+-*%&|^$<>,#_~!?@.=".toCharArray(),new int[]{0,1,2,3,4,5,6,7,11,9,10,12,13,14,15,16,17,18,19,8});
+        private String s=null;
+        public Primitive(String[]ops,int i){
+            primitive=i;
+            if(i<ops.length)
+                s=ops[i];
         }
 
-        public Primitive(int i) {
-            primitive = i;
-            Character c = (Character) map.get(new Integer(i));
-            if (c != null)
-                charVal = c.charValue();
-        }
-
-        public char getPrimitive() {
-            return charVal;
+        public String getPrimitive() {
+            return s;
         }
 
         public int getPrimitiveAsInt() {
@@ -280,7 +268,7 @@ public class K {
             boolean listProjection = false;
             if ((objs.getLength() > 0) && (objs.at(0) instanceof UnaryPrimitive)) {
                 UnaryPrimitive up = (UnaryPrimitive) objs.at(0);
-                if (up.getPrimitiveAsInt() == 41) // used to be 40 ?
+                if (up.getPrimitiveAsInt() == 41) // plist
                     listProjection = true;
             }
 
@@ -365,17 +353,17 @@ public class K {
     }
 
     public static class UnaryPrimitive extends Primitive {
+        private static String[]ops={"::","+:","-:","*:","%:","&:","|:","^:","=:","<:",">:","$:",",:","#:","_:","~:","!:","?:","@:",".:","0::","1::","2::","avg","last","sum","prd","min","max","exit","getenv","abs","sqrt","log","exp","sin","asin","cos","acos","tan","atan","plist"};
+
         public UnaryPrimitive(int i) {
-            super(i);
+            super(ops,i);
             type = 101;
         }
 
         public void toString(LimitedWriter w,boolean showType) throws IOException {
             if (getPrimitiveAsInt() == -1)
                 return;
-
             w.write(getPrimitive());
-            w.write(":");
         }
     }
 
