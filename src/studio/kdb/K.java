@@ -236,10 +236,10 @@ public class K {
         }
         ;
         private int primitive;
-        private String s=null;
+        private String s=" ";
         public Primitive(String[]ops,int i){
             primitive=i;
-            if(i<ops.length)
+            if(i>0&&i<ops.length)
                 s=ops[i];
         }
 
