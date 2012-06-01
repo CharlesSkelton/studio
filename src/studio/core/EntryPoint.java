@@ -6,6 +6,7 @@
 
 package studio.core;
 
+import java.awt.Font;
 import java.util.Locale;
 import studio.kdb.Config;
 import studio.kdb.Lm;
@@ -15,6 +16,8 @@ import studio.ui.Studio;
 import java.util.TimeZone;
 import javax.swing.JOptionPane;
 import javax.swing.UIManager;
+import javax.swing.plaf.FontUIResource;
+import javax.swing.text.StyleConstants;
 import studio.ui.LicensePanel;
 
 public class EntryPoint {
@@ -62,7 +65,11 @@ public class EntryPoint {
 
             Config.getInstance().setAcceptedLicense(Lm.buildDate);
         }
-
+        
+        UIManager.put("Table.font",new javax.swing.plaf.FontUIResource("Monospaced",Font.PLAIN,UIManager.getFont("Table.font").getSize()));
+        System.setProperty("awt.useSystemAAFontSettings","on");
+        System.setProperty("swing.aatext", "true");
+     
         ThreadGroup exceptionThreadGroup = new ExceptionGroup();
 
         new Thread(exceptionThreadGroup,"Init thread") {

@@ -165,6 +165,7 @@ public class QSyntax extends Syntax
         new Entry(1,delimiters,INIT,QTokenContext.INTEGER,ACTION_MATCHANDPUTBACK),
         new Entry(1,"D".toCharArray(),95,QTokenContext.TIMESPAN,ACTION_LOOKSLIKE),
         new Entry(1,"j".toCharArray(),2,QTokenContext.LONG,ACTION_LOOKSLIKE),
+        new Entry(1,"g".toCharArray(),2,QTokenContext.LONG,ACTION_LOOKSLIKE),
         new Entry(1,"h".toCharArray(),3,QTokenContext.SHORT,ACTION_LOOKSLIKE),
         new Entry(1,"e".toCharArray(),28,QTokenContext.REAL,ACTION_LOOKSLIKE),
         new Entry(1,"f".toCharArray(),16,QTokenContext.FLOAT,ACTION_LOOKSLIKE),
