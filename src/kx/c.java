@@ -600,56 +600,61 @@ public class c {
 
 
     public Object k() throws K4Exception,IOException {
+        boolean responseMsg=false;
         synchronized(inputStream){
-            inputStream.readFully(b = new byte[8]);
+            while(!responseMsg){ // throw away incoming aync, and error out on incoming sync
+                inputStream.readFully(b = new byte[8]);
+                a = b[0] == 1;
+                boolean c = b[2] == 1;
+                byte msgType=b[1];
+                if(msgType==1){close();throw new IOException("Cannot process sync msg from remote");}
+                responseMsg=msgType == 2;
+                j = 4;
 
-            a = b[0] == 1;
-            boolean c = b[2] == 1;
-            j = 4;
+                final int msgLength = ri() - 8;
+   
+                final String message = "Receiving data ...";
+                final String note = "0 of " + (msgLength / 1024) + " kB";
+                String title = "Studio for kdb+";
+                UIManager.put("ProgressMonitor.progressText",title);
 
-            final int msgLength = ri() - 8;
+                final int min = 0;
+                final int max = msgLength;
+                ProgressMonitor pm = new ProgressMonitor(frame,message,note,min,max);
 
-            final String message = "Receiving data ...";
-            final String note = "0 of " + (msgLength / 1024) + " kB";
-            String title = "Studio for kdb+";
-            UIManager.put("ProgressMonitor.progressText",title);
+                try {
+                    pm.setMillisToDecideToPopup(300);
+                    pm.setMillisToPopup(100);
+                    pm.setProgress(0);
 
-            final int min = 0;
-            final int max = msgLength;
-            ProgressMonitor pm = new ProgressMonitor(frame,message,note,min,max);
+                    b = new byte[msgLength];
+                    int total = 0;
+                    int packetSize = 1 + msgLength / 100;
+                    if (packetSize < rxBufferSize)
+                        packetSize = rxBufferSize;
 
-            try {
-                pm.setMillisToDecideToPopup(300);
-                pm.setMillisToPopup(100);
-                pm.setProgress(0);
+                    while (total < msgLength) {
+                        if (pm.isCanceled())
+                            throw new IOException("Cancelled by user");
 
-                b = new byte[msgLength];
-                int total = 0;
-                int packetSize = 1 + msgLength / 100;
-                if (packetSize < rxBufferSize)
-                    packetSize = rxBufferSize;
+                        int remainder = msgLength - total;
+                        if (remainder < packetSize)
+                            packetSize = remainder;
 
-                while (total < msgLength) {
-                    if (pm.isCanceled())
-                        throw new IOException("Cancelled by user");
-
-                    int remainder = msgLength - total;
-                    if (remainder < packetSize)
-                        packetSize = remainder;
-
-                    total += inputStream.read(b,total,packetSize);
-                    pm.setProgress(total);
-                    pm.setNote((total / 1024) + " of " + (msgLength / 1024) + " kB");
+                        total += inputStream.read(b,total,packetSize);
+                        pm.setProgress(total);
+                        pm.setNote((total / 1024) + " of " + (msgLength / 1024) + " kB");
+                    }
                 }
-            }
-            finally {
-                pm.close();
-            }
+                finally {
+                    pm.close();
+                }
 
-            if (c) {
-                u();
-            } else {
-                j = 0;
+                if (c) {
+                    u();  
+                } else {
+                    j = 0;
+                }
             }
 
             if (b[0] == -128) {
