@@ -601,11 +601,12 @@ public class c {
 
     public Object k() throws K4Exception,IOException {
         boolean responseMsg=false;
+        boolean c=false;
         synchronized(inputStream){
             while(!responseMsg){ // throw away incoming aync, and error out on incoming sync
                 inputStream.readFully(b = new byte[8]);
                 a = b[0] == 1;
-                boolean c = b[2] == 1;
+                c = b[2] == 1;
                 byte msgType=b[1];
                 if(msgType==1){close();throw new IOException("Cannot process sync msg from remote");}
                 responseMsg=msgType == 2;
@@ -613,7 +614,7 @@ public class c {
 
                 final int msgLength = ri() - 8;
    
-                final String message = "Receiving data ...";
+                final String message = "Receiving "+(c?"compressed ":"")+"data ...";
                 final String note = "0 of " + (msgLength / 1024) + " kB";
                 String title = "Studio for kdb+";
                 UIManager.put("ProgressMonitor.progressText",title);
@@ -649,13 +650,11 @@ public class c {
                 finally {
                     pm.close();
                 }
-
-                if (c) {
-                    u();  
-                } else {
-                    j = 0;
-                }
             }
+            if (c)
+                u();  
+            else
+                j = 0;
 
             if (b[0] == -128) {
                 j = 1;
