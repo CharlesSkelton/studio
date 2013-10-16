@@ -29,7 +29,8 @@ import java.util.logging.Logger;
 import studio.kdb.K;
 import javax.swing.*;
 import java.io.*;
-import java.net.ServerSocket;
+import java.net.InetSocketAddress;
+//import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.LinkedList;
 import java.util.UUID;
@@ -49,9 +50,7 @@ public class c {
         this.frame = frame;
     }
   
-
     void io(Socket s) throws IOException {
-        s.setReceiveBufferSize(1048576);
         s.setTcpNoDelay(true);
         inputStream = new DataInputStream(s.getInputStream());
         outputStream = s.getOutputStream();
@@ -89,7 +88,7 @@ public class c {
     public c() {
     }
 
-    public c(Socket s) throws IOException {
+/*    public c(Socket s) throws IOException {
         io(s);
         inputStream.read(b = new byte[99]);
         outputStream.write(b,0,1);
@@ -98,7 +97,7 @@ public class c {
     public c(ServerSocket s) throws IOException {
         this(s.accept());
     }
-
+*/
     public static class K4AccessException extends Exception {
         K4AccessException(String s) {
             super(s);
@@ -162,7 +161,10 @@ public class c {
     }
 
     public void reconnect(boolean retry) throws IOException,K4Exception {
-        io(new Socket(host,port));
+        Socket s=new Socket();
+        s.setReceiveBufferSize(1024*1024);
+        s.connect(new InetSocketAddress(host,port));
+        io(s);
         java.io.ByteArrayOutputStream baos = new ByteArrayOutputStream();
         java.io.DataOutputStream dos = new DataOutputStream(baos);
         dos.write((up+(retry?"\3":"")).getBytes());
