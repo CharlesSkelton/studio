@@ -1169,9 +1169,10 @@ public class K {
         public Time toTime(){return new Time((j/1000000));}
     }
 
+    static java.text.DecimalFormat i2Formatter= new java.text.DecimalFormat("00");
 
     static String i2(int i) {
-        return new java.text.DecimalFormat("00").format(i);
+        return i2Formatter.format(i);
     }
 
     public static abstract class KBaseVector extends KBase {
