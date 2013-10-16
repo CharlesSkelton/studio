@@ -15,14 +15,14 @@ import java.util.TimeZone;
 
 public class Lm {
     private static int majorVersion = 3;
-    private static int minorVersion = 29;
+    private static int minorVersion = 31;
     public static Date buildDate;
     
     static {
         try {
             SimpleDateFormat f = new SimpleDateFormat("yyyyMMdd");
             f.setTimeZone(TimeZone.getTimeZone("GMT"));
-            buildDate = f.parse("20120601");
+            buildDate = f.parse("20131016");
         }
         catch (ParseException e) {
         }
