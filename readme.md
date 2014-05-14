@@ -19,6 +19,10 @@ Additionally the application features
   - drag and drop
   - immediate charting of grid data
 
+Screenshot
+---------
+![alt tag](https://raw.githubusercontent.com/CharlesSkelton/studio/master/meta/ssthumb.png)
+
 Current Version
 ----
 
