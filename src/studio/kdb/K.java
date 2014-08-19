@@ -61,23 +61,44 @@ public class K {
             write(o,(byte) type);
         }
 
-        public void toString(LimitedWriter w,boolean showType) throws IOException {
-        }
-        ;
 
-        public String toString(boolean showType) {
+/*        public String toString(boolean showType) {
             return "";
         }
         ;
-
-        public String toString() {
+*/
+/*        public String toString() {
             return toString(true);
         }
         ;
-
+*/
         public boolean isNull() {
             return false;
         }
+        
+                private byte attr;
+
+        public byte getAttr() {
+            return attr;
+        }
+
+        public void setAttr(byte attr) {
+            this.attr = attr;
+        }
+        private static String[] sAttr = new String[]{"","`s#","`u#","`p#","`g#"};
+
+        public String toString(boolean showType) {
+            if (attr <= sAttr.length)
+                return sAttr[attr];
+            return "";
+        }
+        ;
+        
+        public void toString(LimitedWriter w,boolean showType) throws IOException {
+          w.write(toString(showType));
+        }
+        ;
+
         //      public KBase(int type){this.type=type;}
     }
 
@@ -957,8 +978,8 @@ public class K {
         }
 
         public void toString(LimitedWriter w,boolean showType) throws IOException {
-            boolean useBrackets = x instanceof Flip;
-
+            boolean useBrackets = getAttr()!=0||x instanceof Flip;
+            super.toString(w,showType);
             if (useBrackets)
                 w.write("(");
             x.toString(w,showType);
@@ -1189,23 +1210,6 @@ public class K {
 
         public int getLength() {
             return length;
-        }
-        ;
-        private byte attr;
-
-        public byte getAttr() {
-            return attr;
-        }
-
-        public void setAttr(byte attr) {
-            this.attr = attr;
-        }
-        private static String[] sAttr = new String[]{"","`s#","`u#","`p#","`g#"};
-
-        public String toString(boolean showType) {
-            if (attr <= sAttr.length)
-                return sAttr[attr];
-            return "";
         }
         ;
 

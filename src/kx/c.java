@@ -402,6 +402,11 @@ public class c {
             j++;
             return null;
         }
+        if(t==127){
+          K.Dict d=new K.Dict(r(),r());
+          d.setAttr((byte)1);
+          return d;
+        }
         if (t > 99) {
             j++;
             return null;
