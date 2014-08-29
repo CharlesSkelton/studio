@@ -16,15 +16,13 @@ import studio.ui.Studio;
 import java.util.TimeZone;
 import javax.swing.JOptionPane;
 import javax.swing.UIManager;
-import javax.swing.plaf.FontUIResource;
-import javax.swing.text.StyleConstants;
 import studio.ui.LicensePanel;
 
 public class EntryPoint {
     public static void main(final String[] args) {
         TimeZone.setDefault(TimeZone.getTimeZone("GMT"));
 
-        if (System.getProperty("mrj.version") != null) {
+        if(System.getProperty("os.name","").contains("OS X")){ 
             System.setProperty("apple.laf.useScreenMenuBar","true");
             //     System.setProperty("apple.awt.brushMetalLook", "true");
             System.setProperty("apple.awt.showGrowBox","true");

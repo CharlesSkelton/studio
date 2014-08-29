@@ -6,33 +6,36 @@
 
 package studio.ui;
 
-import studio.kdb.*;
-import studio.utils.OSXAdapter;
+import java.awt.*;
+import java.awt.event.*;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.io.*;
+import java.util.*;
+import javax.swing.*;
+import static javax.swing.JSplitPane.VERTICAL_SPLIT;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import javax.swing.event.UndoableEditEvent;
+import javax.swing.filechooser.FileFilter;
+import javax.swing.filechooser.FileView;
+import javax.swing.plaf.basic.BasicSplitPaneDivider;
+import javax.swing.plaf.basic.BasicSplitPaneUI;
+import javax.swing.table.TableModel;
+import javax.swing.text.*;
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
+import javax.swing.undo.UndoManager;
 import kx.c;
 import org.netbeans.editor.*;
 import org.netbeans.editor.Utilities;
+import org.netbeans.editor.example.QKit;
 import org.netbeans.editor.ext.ExtKit;
 import org.netbeans.editor.ext.ExtSettingsInitializer;
-
-import javax.swing.*;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
-import javax.swing.filechooser.FileFilter;
-import javax.swing.filechooser.FileView;
-import javax.swing.table.TableModel;
-import javax.swing.text.*;
-import javax.swing.undo.UndoManager;
-import java.awt.*;
-import java.awt.event.*;
-import java.io.*;
-import java.util.*;
-import javax.swing.plaf.basic.BasicSplitPaneUI;
-import org.netbeans.editor.example.QKit;
 import org.netbeans.editor.ext.q.QSettingsInitializer;
+import studio.kdb.*;
 import studio.utils.BrowserLaunch;
+import studio.utils.OSXAdapter;
 import studio.utils.SwingWorker;
 
 public class Studio extends JPanel implements Observer,WindowListener {
@@ -68,7 +71,6 @@ public class Studio extends JPanel implements Observer,WindowListener {
     private UserAction saveFileAction;
     private UserAction saveAsFileAction;
     private UserAction exportAction;
-    private UserAction builtToolTipAction;
     private UserAction chartAction;
     private ActionFactory.UndoAction undoAction;
     private ActionFactory.RedoAction redoAction;
@@ -85,6 +87,7 @@ public class Studio extends JPanel implements Observer,WindowListener {
     private UserAction aboutAction;
     private UserAction exitAction;
     private UserAction toggleDividerOrientationAction;
+    private UserAction minMaxDividerAction;
     private UserAction editServerAction;
     private UserAction addServerAction;
     private UserAction removeServerAction;
@@ -131,7 +134,7 @@ public class Studio extends JPanel implements Observer,WindowListener {
         }
     }
     public static WindowListMonitor windowListMonitor = new WindowListMonitor();
-
+/*
     private void updateKeyBindings(JEditorPane editorPane) {
         InputMap inputMap = editorPane.getInputMap();
         inputMap.put(KeyStroke.getKeyStroke("DELETE"),ExtKit.deleteNextCharAction);
@@ -144,7 +147,7 @@ public class Studio extends JPanel implements Observer,WindowListener {
         inputMap.put(KeyStroke.getKeyStroke("ctrl Z"),ExtKit.undoAction);
         inputMap.put(KeyStroke.getKeyStroke("ctrl Y"),ExtKit.redoAction);
     }
-
+*/
     private void updateUndoRedoState(UndoManager um) {
         undoAction.setEnabled(um.canUndo());
         redoAction.setEnabled(um.canRedo());
@@ -371,7 +374,7 @@ public class Studio extends JPanel implements Observer,WindowListener {
                 if (filename != null) {
                     String lineSeparator = (String) java.security.AccessController.doPrivileged(new sun.security.action.GetPropertyAction("line.separator"));
 
-                    BufferedWriter fw = null;
+                    BufferedWriter fw;
 
                     try {
                         fw = new BufferedWriter(new FileWriter(filename));
@@ -1021,7 +1024,16 @@ public class Studio extends JPanel implements Observer,WindowListener {
                 arrangeAll();
             }
         };
-
+    
+        minMaxDividerAction = new UserAction(I18n.getString("MaximizeEditorPane"),
+                                             getImage(Config.imageBase2 + "blank.png"),
+                                             "Maximize editor pane",
+                                             new Integer(KeyEvent.VK_M),
+                                             KeyStroke.getKeyStroke(KeyEvent.VK_M,menuShortcutKeyMask)) {
+            public void actionPerformed(ActionEvent e) {
+              minMaxDivider();
+            }
+        };
 
         toggleDividerOrientationAction = new UserAction(I18n.getString("ToggleDividerOrientation"),
                                                         getImage(Config.imageBase2 + "blank.png"),
@@ -1508,6 +1520,7 @@ public class Studio extends JPanel implements Observer,WindowListener {
         menu = new JMenu(I18n.getString("Window"));
         menu.setMnemonic(KeyEvent.VK_W);
 
+        menu.add(new JMenuItem(minMaxDividerAction));
         menu.add(new JMenuItem(toggleDividerOrientationAction));
         menu.add(new JMenuItem(openFileInNewWindowAction));
         menu.add(new JMenuItem(arrangeAllAction));
@@ -1754,6 +1767,37 @@ public class Studio extends JPanel implements Observer,WindowListener {
     }
     private WindowListChangedEventListener windowListChangedEventListener;
 
+    private int dividerLastPosition; // updated from property change listener
+    private void minMaxDivider(){
+      //BasicSplitPaneDivider divider = ((BasicSplitPaneUI)splitpane.getUI()).getDivider();
+      //((JButton)divider.getComponent(0)).doClick();
+      //((JButton)divider.getComponent(1)).doClick();
+      if(splitpane.getDividerLocation()>=splitpane.getMaximumDividerLocation()){
+        // Minimize editor pane
+        splitpane.getTopComponent().setMinimumSize(new Dimension());
+        splitpane.getBottomComponent().setMinimumSize(null);
+        splitpane.setDividerLocation(0.);
+        splitpane.setResizeWeight(0.);
+      }
+      else if(splitpane.getDividerLocation()<=splitpane.getMinimumDividerLocation()){
+        // Restore editor pane
+        splitpane.getTopComponent().setMinimumSize(null);
+        splitpane.getBottomComponent().setMinimumSize(null);
+        splitpane.setResizeWeight(0.);
+        // Could probably catch resize edge-cases etc in pce too
+        if(dividerLastPosition>=splitpane.getMaximumDividerLocation()||dividerLastPosition<=splitpane.getMinimumDividerLocation())
+          dividerLastPosition=splitpane.getMaximumDividerLocation()/2;
+        splitpane.setDividerLocation(dividerLastPosition);
+      }
+      else{
+        // Maximize editor pane
+        splitpane.getBottomComponent().setMinimumSize(new Dimension());
+        splitpane.getTopComponent().setMinimumSize(null);
+        splitpane.setDividerLocation(splitpane.getOrientation()==VERTICAL_SPLIT?splitpane.getHeight()-splitpane.getDividerSize():splitpane.getWidth()-splitpane.getDividerSize());
+        splitpane.setResizeWeight(1.);
+      }
+    }
+
     private void toggleDividerOrientation() {
         if (splitpane.getOrientation() == JSplitPane.VERTICAL_SPLIT)
             splitpane.setOrientation(JSplitPane.HORIZONTAL_SPLIT);
@@ -1837,6 +1881,16 @@ public class Studio extends JPanel implements Observer,WindowListener {
         splitpane.setDividerLocation(0.5);
 
         textArea.requestFocus();
+        splitpane.addPropertyChangeListener(JSplitPane.DIVIDER_LOCATION_PROPERTY,new PropertyChangeListener(){
+          public void propertyChange(PropertyChangeEvent pce){
+            String s=splitpane.getDividerLocation()>=splitpane.getMaximumDividerLocation()?I18n.getString("MinimizeEditorPane"):splitpane.getDividerLocation()<=splitpane.getMinimumDividerLocation()?I18n.getString("RestoreEditorPane"):I18n.getString("MaximizeEditorPane");
+            minMaxDividerAction.putValue(Action.SHORT_DESCRIPTION,s);
+            minMaxDividerAction.putValue(Action.NAME,s);
+            if(splitpane.getDividerLocation()<splitpane.getMaximumDividerLocation()&&splitpane.getDividerLocation()>splitpane.getMinimumDividerLocation())
+              dividerLastPosition=splitpane.getDividerLocation();
+          }
+        });
+        dividerLastPosition=splitpane.getDividerLocation();
     }
 
     public void update(Observable obs,Object obj) {

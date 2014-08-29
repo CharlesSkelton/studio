@@ -557,12 +557,12 @@ public class SettingsDefaults {
               },
               BaseKit.switchCaseAction
           ),
-
+/*
           new MultiKeyBinding(
               KeyStroke.getKeyStroke(KeyEvent.VK_M, menuShortcutKeyMask),
               BaseKit.selectNextParameterAction
           ),
-
+*/
           new MultiKeyBinding(
               new KeyStroke[] {
                   KeyStroke.getKeyStroke(KeyEvent.VK_J, menuShortcutKeyMask),
