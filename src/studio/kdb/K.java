@@ -67,11 +67,11 @@ public class K {
         }
         ;
 */
-/*        public String toString() {
+        public String toString() {
             return toString(true);
         }
         ;
-*/
+        
         public boolean isNull() {
             return false;
         }
@@ -261,7 +261,7 @@ public class K {
         private String s=" ";
         public Primitive(String[]ops,int i){
             primitive=i;
-            if(i>0&&i<ops.length)
+            if(i>=0&&i<ops.length)
                 s=ops[i];
         }
 
@@ -375,7 +375,7 @@ public class K {
     }
 
     public static class UnaryPrimitive extends Primitive {
-        private static String[]ops={"::","+:","-:","*:","%:","&:","|:","^:","=:","<:",">:","$:",",:","#:","_:","~:","!:","?:","@:",".:","0::","1::","2::","avg","last","sum","prd","min","max","exit","getenv","abs","sqrt","log","exp","sin","asin","cos","acos","tan","atan","plist"};
+        private static String[]ops={"::","+:","-:","*:","%:","&:","|:","^:","=:","<:",">:","$:",",:","#:","_:","~:","!:","?:","@:",".:","0::","1::","2::","avg","last","sum","prd","min","max","exit","getenv","abs","sqrt","log","exp","sin","asin","cos","acos","tan","atan","enlist"};
 
         public UnaryPrimitive(int i) {
             super(ops,i);
@@ -1986,7 +1986,7 @@ public class K {
         public String getDataType() {
             return "Character Vector";
         }
-        ;
+        
 
         public KCharacterVector(int length) {
             super(char.class,length);
@@ -2028,6 +2028,21 @@ public class K {
                 w.write(Array.getChar(array,i));
             if (showType)
                 w.write("\"");
+        }
+        
+        public String toString(boolean showType){
+          try{
+            LimitedWriter lw=new LimitedWriter(256);
+            toString(lw,showType);
+            return lw.toString();
+          }
+          catch(IOException e){
+            StringBuilder sb=new StringBuilder(256);
+            if(getLength()==1)
+              sb.append(enlist);
+            sb.append('"').append((char[])array).append('"');
+            return sb.toString();
+          }
         }
     }
 

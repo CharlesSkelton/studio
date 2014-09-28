@@ -2072,6 +2072,7 @@ public class Studio extends JPanel implements Observer,WindowListener {
                 openInExcel.setEnabled(false);
                 LimitedWriter lm = new LimitedWriter(50000);
                 try {
+                  if(!(r instanceof K.UnaryPrimitive&&0==((K.UnaryPrimitive)r).getPrimitiveAsInt()))
                     r.toString(lm,true);
                 }
                 catch (IOException ex) {
