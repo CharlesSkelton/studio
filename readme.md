@@ -86,13 +86,13 @@ Studio for kdb+ has been developed since October 2002, and the source was releas
 Studio is written 100% in Java. The primary motivation for its development was to be able to comfortably access remote kdb+ processes. In time, it has become clear that it is not an IDE as such, but is better described as a rapid execution environment. One can edit text in the "scratch" window, highlight a selection and execute it against a remote kdb+ process via tcp/ip, with the results displayed as a grid or as in the classic kdb+ console.
 
 License
-----
-I'll probably change this but currently it is
-[license]
+-------
+GNU GENERAL PUBLIC LICENSE Version 3 [license]
 
+N.B. Netbeans and JFreeChart components have their own respective licenses.
 
 [Kx Systems]:http://www.kx.com
 [Netbeans]:http:///netbeans.org
-[license]:http://creativecommons.org/licenses/by-nc-sa/3.0/
+[license]:https://github.com/CharlesSkelton/studio/blob/master/license.md
 [git-repo-url]:https://github.com/CharlesSkelton/studio
 [JFreeChart]:http://www.jfree.org/jfreechart/
