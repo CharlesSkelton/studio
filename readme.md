@@ -35,6 +35,7 @@ Studio for kdb+ uses the following open source projects:
 
 * [NetBeans] - text editor component
 * [JFreeChart] - charting component
+* [Kx Systems] - kdb+ driver c.java
 
 Installation
 --------------
@@ -89,7 +90,7 @@ License
 -------
 GNU GENERAL PUBLIC LICENSE Version 3 [license]
 
-N.B. Netbeans and JFreeChart components have their own respective licenses.
+N.B. Netbeans, JFreeChart and c.java components have their own respective licenses.
 
 [Kx Systems]:http://www.kx.com
 [Netbeans]:http:///netbeans.org

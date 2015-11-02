@@ -1,8 +1,4 @@
-/* Studio for kdb+ by Charles Skelton
-   is licensed under a Creative Commons Attribution-Noncommercial-Share Alike 3.0 Germany License
-   http://creativecommons.org/licenses/by-nc-sa/3.0
-*/
-
+// licensed according to http://code.kx.com/wiki/TermsAndConditions
 package kx;
 
 /*

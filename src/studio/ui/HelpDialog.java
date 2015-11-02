@@ -1,9 +1,3 @@
-/* Studio for kdb+ by Charles Skelton
-   is licensed under a Creative Commons Attribution-Noncommercial-Share Alike 3.0 Germany License
-   http://creativecommons.org/licenses/by-nc-sa/3.0
-   except for the netbeans components which retain their original copyright notice
-*/
-
 package studio.ui;
 
 import com.jgoodies.forms.builder.ButtonBarBuilder;
@@ -110,11 +104,11 @@ public class HelpDialog extends JDialog
              cc.xy (1,  row));         // p
         row++;                                                             // 3dlu
         layout.appendRow( new RowSpec( "p"));
-        builder.addLabel( "is licensed under a Creative Commons Attribution-Noncommercial-Share Alike 3.0 Germany License",
+        builder.addLabel( "is licensed under GNU GENERAL PUBLIC LICENSE Version 3",
              cc.xy (1,  row));         // p
         row++;                                                             // 3dlu
         layout.appendRow( new RowSpec( "p"));
-        builder.addLabel( "http://creativecommons.org/licenses/by-nc-sa/3.0",
+        builder.addLabel( "http://github.com/CharlesSkelton/studio/blob/master/license.md",
              cc.xy (1,  row));         // p
         row++;                                                             // 3dlu
 
@@ -129,7 +123,7 @@ public class HelpDialog extends JDialog
         row++;                                                             // 3dlu
 
         layout.appendRow( new RowSpec( "p"));
-        builder.addLabel( "Project hosted at http://code.kx.com",       cc.xy (1,  row));          // p
+        builder.addLabel( "Project hosted at http://github.com/CharlesSkelton/studio",       cc.xy (1,  row));          // p
         row++;                                                             // 3dlu
         layout.appendRow( new RowSpec( "3dlu"));
         row++;                                                             // 18dlu

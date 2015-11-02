@@ -89,17 +89,17 @@
     </Component>
     <Component class="javax.swing.JLabel" name="jLabel3">
       <Properties>
-        <Property name="text" type="java.lang.String" value="is licensed under a Creative Commons Attribution-Noncommercial-Share Alike 3.0 Germany License"/>
+        <Property name="text" type="java.lang.String" value="is licensed under GNU GENERAL PUBLIC LICENSE Version 3"/>
       </Properties>
     </Component>
     <Component class="javax.swing.JLabel" name="jLabel4">
       <Properties>
-        <Property name="text" type="java.lang.String" value="http://creativecommons.org/licenses/by-nc-sa/3.0"/>
+        <Property name="text" type="java.lang.String" value="http://github.com/CharlesSkelton/studio/blob/master/license.md"/>
       </Properties>
     </Component>
     <Component class="javax.swing.JLabel" name="jLabel5">
       <Properties>
-        <Property name="text" type="java.lang.String" value="Project hosted at http://code.kx.com"/>
+        <Property name="text" type="java.lang.String" value="Project hosted at http://github.com/CharlesSkelton/studio"/>
       </Properties>
     </Component>
     <Component class="javax.swing.JLabel" name="jLabel6">
@@ -202,17 +202,17 @@
     </Component>
     <Component class="javax.swing.JLabel" name="jLabel3">
       <Properties>
-        <Property name="text" type="java.lang.String" value="is licensed under a Creative Commons Attribution-Noncommercial-Share Alike 3.0 Germany License"/>
+        <Property name="text" type="java.lang.String" value="is licensed under GNU GENERAL PUBLIC LICENSE Version 3"/>
       </Properties>
     </Component>
     <Component class="javax.swing.JLabel" name="jLabel4">
       <Properties>
-        <Property name="text" type="java.lang.String" value="http://creativecommons.org/licenses/by-nc-sa/3.0"/>
+        <Property name="text" type="java.lang.String" value="http://github.com/CharlesSkelton/studio/blob/master/license.md"/>
       </Properties>
     </Component>
     <Component class="javax.swing.JLabel" name="jLabel5">
       <Properties>
-        <Property name="text" type="java.lang.String" value="Project hosted at http://code.kx.com"/>
+        <Property name="text" type="java.lang.String" value="Project hosted at http://github.com/CharlesSkelton/studio"/>
       </Properties>
     </Component>
     <Component class="javax.swing.JLabel" name="jLabel6">
