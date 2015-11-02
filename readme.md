@@ -92,6 +92,13 @@ GNU GENERAL PUBLIC LICENSE Version 3 [license]
 
 N.B. Netbeans, JFreeChart and c.java components have their own respective licenses.
 
+Icon Experience Collection
+
+Selected icons within the lib/images directory are part of the Icon Experience
+collection (http://www.iconexperience.com) and may be freely used with Studio for kdb+
+without charge, but may not be used separately from Studio for kdb+ without a purchase
+of a license from Icon Experience.
+
 [Kx Systems]:http://www.kx.com
 [Netbeans]:http:///netbeans.org
 [license]:https://github.com/CharlesSkelton/studio/blob/master/license.md
