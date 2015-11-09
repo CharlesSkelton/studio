@@ -3,7 +3,6 @@ package studio.ui;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.net.URI;
 import java.text.SimpleDateFormat;
 import java.util.TimeZone;
 import javax.swing.AbstractAction;
@@ -20,6 +19,7 @@ import javax.swing.KeyStroke;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
 import studio.kdb.Lm;
+import studio.utils.BrowserLaunch;
 
 public class HelpDialog extends JDialog{
   public HelpDialog(JFrame parent){
@@ -41,10 +41,7 @@ public class HelpDialog extends JDialog{
       @Override
       public void hyperlinkUpdate(HyperlinkEvent hle){
         if(HyperlinkEvent.EventType.ACTIVATED.equals(hle.getEventType()))
-          try{
-            Desktop.getDesktop().browse(new URI(hle.getURL().toString()));
-          }catch(Exception ex){
-          }
+            BrowserLaunch.openURL(hle.getURL().toString());
       }
     });
     getContentPane().add(jep);
