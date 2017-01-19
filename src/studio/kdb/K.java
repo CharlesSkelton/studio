@@ -920,7 +920,7 @@ public class K {
                 return "0Np";
             else if (time == Long.MAX_VALUE)
                 return "0Wp";
-            else if (time == Long.MAX_VALUE)
+            else if (time == -Long.MAX_VALUE)
                 return "-0Wp";
             else{
                 Timestamp ts=toTimestamp();
