@@ -26,7 +26,7 @@ Screenshot
 Current Version
 ----
 
-3.31
+3.34 build date 2018.02.28
 
 Credits
 -----------
