@@ -43,42 +43,10 @@ Download the latest release from
 
 https://github.com/CharlesSkelton/studio/tree/master/releases
 
-unzip it (retaining the directory structure) to reveal
-
-
-    releases$unzip studio.zip
-    Archive:  studio.zip
-    inflating: studio.jar
-    creating: lib/
-    inflating: lib/images.jar
-    inflating: lib/jcommon-1.0.16.jar
-    inflating: lib/jfreechart-1.0.13.jar
-
-and this can be executed with the command
+unzip it to reveal the studio.jar file. This can be then executed with the command
 
     java -jar studio.jar
 
-There is also an osx bundle for studio
-
-unzip it to reveal the bundle
-
-    osx $ unzip studio.app.zip
-    Archive:  studio.app.zip
-    creating: studio.app/
-    creating: studio.app/Contents/
-    inflating: studio.app/Contents/Info.plist
-    creating: studio.app/Contents/MacOS/
-    inflating: studio.app/Contents/MacOS/JavaApplicationStub
-    extracting: studio.app/Contents/PkgInfo
-    creating: studio.app/Contents/Resources/
-    inflating: studio.app/Contents/Resources/GenericJavaApp.icns
-    creating: studio.app/Contents/Resources/Java/
-    inflating: studio.app/Contents/Resources/Java/images.jar
-    inflating: studio.app/Contents/Resources/Java/jcommon-1.0.16.jar
-    inflating: studio.app/Contents/Resources/Java/jfreechart-1.0.13.jar
-    inflating: studio.app/Contents/Resources/Java/studio.jar
-
-and then from a finder window, drag the "studio.app" folder to the dock for easy launching.
 
 Background
 ----------
