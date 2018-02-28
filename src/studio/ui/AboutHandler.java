@@ -1,9 +1,9 @@
 package studio.ui;
 
 public class AboutHandler {
-    private Studio s;
+    private StudioPanel s;
 
-    public AboutHandler(Studio s) {
+    public AboutHandler(StudioPanel s) {
         this.s = s;
     }
 

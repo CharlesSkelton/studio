@@ -32,7 +32,7 @@ import studio.utils.BrowserLaunch;
 import studio.utils.OSXAdapter;
 import studio.utils.SwingWorker;
 
-public class Studio extends JPanel implements Observer,WindowListener {
+public class StudioPanel extends JPanel implements Observer,WindowListener {
     static {
         // Register us
         LocaleSupport.addLocalizer(new Impl("org.netbeans.editor.Bundle"));
@@ -937,8 +937,8 @@ public class Studio extends JPanel implements Observer,WindowListener {
                 Object o = i.next();
                 JFrame f;
 
-                if (o instanceof Studio)
-                    f = ((Studio) o).frame;
+                if (o instanceof StudioPanel)
+                    f = ((StudioPanel) o).frame;
                 else
                     f = (JFrame) o;
 
@@ -1067,7 +1067,7 @@ public class Studio extends JPanel implements Observer,WindowListener {
                                                    new Integer(KeyEvent.VK_N),
                                                    null) {
             public void actionPerformed(ActionEvent e) {
-                new Studio(server,null);
+                new StudioPanel(server,null);
             }
         };
 
@@ -1325,8 +1325,8 @@ public class Studio extends JPanel implements Observer,WindowListener {
         for (int i = 0;i < objs.length;i++) {
             Object o = objs[i];
 
-            if (o instanceof Studio) {
-                if (!((Studio) o).quitWindow())
+            if (o instanceof StudioPanel) {
+                if (!((StudioPanel) o).quitWindow())
                     okToExit = false;
             }
             else
@@ -1530,8 +1530,8 @@ public class Studio extends JPanel implements Observer,WindowListener {
 
                 final Object o = it.next();
 
-                if (o instanceof Studio) {
-                    Studio r = (Studio) o;
+                if (o instanceof StudioPanel) {
+                    StudioPanel r = (StudioPanel) o;
                     String filename = (String) r.textArea.getDocument().getProperty("filename");
 
                     if (filename != null)
@@ -1550,8 +1550,8 @@ public class Studio extends JPanel implements Observer,WindowListener {
                 item.addActionListener(new ActionListener() {
                     
                                        public void actionPerformed(ActionEvent e) {
-                                           if (o instanceof Studio) {
-                                               JFrame f = ((Studio) o).frame;
+                                           if (o instanceof StudioPanel) {
+                                               JFrame f = ((StudioPanel) o).frame;
                                                ensureDeiconified(f);
                                            }
                                            else
@@ -1801,7 +1801,7 @@ public class Studio extends JPanel implements Observer,WindowListener {
         splitpane.setDividerLocation(0.5);
     }
 
-    public Studio(Server server,String filename) {
+    public StudioPanel(Server server,String filename) {
         super(true);
 
         registerForMacOSXEvents();
@@ -1932,7 +1932,7 @@ public class Studio extends JPanel implements Observer,WindowListener {
             if (lruServer != null)
                 s = Config.getInstance().getServer(lruServer);
 
-            new Studio(s,filename);
+            new StudioPanel(s,filename);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -2309,7 +2309,7 @@ public class Studio extends JPanel implements Observer,WindowListener {
     }
 
     public static ImageIcon getImage(String strFilename) {
-        Class thisClass = Studio.class;
+        Class thisClass = StudioPanel.class;
 
         java.net.URL url = null;
 

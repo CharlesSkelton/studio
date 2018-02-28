@@ -4,12 +4,12 @@ import java.awt.Font;
 import java.util.Locale;
 import studio.kdb.Config;
 import studio.ui.ExceptionGroup;
-import studio.ui.Studio;
+import studio.ui.StudioPanel;
 
 import java.util.TimeZone;
 import javax.swing.UIManager;
 
-public class EntryPoint {
+public class Studio {
     public static void main(final String[] args) {
         TimeZone.setDefault(TimeZone.getTimeZone("GMT"));
 
@@ -63,7 +63,7 @@ public class EntryPoint {
 
         new Thread(exceptionThreadGroup,"Init thread") {
             public void run() {
-                Studio.init(args);
+                StudioPanel.init(args);
             }
         }.start();
 

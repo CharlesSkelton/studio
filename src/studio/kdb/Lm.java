@@ -9,14 +9,14 @@ import java.util.TimeZone;
 
 public class Lm {
     private static int majorVersion = 3;
-    private static int minorVersion = 33;
+    private static int minorVersion = 34;
     public static Date buildDate;
     
     static {
         try {
             SimpleDateFormat f = new SimpleDateFormat("yyyyMMdd");
             f.setTimeZone(TimeZone.getTimeZone("GMT"));
-            buildDate = f.parse("20151008");
+            buildDate = f.parse("20180228");
         }
         catch (ParseException e) {
         }

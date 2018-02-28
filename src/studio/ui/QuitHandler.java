@@ -1,9 +1,9 @@
 package studio.ui;
 
 public class QuitHandler {
-    private Studio s;
+    private StudioPanel s;
 
-    public QuitHandler(Studio s) {
+    public QuitHandler(StudioPanel s) {
         this.s = s;
     }
 
