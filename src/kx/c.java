@@ -20,17 +20,18 @@ types
 111 f\:
 112 dynamic load
  */
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import studio.kdb.K;
-import javax.swing.*;
 import java.io.*;
 import java.net.InetSocketAddress;
-//import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.LinkedList;
 import java.util.UUID;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.net.ssl.SSLSocket;
+import javax.net.ssl.SSLSocketFactory;
+import javax.swing.*;
 import studio.kdb.Config;
+import studio.kdb.K;
 
 public class c {
     DataInputStream inputStream;
@@ -160,6 +161,17 @@ public class c {
         Socket s=new Socket();
         s.setReceiveBufferSize(1024*1024);
         s.connect(new InetSocketAddress(host,port));
+        
+        if(useTLS){
+          try{
+            s=((SSLSocketFactory)SSLSocketFactory.getDefault()).createSocket(s,host,port,true);
+            ((SSLSocket)s).startHandshake();
+          }
+          catch(Exception e){
+            s.close();
+            throw e;
+          }
+        }        
         io(s);
         java.io.ByteArrayOutputStream baos = new ByteArrayOutputStream();
         java.io.DataOutputStream dos = new DataOutputStream(baos);
@@ -179,11 +191,13 @@ public class c {
     private String host;
     private int port;
     private String up;
+    private boolean useTLS;
 
-    public c(String h,int p,String u) {
+    public c(String h,int p,String u,boolean useTLS) {
         host = h;
         port = p;
         up = u;
+        this.useTLS=useTLS;
     }
 
     boolean rb() {

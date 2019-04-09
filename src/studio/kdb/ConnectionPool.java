@@ -82,10 +82,10 @@ public class ConnectionPool {
                 if (credentials.getUsername().length() > 0) {
                     String p = credentials.getPassword();
 
-                    c = new kx.c(s.getHost(),s.getPort(),credentials.getUsername() + ((p.length() == 0) ? "" : ":" + p));
+                    c = new kx.c(s.getHost(),s.getPort(),credentials.getUsername() + ((p.length() == 0) ? "" : ":" + p),s.getUseTLS());
                 }
                 else
-                    c = new kx.c(s.getHost(),s.getPort(),"");
+                    c = new kx.c(s.getHost(),s.getPort(),"",s.getUseTLS());
             }
             catch (IOException ex) {
             }

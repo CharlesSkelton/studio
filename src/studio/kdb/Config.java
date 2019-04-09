@@ -475,13 +475,13 @@ public class Config
                 String password = p.getProperty( "server."+name + "." + "password");
                 String backgroundColor= p.getProperty( "server."+name + "." + "backgroundColor", "FFFFFF");
                 String authenticationMechanism = p.getProperty( "server."+name + "." + "authenticationMechanism",new DefaultAuthenticationMechanism().getMechanismName());
-
+                boolean useTLS=Boolean.parseBoolean(p.getProperty("server."+name+"."+"useTLS", "false"));
                 Color c= new Color(Integer.parseInt(backgroundColor.substring(0,2),16),
                         Integer.parseInt(backgroundColor.substring(2,4),16),
                         Integer.parseInt(backgroundColor.substring(4,6),16));
                 if( (host != null) || ( port > 0))
                 {
-                    Server server = new Server(name, host, port, username, password,c, authenticationMechanism);
+                    Server server = new Server(name, host, port, username, password,c, authenticationMechanism,useTLS);
                     list.add(server);
                 }
             }
@@ -510,6 +510,7 @@ public class Config
         p.remove( "server."+server.getName()+"."+"password");
         p.remove( "server."+server.getName()+ "." + "backgroundColor");
         p.remove( "server."+server.getName()+ "." + "authenticationMechanism");
+        p.remove( "server."+server.getName()+ "." + "useTLS");
 
         setServers( (Server []) l.toArray( new Server[0]));
     }
@@ -543,6 +544,7 @@ public class Config
         p.setProperty( "server."+name + "." + "password", "" + server.getPassword());
         p.setProperty( "server."+name + "." + "backgroundColor", "" + Integer.toHexString(server.getBackgroundColor().getRGB()).substring(2));
         p.setProperty( "server."+name + "." + "authenticationMechanism", server.getAuthenticationMechanism());
+        p.setProperty( "server."+name + "." + "useTLS", ""+server.getUseTLS());
     }
 
     public void addServer(Server server)
