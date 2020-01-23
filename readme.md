@@ -56,7 +56,7 @@ Studio is written 100% in Java. The primary motivation for its development was t
 
 License
 -------
-Apache 2 [LICENSE]
+Apache 2 , see LICENSE file in repository root.
 
 N.B. Netbeans, JFreeChart and c.java components have their own respective licenses.
 
