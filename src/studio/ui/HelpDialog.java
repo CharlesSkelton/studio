@@ -30,7 +30,7 @@ public class HelpDialog extends JDialog{
       "<html><head><title>Studio for kdb+</title></head><body><h1>Studio for kdb+</h1>"
       +"<br>Version: "+Lm.getVersionString()
       +"<br>Build date: "+f.format(Lm.buildDate)
-      +"<br>License: <a href=\"http://github.com/CharlesSkelton/studio/blob/master/license.md\">GPL v3</a>"
+      +"<br>License: <a href=\"http://github.com/CharlesSkelton/studio/blob/master/license.md\">Apache 2</a>"
       +"<br>N.B. Some components have their own license terms, see this project on github for details."
       +"<br>Source available from <a href=\"http://github.com/CharlesSkelton/studio\">Github</a>"
       +"<br>Contributions and corrections welcome."
