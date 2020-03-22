@@ -366,7 +366,7 @@ public class StudioPanel extends JPanel implements Observer,WindowListener {
         Runnable runner = new Runnable() {
             public void run() {
                 if (filename != null) {
-                    String lineSeparator = (String) java.security.AccessController.doPrivileged(new sun.security.action.GetPropertyAction("line.separator"));
+                    String lineSeparator = System.getProperty("line.separator");;
 
                     BufferedWriter fw;
 
@@ -458,7 +458,7 @@ public class StudioPanel extends JPanel implements Observer,WindowListener {
         Runnable runner = new Runnable() {
             public void run() {
                 if (filename != null) {
-                    String lineSeparator = (String) java.security.AccessController.doPrivileged(new sun.security.action.GetPropertyAction("line.separator"));
+                    String lineSeparator = System.getProperty("line.separator");;
 
                     BufferedWriter fw = null;
 
