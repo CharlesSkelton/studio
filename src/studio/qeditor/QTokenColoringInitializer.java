@@ -1,4 +1,4 @@
-package org.netbeans.editor.ext.q;
+package studio.qeditor;
 
 import studio.kdb.Config;
 import java.awt.Color;
