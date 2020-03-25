@@ -60,6 +60,7 @@ public class StudioPanel extends JPanel implements Observer,WindowListener {
     private UserAction openFileAction;
     private UserAction openInExcel;
     private UserAction codeKxComAction;
+    private UserAction serverListAction;
     private UserAction openFileInNewWindowAction;
     private UserAction saveFileAction;
     private UserAction saveAsFileAction;
@@ -280,6 +281,7 @@ public class StudioPanel extends JPanel implements Observer,WindowListener {
         newFileAction.setEnabled(true);
         arrangeAllAction.setEnabled(true);
         openFileAction.setEnabled(true);
+        serverListAction.setEnabled(true);
         openFileInNewWindowAction.setEnabled(true);
         saveFileAction.setEnabled(true);
         saveAsFileAction.setEnabled(true);
@@ -1064,10 +1066,25 @@ public class StudioPanel extends JPanel implements Observer,WindowListener {
                                                    getImage(Config.imageBase2 + "blank.png"),
                                                    "Open a new window",
                                                    new Integer(KeyEvent.VK_N),
-                                                   null) {
+                                                   KeyStroke.getKeyStroke(KeyEvent.VK_N, menuShortcutKeyMask) ) {
             public void actionPerformed(ActionEvent e) {
                 new StudioPanel(server,null);
             }
+        };
+
+        serverListAction = new UserAction(I18n.getString("ServerList"),
+                getImage(Config.imageBase2 + "blank.png"),
+                "Show sever list",
+                new Integer(KeyEvent.VK_L),
+                KeyStroke.getKeyStroke(KeyEvent.VK_L, menuShortcutKeyMask | Event.SHIFT_MASK) ) {
+                        public void actionPerformed(ActionEvent e) {
+                            ServerList serverList = new ServerList(frame, Config.getInstance().getServers(), server);
+                            Server selectedServer = serverList.getSelectedServer();
+                            if (selectedServer.equals(server)) return;
+
+                            setServer(selectedServer);
+                            rebuildToolbar();
+                        }
         };
 
         editServerAction = new UserAction(I18n.getString("Edit"),
@@ -1517,6 +1534,7 @@ public class StudioPanel extends JPanel implements Observer,WindowListener {
         menu.add(new JMenuItem(toggleDividerOrientationAction));
         menu.add(new JMenuItem(openFileInNewWindowAction));
         menu.add(new JMenuItem(arrangeAllAction));
+        menu.add(new JMenuItem(serverListAction));
 
         if (windowList.size() > 0) {
             menu.addSeparator();

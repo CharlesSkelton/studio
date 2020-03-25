@@ -5,7 +5,6 @@ import javax.swing.JFrame;
 
 public class EditServerForm extends ServerForm {
     public EditServerForm(JFrame owner,Server server) {
-        super(owner,server);
-        this.setTitle("Edit Server Details");
+        super(owner,"Edit Server Details",server);
     }
 }
