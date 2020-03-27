@@ -3,46 +3,85 @@ package studio.ui;
 import studio.kdb.Server;
 
 import javax.swing.*;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.ArrayList;
+import java.util.StringTokenizer;
 
 public class ServerList extends EscapeDialog {
 
     private JTree tree;
+    private JTextField filter;
     private DefaultMutableTreeNode root;
-    private Server selectedServer;
 
+    private Server selectedServer;
+    private Server activeServer;
+    private Server[] servers;
+    private java.util.List<String> filters = new ArrayList<>();
 
     public ServerList(JFrame parent, Server[] servers, Server active) {
         super(parent, "Server List", true);
         initComponents();
-        setServers(servers, active);
 
-        tree.expandPath(new TreePath(root.getPath()));
-        tree.invalidate();
+        this.servers = servers;
+        this.activeServer = active;
+        selectedServer = active;
+
+        refreshServers();
+
         Util.centerChildOnParent(this, getParent());
         pack();
         setVisible(true);
     }
 
-    private void setServers(Server[] servers, Server active) {
+    private void refreshFilters(String filterSting) {
+        filters.clear();
+        StringTokenizer st = new StringTokenizer(filterSting," \t");
+        while (st.hasMoreTokens()) {
+            String word = st.nextToken().trim();
+            if (word.length()>0) filters.add(word.toLowerCase());
+        }
+    }
+
+    private boolean filterServer(Server server) {
+        if (filters.size() == 0) return false;
+        if (server.equals(activeServer)) return false;
+        String name = server.getName().toLowerCase();
+        for(String filter:filters) {
+            if (! name.contains(filter)) return true;
+        }
+        return false;
+    }
+
+    private void refreshServers() {
         root.removeAllChildren();
         for (Server server:servers) {
+            if (filterServer(server)) continue;
             ServerNode node = new ServerNode(server);
-            if (active != null && active.equals(server)) {
+            if (activeServer != null && activeServer.equals(server)) {
                 node.setActive(true);
             }
             root.add(new DefaultMutableTreeNode(node));
         }
-        selectedServer = active;
+        tree.expandPath(new TreePath(root.getPath()));
+        ((DefaultTreeModel)tree.getModel()).reload();
+        tree.invalidate();
     }
 
     public Server getSelectedServer() {
         return selectedServer;
+    }
+
+    private void filterChanged() {
+        refreshFilters(filter.getText());
+        refreshServers();
     }
 
     private void initComponents() {
@@ -63,6 +102,22 @@ public class ServerList extends EscapeDialog {
             }
         });
         add(new JScrollPane(tree), BorderLayout.CENTER);
+        filter = new JTextField();
+        filter.getDocument().addDocumentListener(new DocumentListener() {
+            @Override
+            public void insertUpdate(DocumentEvent e) {
+                filterChanged();
+            }
+            @Override
+            public void removeUpdate(DocumentEvent e) {
+                filterChanged();
+            }
+            @Override
+            public void changedUpdate(DocumentEvent e) {
+                filterChanged();
+            }
+        });
+        add(filter, BorderLayout.NORTH);
         setPreferredSize(new Dimension(300,400));
     }
 
