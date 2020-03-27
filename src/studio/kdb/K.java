@@ -16,62 +16,63 @@ import java.util.UUID;
 
 public class K {
     private static SimpleDateFormat formatter = new SimpleDateFormat();
-    private static DecimalFormat nsFormatter=new DecimalFormat("000000000");
+    private static DecimalFormat nsFormatter = new DecimalFormat("000000000");
 
     static {
         formatter.setTimeZone(java.util.TimeZone.getTimeZone("GMT"));
     }
+
     private static final String enlist = "enlist ";
     private static final String flip = "flip ";
 
-    public static void write(OutputStream o,byte b) throws IOException {
+    public static void write(OutputStream o, byte b) throws IOException {
         o.write(b);
     }
 
-    public static void write(OutputStream o,short h) throws IOException {
-        write(o,(byte) (h >> 8));
-        write(o,(byte) h);
+    public static void write(OutputStream o, short h) throws IOException {
+        write(o, (byte) (h >> 8));
+        write(o, (byte) h);
     }
 
-    public static void write(OutputStream o,int i) throws IOException {
-        write(o,(short) (i >> 16));
-        write(o,(short) i);
+    public static void write(OutputStream o, int i) throws IOException {
+        write(o, (short) (i >> 16));
+        write(o, (short) i);
     }
 
-    public static void write(OutputStream o,long j) throws IOException {
-        write(o,(int) (j >> 32));
-        write(o,(int) j);
+    public static void write(OutputStream o, long j) throws IOException {
+        write(o, (int) (j >> 32));
+        write(o, (int) j);
     }
 
-    private static synchronized String sd(String s,java.util.Date x) {
+    private static synchronized String sd(String s, java.util.Date x) {
         formatter.applyPattern(s);
         return formatter.format(x);
     }
 
     public abstract static class KBase {
         public abstract String getDataType();
+
         public int type;
 
         public void serialise(OutputStream o) throws IOException {
-            write(o,(byte) type);
+            write(o, (byte) type);
         }
 
 
-/*        public String toString(boolean showType) {
-            return "";
-        }
-        ;
-*/
+        /*        public String toString(boolean showType) {
+                    return "";
+                }
+                ;
+        */
         public String toString() {
             return toString(true);
         }
-        ;
-        
+
         public boolean isNull() {
             return false;
         }
-        
-                private byte attr;
+
+        private byte attr;
 
         public byte getAttr() {
             return attr;
@@ -80,19 +81,18 @@ public class K {
         public void setAttr(byte attr) {
             this.attr = attr;
         }
-        private static String[] sAttr = new String[]{"","`s#","`u#","`p#","`g#"};
+
+        private static String[] sAttr = new String[]{"", "`s#", "`u#", "`p#", "`g#"};
 
         public String toString(boolean showType) {
             if (attr <= sAttr.length)
                 return sAttr[attr];
             return "";
         }
-        ;
-        
-        public void toString(LimitedWriter w,boolean showType) throws IOException {
-          w.write(toString(showType));
+
+        public void toString(LimitedWriter w, boolean showType) throws IOException {
+            w.write(toString(showType));
         }
-        ;
 
         //      public KBase(int type){this.type=type;}
     }
@@ -101,7 +101,7 @@ public class K {
         public String getDataType() {
             return "Adverb";
         }
-        ;
+
         protected K.KBase o;
 
         public Adverb(K.KBase o) {
@@ -114,19 +114,18 @@ public class K {
     }
 
     public static class BinaryPrimitive extends Primitive {
-        private static String[]ops={":","+","-","*","%","&","|","^","=","<",">","$",",","#","_","~","!","?","@",".","0:","1:","2:","in","within","like","bin","ss","insert","wsum","wavg","div","xexp","setenv"};
-        
+        private static final String[] ops = {":", "+", "-", "*", "%", "&", "|", "^", "=", "<", ">", "$", ",", "#", "_", "~", "!", "?", "@", ".", "0:", "1:", "2:", "in", "within", "like", "bin", "ss", "insert", "wsum", "wavg", "div", "xexp", "setenv", "binr"};
+
         public String getDataType() {
             return "Binary Primitive";
         }
-        ;
 
         public BinaryPrimitive(int i) {
-            super(ops,i);
+            super(ops, i);
             type = 102;
         }
 
-        public void toString(LimitedWriter w,boolean showType) throws IOException {
+        public void toString(LimitedWriter w, boolean showType) throws IOException {
             w.write(getPrimitive());
         }
     }
@@ -137,7 +136,6 @@ public class K {
         public String getDataType() {
             return "Function Composition";
         }
-        ;
 
         public FComposition(Object[] objs) {
             this.objs = objs;
@@ -155,8 +153,8 @@ public class K {
             type = 111;
         }
 
-        public void toString(LimitedWriter w,boolean showType) throws IOException {
-            o.toString(w,showType);
+        public void toString(LimitedWriter w, boolean showType) throws IOException {
+            o.toString(w, showType);
             w.write("\\:");
         }
     }
@@ -167,8 +165,8 @@ public class K {
             type = 110;
         }
 
-        public void toString(LimitedWriter w,boolean showType) throws IOException {
-            o.toString(w,showType);
+        public void toString(LimitedWriter w, boolean showType) throws IOException {
+            o.toString(w, showType);
             w.write("/:");
         }
     }
@@ -179,8 +177,8 @@ public class K {
             type = 109;
         }
 
-        public void toString(LimitedWriter w,boolean showType) throws IOException {
-            o.toString(w,showType);
+        public void toString(LimitedWriter w, boolean showType) throws IOException {
+            o.toString(w, showType);
             w.write("':");
         }
     }
@@ -191,8 +189,8 @@ public class K {
             type = 106;
         }
 
-        public void toString(LimitedWriter w,boolean showType) throws IOException {
-            o.toString(w,showType);
+        public void toString(LimitedWriter w, boolean showType) throws IOException {
+            o.toString(w, showType);
             w.write("'");
         }
     }
@@ -203,8 +201,8 @@ public class K {
             type = 107;
         }
 
-        public void toString(LimitedWriter w,boolean showType) throws IOException {
-            o.toString(w,showType);
+        public void toString(LimitedWriter w, boolean showType) throws IOException {
+            o.toString(w, showType);
             w.write("/");
         }
     }
@@ -216,8 +214,8 @@ public class K {
             this.o = o;
         }
 
-        public void toString(LimitedWriter w,boolean showType) throws IOException {
-            o.toString(w,showType);
+        public void toString(LimitedWriter w, boolean showType) throws IOException {
+            o.toString(w, showType);
             w.write("\\");
         }
     }
@@ -226,12 +224,12 @@ public class K {
         public String getDataType() {
             return "Function";
         }
-        ;
+
         private String body;
 
         public Function(KCharacterVector body) {
             type = 100;
-            this.body = new String((char[]) body.getArray(),0,body.getLength());
+            this.body = new String((char[]) body.getArray(), 0, body.getLength());
         }
 
         public String getBody() {
@@ -242,7 +240,7 @@ public class K {
             return body;
         }
 
-        public void toString(LimitedWriter w,boolean showType) throws IOException {
+        public void toString(LimitedWriter w, boolean showType) throws IOException {
             w.write(body);
         }
     }
@@ -251,13 +249,14 @@ public class K {
         public String getDataType() {
             return "Primitive";
         }
-        ;
+
         private int primitive;
-        private String s=" ";
-        public Primitive(String[]ops,int i){
-            primitive=i;
-            if(i>=0&&i<ops.length)
-                s=ops[i];
+        private String s = " ";
+
+        public Primitive(String[] ops, int i) {
+            primitive = i;
+            if (i >= 0 && i < ops.length)
+                s = ops[i];
         }
 
         public String getPrimitive() {
@@ -273,7 +272,7 @@ public class K {
         public String getDataType() {
             return "Projection";
         }
-        ;
+
         private K.KList objs;
 
         public Projection(K.KList objs) {
@@ -281,7 +280,7 @@ public class K {
             this.objs = objs;
         }
 
-        public void toString(LimitedWriter w,boolean showType) throws IOException {
+        public void toString(LimitedWriter w, boolean showType) throws IOException {
             boolean listProjection = false;
             if ((objs.getLength() > 0) && (objs.at(0) instanceof UnaryPrimitive)) {
                 UnaryPrimitive up = (UnaryPrimitive) objs.at(0);
@@ -291,18 +290,17 @@ public class K {
 
             if (listProjection) {
                 w.write("(");
-                for (int i = 1;i < objs.getLength();i++) {
+                for (int i = 1; i < objs.getLength(); i++) {
                     if (i > 1)
                         w.write(";");
 
-                    objs.at(i).toString(w,showType);
+                    objs.at(i).toString(w, showType);
                 }
                 w.write(")");
-            }
-            else {
+            } else {
                 boolean isFunction = false;
 
-                for (int i = 0;i < objs.getLength();i++) {
+                for (int i = 0; i < objs.getLength(); i++) {
                     if (i == 0)
                         if ((objs.at(0) instanceof Function) || (objs.at(0) instanceof UnaryPrimitive) || (objs.at(0) instanceof BinaryPrimitive))
                             isFunction = true;
@@ -318,7 +316,7 @@ public class K {
                         else
                             w.write(";");
 
-                    objs.at(i).toString(w,showType);
+                    objs.at(i).toString(w, showType);
                 }
 
                 if (isFunction)
@@ -333,27 +331,28 @@ public class K {
         public String getDataType() {
             return "Ternary Operator";
         }
-        ;
-        private static Map map = new HashMap();
 
-        public static void init(char[] ops,int[] values) {
-            for (int i = 0;i < values.length;i++)
-                map.put(new Integer(values[i]),new Character(ops[i]));
+        private static final Map map = new HashMap();
+
+        public static void init(char[] ops, int[] values) {
+            for (int i = 0; i < values.length; i++)
+                map.put(values[i], ops[i]);
         }
+
         private int primitive;
         private char charVal = ' ';
 
 
         static {
-            init("'/\\".toCharArray(),new int[]{0,1,2});
+            init("'/\\".toCharArray(), new int[]{0, 1, 2});
         }
 
         public TernaryOperator(int i) {
             type = 103;
             primitive = i;
-            Character c = (Character) map.get(new Integer(i));
+            Character c = (Character) map.get(i);
             if (c != null)
-                charVal = c.charValue();
+                charVal = c;
         }
 
         public char getPrimitive() {
@@ -364,20 +363,20 @@ public class K {
             return primitive;
         }
 
-        public void toString(LimitedWriter w,boolean showType) throws IOException {
+        public void toString(LimitedWriter w, boolean showType) throws IOException {
             w.write(charVal);
         }
     }
 
     public static class UnaryPrimitive extends Primitive {
-        private static String[]ops={"::","+:","-:","*:","%:","&:","|:","^:","=:","<:",">:","$:",",:","#:","_:","~:","!:","?:","@:",".:","0::","1::","2::","avg","last","sum","prd","min","max","exit","getenv","abs","sqrt","log","exp","sin","asin","cos","acos","tan","atan","enlist"};
+        private static String[] ops = {"::", "+:", "-:", "*:", "%:", "&:", "|:", "^:", "=:", "<:", ">:", "$:", ",:", "#:", "_:", "~:", "!:", "?:", "@:", ".:", "0::", "1::", "2::", "avg", "last", "sum", "prd", "min", "max", "exit", "getenv", "abs", "sqrt", "log", "exp", "sin", "asin", "cos", "acos", "tan", "atan", "enlist"};
 
         public UnaryPrimitive(int i) {
-            super(ops,i);
+            super(ops, i);
             type = 101;
         }
 
-        public void toString(LimitedWriter w,boolean showType) throws IOException {
+        public void toString(LimitedWriter w, boolean showType) throws IOException {
             if (getPrimitiveAsInt() == -1)
                 return;
             w.write(getPrimitive());
@@ -388,7 +387,6 @@ public class K {
         public String getDataType() {
             return "Variable";
         }
-        ;
 
         public String getContext() {
             return context;
@@ -413,6 +411,7 @@ public class K {
         public void setType(short type) {
             this.type = type;
         }
+
         private String name;
         private String context;
     }
@@ -421,7 +420,7 @@ public class K {
         public String getDataType() {
             return "Boolean";
         }
-        ;
+
         public boolean b;
 
         public KBoolean(boolean b) {
@@ -436,7 +435,7 @@ public class K {
             return s;
         }
 
-        public void toString(LimitedWriter w,boolean showType) throws IOException {
+        public void toString(LimitedWriter w, boolean showType) throws IOException {
             w.write(toString(showType));
         }
 
@@ -453,7 +452,7 @@ public class K {
         public String getDataType() {
             return "Byte";
         }
-        ;
+
         public byte b;
 
         public double toDouble() {
@@ -469,7 +468,7 @@ public class K {
             return "0x" + Integer.toHexString((b >> 4) & 0xf) + Integer.toHexString(b & 0xf);
         }
 
-        public void toString(LimitedWriter w,boolean showType) throws IOException {
+        public void toString(LimitedWriter w, boolean showType) throws IOException {
             w.write(toString(showType));
         }
     }
@@ -478,7 +477,7 @@ public class K {
         public String getDataType() {
             return "Short";
         }
-        ;
+
         public short s;
 
         public double toDouble() {
@@ -509,7 +508,7 @@ public class K {
             return t;
         }
 
-        public void toString(LimitedWriter w,boolean showType) throws IOException {
+        public void toString(LimitedWriter w, boolean showType) throws IOException {
             w.write(toString(showType));
         }
     }
@@ -518,7 +517,7 @@ public class K {
         public String getDataType() {
             return "Integer";
         }
-        ;
+
         public int i;
 
         public double toDouble() {
@@ -537,19 +536,19 @@ public class K {
         public String toString(boolean showType) {
             String s;
             if (isNull())
-                s="0N";
+                s = "0N";
             else if (i == Integer.MAX_VALUE)
-                s="0W";
+                s = "0W";
             else if (i == -Integer.MAX_VALUE)
-                s="-0W";
+                s = "-0W";
             else
-                s=Integer.toString(i);
+                s = Integer.toString(i);
             if (showType)
                 s += "i";
             return s;
         }
 
-        public void toString(LimitedWriter w,boolean showType) throws IOException {
+        public void toString(LimitedWriter w, boolean showType) throws IOException {
             w.write(toString(showType));
         }
     }
@@ -558,7 +557,7 @@ public class K {
         public String getDataType() {
             return "Symbol";
         }
-        ;
+
         public String s;
 
         public KSymbol(String s) {
@@ -574,7 +573,7 @@ public class K {
             return s.length() == 0;
         }
 
-        public void toString(LimitedWriter w,boolean showType) throws IOException {
+        public void toString(LimitedWriter w, boolean showType) throws IOException {
             if (showType)
                 w.write("`");
             w.write(s);
@@ -589,7 +588,7 @@ public class K {
         public String getDataType() {
             return "Long";
         }
-        ;
+
         public long j;
 
         public double toDouble() {
@@ -622,13 +621,13 @@ public class K {
             return s;
         }
 
-        public void toString(LimitedWriter w,boolean showType) throws IOException {
+        public void toString(LimitedWriter w, boolean showType) throws IOException {
             w.write(toString(showType));
         }
 
         public void serialise(OutputStream o) throws IOException {
             super.serialise(o);
-            write(o,j);
+            write(o, j);
         }
     }
 
@@ -636,7 +635,7 @@ public class K {
         public String getDataType() {
             return "Character";
         }
-        ;
+
         public char c;
 
         public KCharacter(char c) {
@@ -655,13 +654,13 @@ public class K {
                 return "" + c;
         }
 
-        public void toString(LimitedWriter w,boolean showType) throws IOException {
+        public void toString(LimitedWriter w, boolean showType) throws IOException {
             w.write(toString(showType));
         }
 
         public void serialise(OutputStream o) throws IOException {
             super.serialise(o);
-            write(o,(byte) c);
+            write(o, (byte) c);
         }
     }
 
@@ -669,7 +668,7 @@ public class K {
         public String getDataType() {
             return "Float";
         }
-        ;
+
         public float f;
 
         public double toDouble() {
@@ -704,14 +703,14 @@ public class K {
             }
         }
 
-        public void toString(LimitedWriter w,boolean showType) throws IOException {
+        public void toString(LimitedWriter w, boolean showType) throws IOException {
             w.write(toString(showType));
         }
 
         public void serialise(OutputStream o) throws IOException {
             super.serialise(o);
             int i = Float.floatToIntBits(f);
-            write(o,i);
+            write(o, i);
         }
     }
 
@@ -719,7 +718,7 @@ public class K {
         public String getDataType() {
             return "Double";
         }
-        ;
+
         public double d;
 
         public KDouble(double d) {
@@ -754,14 +753,14 @@ public class K {
             }
         }
 
-        public void toString(LimitedWriter w,boolean showType) throws IOException {
+        public void toString(LimitedWriter w, boolean showType) throws IOException {
             w.write(toString(showType));
         }
 
         public void serialise(OutputStream o) throws IOException {
             super.serialise(o);
             long j = Double.doubleToLongBits(d);
-            write(o,j);
+            write(o, j);
         }
     }
 
@@ -769,7 +768,7 @@ public class K {
         public String getDataType() {
             return "Date";
         }
-        ;
+
         int date;
 
         public KDate(int date) {
@@ -789,10 +788,10 @@ public class K {
             else if (date == -Integer.MAX_VALUE)
                 return "-0Wd";
             else
-                return sd("yyyy.MM.dd",new Date(86400000L * (date + 10957)));
+                return sd("yyyy.MM.dd", new Date(86400000L * (date + 10957)));
         }
 
-        public void toString(LimitedWriter w,boolean showType) throws IOException {
+        public void toString(LimitedWriter w, boolean showType) throws IOException {
             w.write(toString(showType));
         }
 
@@ -802,11 +801,12 @@ public class K {
     }
 
     public static class KGuid extends KBase {
-        static UUID nuuid=new UUID(0,0);
+        static UUID nuuid = new UUID(0, 0);
+
         public String getDataType() {
             return "Guid";
         }
-        ;
+
         UUID uuid;
 
         public KGuid(UUID uuid) {
@@ -822,16 +822,16 @@ public class K {
             return uuid.toString();
         }
 
-        public void toString(LimitedWriter w,boolean showType) throws IOException {
+        public void toString(LimitedWriter w, boolean showType) throws IOException {
             w.write(toString(showType));
         }
     }
-    
+
     public static class KTime extends KBase {
         public String getDataType() {
             return "Time";
         }
-        ;
+
         int time;
 
         public KTime(int time) {
@@ -851,10 +851,10 @@ public class K {
             else if (time == -Integer.MAX_VALUE)
                 return "-0Wt";
             else
-                return sd("HH:mm:ss.SSS",new Time(time));
+                return sd("HH:mm:ss.SSS", new Time(time));
         }
 
-        public void toString(LimitedWriter w,boolean showType) throws IOException {
+        public void toString(LimitedWriter w, boolean showType) throws IOException {
             w.write(toString(showType));
         }
 
@@ -867,7 +867,7 @@ public class K {
         public String getDataType() {
             return "Datetime";
         }
-        ;
+
         double time;
 
         public KDatetime(double time) {
@@ -887,10 +887,10 @@ public class K {
             else if (time == Double.NEGATIVE_INFINITY)
                 return "-0wz";
             else
-                return sd("yyyy.MM.dd HH:mm:ss.SSS",toTimestamp());
+                return sd("yyyy.MM.dd HH:mm:ss.SSS", toTimestamp());
         }
 
-        public void toString(LimitedWriter w,boolean showType) throws IOException {
+        public void toString(LimitedWriter w, boolean showType) throws IOException {
             w.write(toString(showType));
         }
 
@@ -904,6 +904,7 @@ public class K {
         public String getDataType() {
             return "Timestamp";
         }
+
         long time;
 
         public KTimestamp(long time) {
@@ -912,7 +913,7 @@ public class K {
         }
 
         public boolean isNull() {
-            return time==Long.MIN_VALUE;
+            return time == Long.MIN_VALUE;
         }
 
         public String toString(boolean showType) {
@@ -922,13 +923,13 @@ public class K {
                 return "0Wp";
             else if (time == -Long.MAX_VALUE)
                 return "-0Wp";
-            else{
-                Timestamp ts=toTimestamp();
-                return sd("yyyy.MM.dd HH:mm:ss.",ts)+nsFormatter.format(ts.getNanos());
+            else {
+                Timestamp ts = toTimestamp();
+                return sd("yyyy.MM.dd HH:mm:ss.", ts) + nsFormatter.format(ts.getNanos());
             }
         }
 
-        public void toString(LimitedWriter w,boolean showType) throws IOException {
+        public void toString(LimitedWriter w, boolean showType) throws IOException {
             w.write(toString(showType));
         }
 
@@ -936,52 +937,53 @@ public class K {
             long k = 86400000L * 10957;
             long n = 1000000000L;
             long d = time < 0 ? (time + 1) / n - 1 : time / n;
-            long ltime=time == Long.MIN_VALUE ? time : (k + 1000 * d);
-            int nanos=(int) (time - n * d);
-            Timestamp ts=new Timestamp(ltime);
+            long ltime = time == Long.MIN_VALUE ? time : (k + 1000 * d);
+            int nanos = (int) (time - n * d);
+            Timestamp ts = new Timestamp(ltime);
             ts.setNanos(nanos);
             return ts;
         }
     }
+
     public static class Dict extends KBase {
         public String getDataType() {
             return "Dictionary";
         }
-        
+
         public K.KBase x;
         public K.KBase y;
 
-        public Dict(K.KBase X,K.KBase Y) {
+        public Dict(K.KBase X, K.KBase Y) {
             type = 99;
             x = X;
             y = Y;
         }
 
-        public void upsert(K.Dict upd){
+        public void upsert(K.Dict upd) {
             //if dict is not table
-            if(!(x instanceof K.Flip) || !(y instanceof K.Flip))
+            if (!(x instanceof K.Flip) || !(y instanceof K.Flip))
                 return;
             //if upd is not table
-            if (!(upd.x instanceof K.Flip) || ! (upd.y instanceof K.Flip))
+            if (!(upd.x instanceof K.Flip) || !(upd.y instanceof K.Flip))
                 return;
-            Flip cx=(K.Flip)x;
-            Flip cy=(K.Flip)y;
-            Flip updx=(K.Flip)upd.x;
-            Flip updy=(K.Flip)upd.y;
+            Flip cx = (K.Flip) x;
+            Flip cy = (K.Flip) y;
+            Flip updx = (K.Flip) upd.x;
+            Flip updy = (K.Flip) upd.y;
             cx.append(updx);
             cy.append(updy);
         }
 
-        public void toString(LimitedWriter w,boolean showType) throws IOException {
-            boolean useBrackets = getAttr()!=0||x instanceof Flip;
-            super.toString(w,showType);
+        public void toString(LimitedWriter w, boolean showType) throws IOException {
+            boolean useBrackets = getAttr() != 0 || x instanceof Flip;
+            super.toString(w, showType);
             if (useBrackets)
                 w.write("(");
-            x.toString(w,showType);
+            x.toString(w, showType);
             if (useBrackets)
                 w.write(")");
             w.write("!");
-            y.toString(w,showType);
+            y.toString(w, showType);
         }
     }
 
@@ -989,7 +991,7 @@ public class K {
         public String getDataType() {
             return "Flip";
         }
-        ;
+
         public K.KSymbolVector x;
         public K.KBaseVector y;
 
@@ -999,20 +1001,20 @@ public class K {
             y = (K.KBaseVector) X.y;
         }
 
-        public void toString(LimitedWriter w,boolean showType) throws IOException {
+        public void toString(LimitedWriter w, boolean showType) throws IOException {
             boolean usebracket = x.getLength() == 1;
             w.write(flip);
             if (usebracket)
                 w.write("(");
-            x.toString(w,showType);
+            x.toString(w, showType);
             if (usebracket)
                 w.write(")");
             w.write("!");
-            y.toString(w,showType);
+            y.toString(w, showType);
         }
 
         public void append(Flip nf) {
-            for (int i = 0;i < y.getLength();i++)
+            for (int i = 0; i < y.getLength(); i++)
                 ((KBaseVector) y.at(i)).append((KBaseVector) nf.y.at(i));
         }
     }
@@ -1021,7 +1023,7 @@ public class K {
         public String getDataType() {
             return "Month";
         }
-        ;
+
         public int i;
 
         public Month(int x) {
@@ -1052,11 +1054,11 @@ public class K {
         public Date toDate() {
             int m = i + 24000, y = m / 12;
             Calendar cal = Calendar.getInstance();
-            cal.set(y,m,01);
+            cal.set(y, m, 01);
             return cal.getTime();
         }
 
-        public void toString(LimitedWriter w,boolean showType) throws IOException {
+        public void toString(LimitedWriter w, boolean showType) throws IOException {
             w.write(toString(showType));
         }
     }
@@ -1065,7 +1067,7 @@ public class K {
         public String getDataType() {
             return "Minute";
         }
-        ;
+
         public int i;
 
         public Minute(int x) {
@@ -1088,14 +1090,14 @@ public class K {
                 return i2(i / 60) + ":" + i2(i % 60);
         }
 
-        public void toString(LimitedWriter w,boolean showType) throws IOException {
+        public void toString(LimitedWriter w, boolean showType) throws IOException {
             w.write(toString(showType));
         }
 
         public Date toDate() {
             Calendar cal = Calendar.getInstance();
-            cal.set(Calendar.HOUR,i / 60);
-            cal.set(Calendar.MINUTE,i % 60);
+            cal.set(Calendar.HOUR, i / 60);
+            cal.set(Calendar.MINUTE, i % 60);
             return cal.getTime();
         }
     }
@@ -1104,7 +1106,7 @@ public class K {
         public String getDataType() {
             return "Second";
         }
-        ;
+
         public int i;
 
         public Second(int x) {
@@ -1127,25 +1129,27 @@ public class K {
                 return new Minute(i / 60).toString() + ':' + i2(i % 60);
         }
 
-        public void toString(LimitedWriter w,boolean showType) throws IOException {
+        public void toString(LimitedWriter w, boolean showType) throws IOException {
             w.write(toString(showType));
         }
 
         public Date toDate() {
             Calendar cal = Calendar.getInstance();
-            cal.set(Calendar.HOUR,i / (60 * 60));
-            cal.set(Calendar.MINUTE,(int) ((i % (60 * 60)) / 60));
-            cal.set(Calendar.SECOND,i % 60);
+            cal.set(Calendar.HOUR, i / (60 * 60));
+            cal.set(Calendar.MINUTE, (int) ((i % (60 * 60)) / 60));
+            cal.set(Calendar.SECOND, i % 60);
             return cal.getTime();
         }
     }
 
     public static class KTimespan extends KBase {
         public long j;
+
         public KTimespan(long x) {
             j = x;
-            type=-16;
+            type = -16;
         }
+
         public String getDataType() {
             return "Timespan";
         }
@@ -1162,30 +1166,32 @@ public class K {
             else if (j == -Long.MAX_VALUE)
                 return "-0Wn";
             else {
-                String s="";
-                long jj=j;
-                if(jj<0)
-                {
-                    jj=-jj;
-                    s="-";
+                String s = "";
+                long jj = j;
+                if (jj < 0) {
+                    jj = -jj;
+                    s = "-";
                 }
-                int d=((int)(jj/86400000000000L));
-                if(d!=0)
-                    s+=d+"D";
-                return s+i2((int)((jj%86400000000000L)/3600000000000L))+
-                       ":"+i2((int)((jj%3600000000000L)/60000000000L))+
-                       ":"+i2((int)((jj%60000000000L)/1000000000L))+
-                       "."+nsFormatter.format((int)(jj%1000000000L));
+                int d = ((int) (jj / 86400000000000L));
+                if (d != 0)
+                    s += d + "D";
+                return s + i2((int) ((jj % 86400000000000L) / 3600000000000L)) +
+                        ":" + i2((int) ((jj % 3600000000000L) / 60000000000L)) +
+                        ":" + i2((int) ((jj % 60000000000L) / 1000000000L)) +
+                        "." + nsFormatter.format((int) (jj % 1000000000L));
             }
         }
 
-        public void toString(LimitedWriter w,boolean showType) throws IOException {
+        public void toString(LimitedWriter w, boolean showType) throws IOException {
             w.write(toString(showType));
         }
-        public Time toTime(){return new Time((j/1000000));}
+
+        public Time toTime() {
+            return new Time((j / 1000000));
+        }
     }
 
-    static java.text.DecimalFormat i2Formatter= new java.text.DecimalFormat("00");
+    static java.text.DecimalFormat i2Formatter = new java.text.DecimalFormat("00");
 
     static String i2(int i) {
         return i2Formatter.format(i);
@@ -1195,9 +1201,9 @@ public class K {
         protected Object array;
         private int length;
 
-        protected KBaseVector(Class klass,int length) {
+        protected KBaseVector(Class klass, int length) {
             //array=Array.newInstance(klass, calcCapacity(length));
-            array = Array.newInstance(klass,length);
+            array = Array.newInstance(klass, length);
             this.length = length;
         }
 
@@ -1206,19 +1212,17 @@ public class K {
         public int getLength() {
             return length;
         }
-        ;
 
         public Object getArray() {
             return array;
         }
-        ;
 
         public int[] gradeUp() {
-            return Sorter.gradeUp(getArray(),getLength());
+            return Sorter.gradeUp(getArray(), getLength());
         }
 
         public int[] gradeDown() {
-            return Sorter.gradeDown(getArray(),getLength());
+            return Sorter.gradeDown(getArray(), getLength());
         }
 
         protected int calcCapacity(int length) {
@@ -1228,11 +1232,11 @@ public class K {
         public void append(KBaseVector x) {
             if ((x.getLength() + getLength()) > Array.getLength(getArray())) {
                 int newLength = Array.getLength(getArray()) + x.getLength();
-                Object tmp = Array.newInstance(getArray().getClass().getComponentType(),2 * calcCapacity(newLength));
-                System.arraycopy(getArray(),0,tmp,0,getLength());
+                Object tmp = Array.newInstance(getArray().getClass().getComponentType(), 2 * calcCapacity(newLength));
+                System.arraycopy(getArray(), 0, tmp, 0, getLength());
                 array = tmp;
             }
-            System.arraycopy(x.getArray(),0,getArray(),getLength(),x.getLength());
+            System.arraycopy(x.getArray(), 0, getArray(), getLength(), x.getLength());
             length += x.getLength();
         }
     }
@@ -1241,18 +1245,17 @@ public class K {
         public String getDataType() {
             return "Short Vector";
         }
-        ;
 
         public KShortVector(int length) {
-            super(short.class,length);
+            super(short.class, length);
             type = 5;
         }
 
         public KBase at(int i) {
-            return new KShort(Array.getShort(array,i));
+            return new KShort(Array.getShort(array, i));
         }
 
-        public void toString(LimitedWriter w,boolean showType) throws IOException {
+        public void toString(LimitedWriter w, boolean showType) throws IOException {
             w.write(super.toString(showType));
 
             if (getLength() == 0)
@@ -1260,10 +1263,10 @@ public class K {
             else {
                 if (getLength() == 1)
                     w.write(enlist);
-                for (int i = 0;i < getLength();i++) {
+                for (int i = 0; i < getLength(); i++) {
                     if (i > 0)
                         w.write(" ");
-                    short v = Array.getShort(array,i);
+                    short v = Array.getShort(array, i);
                     if (v == Short.MIN_VALUE)
                         w.write("0N");
                     else if (v == Short.MAX_VALUE)
@@ -1274,7 +1277,7 @@ public class K {
                         w.write("" + v);
                     }
                 }
-                if(showType)
+                if (showType)
                     w.write("h");
             }
         }
@@ -1284,18 +1287,17 @@ public class K {
         public String getDataType() {
             return "Int Vector";
         }
-        ;
 
         public KIntVector(int length) {
-            super(int.class,length);
+            super(int.class, length);
             type = 6;
         }
 
         public KBase at(int i) {
-            return new KInteger(Array.getInt(array,i));
+            return new KInteger(Array.getInt(array, i));
         }
 
-        public void toString(LimitedWriter w,boolean showType) throws IOException {
+        public void toString(LimitedWriter w, boolean showType) throws IOException {
             w.write(super.toString(showType));
 
             if (getLength() == 0)
@@ -1303,10 +1305,10 @@ public class K {
             else {
                 if (getLength() == 1)
                     w.write(enlist);
-                for (int i = 0;i < getLength();i++) {
+                for (int i = 0; i < getLength(); i++) {
                     if (i > 0)
                         w.write(" ");
-                    int v = Array.getInt(array,i);
+                    int v = Array.getInt(array, i);
                     if (v == Integer.MIN_VALUE)
                         w.write("0N");
                     else if (v == Integer.MAX_VALUE)
@@ -1316,7 +1318,7 @@ public class K {
                     else
                         w.write("" + v);
                 }
-                if(showType)
+                if (showType)
                     w.write("i");
             }
         }
@@ -1326,28 +1328,27 @@ public class K {
         public String getDataType() {
             return "List";
         }
-        ;
 
         public KList(int length) {
-            super(KBase.class,length);
+            super(KBase.class, length);
             type = 0;
         }
 
         public KBase at(int i) {
-            return (KBase) Array.get(array,i);
+            return (KBase) Array.get(array, i);
         }
 
-        public void toString(LimitedWriter w,boolean showType) throws IOException {
+        public void toString(LimitedWriter w, boolean showType) throws IOException {
             w.write(super.toString(showType));
 
             if (getLength() == 1)
                 w.write(enlist);
             else
                 w.write("(");
-            for (int i = 0;i < getLength();i++) {
+            for (int i = 0; i < getLength(); i++) {
                 if (i > 0)
                     w.write(";");
-                at(i).toString(w,showType);
+                at(i).toString(w, showType);
             }
             if (getLength() != 1)
                 w.write(")");
@@ -1358,18 +1359,17 @@ public class K {
         public String getDataType() {
             return "Double Vector";
         }
-        ;
 
         public KDoubleVector(int length) {
-            super(double.class,length);
+            super(double.class, length);
             type = 9;
         }
 
         public KBase at(int i) {
-            return new KDouble(Array.getDouble(array,i));
+            return new KDouble(Array.getDouble(array, i));
         }
 
-        public void toString(LimitedWriter w,boolean showType) throws IOException {
+        public void toString(LimitedWriter w, boolean showType) throws IOException {
             w.write(super.toString(showType));
 
             if (getLength() == 0)
@@ -1379,24 +1379,21 @@ public class K {
                     w.write(enlist);
 
                 boolean printedP = false;
-                NumberFormat nf= Config.getInstance().getNumberFormat();
-                for (int i = 0;i < getLength();i++) {
-                    double d = Array.getDouble(array,i);
+                NumberFormat nf = Config.getInstance().getNumberFormat();
+                for (int i = 0; i < getLength(); i++) {
+                    double d = Array.getDouble(array, i);
                     if (i > 0)
                         w.write(" ");
                     if (Double.isNaN(d)) {
                         w.write("0n");
                         printedP = true;
-                    }
-                    else if (d == Double.POSITIVE_INFINITY) {
+                    } else if (d == Double.POSITIVE_INFINITY) {
                         w.write("0w");
                         printedP = true;
-                    }
-                    else if (d == Double.NEGATIVE_INFINITY) {
+                    } else if (d == Double.NEGATIVE_INFINITY) {
                         w.write("-0w");
                         printedP = true;
-                    }
-                    else {
+                    } else {
                         double epsilon = 1e-9;
                         double diff = d - Math.round(d);
                         if (!((diff < epsilon) && (diff > -epsilon)))
@@ -1414,18 +1411,17 @@ public class K {
         public String getDataType() {
             return "Float Vector";
         }
-        ;
 
         public KFloatVector(int length) {
-            super(float.class,length);
+            super(float.class, length);
             type = 8;
         }
 
         public KBase at(int i) {
-            return new KFloat(Array.getFloat(array,i));
+            return new KFloat(Array.getFloat(array, i));
         }
 
-        public void toString(LimitedWriter w,boolean showType) throws IOException {
+        public void toString(LimitedWriter w, boolean showType) throws IOException {
             w.write(super.toString(showType));
 
             if (getLength() == 0)
@@ -1435,24 +1431,21 @@ public class K {
                     w.write(enlist);
 
                 boolean printedP = false;
-                NumberFormat nf= Config.getInstance().getNumberFormat();
-                for (int i = 0;i < getLength();i++) {
-                    float d = Array.getFloat(array,i);
+                NumberFormat nf = Config.getInstance().getNumberFormat();
+                for (int i = 0; i < getLength(); i++) {
+                    float d = Array.getFloat(array, i);
                     if (i > 0)
                         w.write(" ");
                     if (Float.isNaN(d)) {
                         w.write("0N");
                         printedP = true;
-                    }
-                    else if (d == Float.POSITIVE_INFINITY) {
+                    } else if (d == Float.POSITIVE_INFINITY) {
                         w.write("0W");
                         printedP = true;
-                    }
-                    else if (d == Float.NEGATIVE_INFINITY) {
+                    } else if (d == Float.NEGATIVE_INFINITY) {
                         w.write("-0W");
                         printedP = true;
-                    }
-                    else {
+                    } else {
                         if (d != ((int) d))
                             printedP = true;
                         w.write(nf.format(d));
@@ -1468,18 +1461,17 @@ public class K {
         public String getDataType() {
             return "Long Vector";
         }
-        ;
 
         public KLongVector(int length) {
-            super(long.class,length);
+            super(long.class, length);
             type = 7;
         }
 
         public KBase at(int i) {
-            return new KLong(Array.getLong(array,i));
+            return new KLong(Array.getLong(array, i));
         }
 
-        public void toString(LimitedWriter w,boolean showType) throws IOException {
+        public void toString(LimitedWriter w, boolean showType) throws IOException {
             w.write(super.toString(showType));
 
             if (getLength() == 0)
@@ -1487,10 +1479,10 @@ public class K {
             else {
                 if (getLength() == 1)
                     w.write(enlist);
-                for (int i = 0;i < getLength();i++) {
+                for (int i = 0; i < getLength(); i++) {
                     if (i > 0)
                         w.write(" ");
-                    long v = Array.getLong(array,i);
+                    long v = Array.getLong(array, i);
                     if (v == Long.MIN_VALUE)
                         w.write("0N");
                     else if (v == Long.MAX_VALUE)
@@ -1511,18 +1503,17 @@ public class K {
         public String getDataType() {
             return "Month Vector";
         }
-        ;
 
         public KMonthVector(int length) {
-            super(int.class,length);
+            super(int.class, length);
             type = 13;
         }
 
         public KBase at(int i) {
-            return new Month(Array.getInt(array,i));
+            return new Month(Array.getInt(array, i));
         }
 
-        public void toString(LimitedWriter w,boolean showType) throws IOException {
+        public void toString(LimitedWriter w, boolean showType) throws IOException {
             w.write(super.toString(showType));
 
             if (getLength() == 0)
@@ -1530,10 +1521,10 @@ public class K {
             else {
                 if (getLength() == 1)
                     w.write(enlist);
-                for (int i = 0;i < getLength();i++) {
+                for (int i = 0; i < getLength(); i++) {
                     if (i > 0)
                         w.write(" ");
-                    int v = Array.getInt(array,i);
+                    int v = Array.getInt(array, i);
                     if (v == Integer.MIN_VALUE)
                         w.write("0N");
                     else if (v == Integer.MAX_VALUE)
@@ -1547,7 +1538,7 @@ public class K {
                     }
                 }
                 if (showType)
-                  w.write("m");
+                    w.write("m");
             }
         }
     }
@@ -1556,30 +1547,29 @@ public class K {
         public String getDataType() {
             return "Date Vector";
         }
-        ;
 
         public KDateVector(int length) {
-            super(int.class,length);
+            super(int.class, length);
             type = 14;
         }
 
         public KBase at(int i) {
-            return new KDate(Array.getInt(array,i));
+            return new KDate(Array.getInt(array, i));
         }
 
-        public void toString(LimitedWriter w,boolean showType) throws IOException {
+        public void toString(LimitedWriter w, boolean showType) throws IOException {
             w.write(super.toString(showType));
 
             if (getLength() == 0)
                 w.write("`date$()");
             else {
-                boolean printD=true;
+                boolean printD = true;
                 if (getLength() == 1)
                     w.write(enlist);
-                for (int i = 0;i < getLength();i++) {
+                for (int i = 0; i < getLength(); i++) {
                     if (i > 0)
                         w.write(" ");
-                    int v = Array.getInt(array,i);
+                    int v = Array.getInt(array, i);
                     if (v == Integer.MIN_VALUE)
                         w.write("0N");
                     else if (v == Integer.MAX_VALUE)
@@ -1587,11 +1577,11 @@ public class K {
                     else if (v == -Integer.MAX_VALUE)
                         w.write("-0W");
                     else {
-                        printD=false;    
-                        w.write(sd("yyyy.MM.dd",new Date(86400000L * (v + 10957))));
+                        printD = false;
+                        w.write(sd("yyyy.MM.dd", new Date(86400000L * (v + 10957))));
                     }
                 }
-                if(printD)
+                if (printD)
                     w.write("d");
             }
         }
@@ -1601,18 +1591,17 @@ public class K {
         public String getDataType() {
             return "Guid Vector";
         }
-        ;
 
         public KGuidVector(int length) {
-            super(UUID.class,length);
+            super(UUID.class, length);
             type = 2;
         }
 
         public KBase at(int i) {
-            return new KGuid((UUID)Array.get(array,i));
+            return new KGuid((UUID) Array.get(array, i));
         }
 
-        public void toString(LimitedWriter w,boolean showType) throws IOException {
+        public void toString(LimitedWriter w, boolean showType) throws IOException {
             w.write(super.toString(showType));
 
             if (getLength() == 0)
@@ -1620,10 +1609,10 @@ public class K {
             else {
                 if (getLength() == 1)
                     w.write(enlist);
-                for (int i = 0;i < getLength();i++) {
+                for (int i = 0; i < getLength(); i++) {
                     if (i > 0)
                         w.write(" ");
-                    w.write(((UUID)Array.get(array,i)).toString());
+                    w.write(((UUID) Array.get(array, i)).toString());
                 }
             }
         }
@@ -1633,18 +1622,17 @@ public class K {
         public String getDataType() {
             return "Minute Vector";
         }
-        ;
 
         public KMinuteVector(int length) {
-            super(int.class,length);
+            super(int.class, length);
             type = 17;
         }
 
         public KBase at(int i) {
-            return new Minute(Array.getInt(array,i));
+            return new Minute(Array.getInt(array, i));
         }
 
-        public void toString(LimitedWriter w,boolean showType) throws IOException {
+        public void toString(LimitedWriter w, boolean showType) throws IOException {
             w.write(super.toString(showType));
 
             if (getLength() == 0)
@@ -1652,10 +1640,10 @@ public class K {
             else {
                 if (getLength() == 1)
                     w.write(enlist);
-                for (int i = 0;i < getLength();i++) {
+                for (int i = 0; i < getLength(); i++) {
                     if (i > 0)
                         w.write(" ");
-                    int v = Array.getInt(array,i);
+                    int v = Array.getInt(array, i);
                     if (v == Integer.MIN_VALUE)
                         w.write("0Nu");
                     else if (v == Integer.MAX_VALUE)
@@ -1673,30 +1661,29 @@ public class K {
         public String getDataType() {
             return "Datetime Vector";
         }
-        ;
 
         public KDatetimeVector(int length) {
-            super(double.class,length);
+            super(double.class, length);
             type = 15;
         }
 
         public KBase at(int i) {
-            return new KDatetime(Array.getDouble(array,i));
+            return new KDatetime(Array.getDouble(array, i));
         }
 
-        public void toString(LimitedWriter w,boolean showType) throws IOException {
+        public void toString(LimitedWriter w, boolean showType) throws IOException {
             w.write(super.toString(showType));
 
             if (getLength() == 0)
                 w.write("`datetime$()");
             else {
-                boolean printZ=true;
+                boolean printZ = true;
                 if (getLength() == 1)
                     w.write(enlist);
-                for (int i = 0;i < getLength();i++) {
+                for (int i = 0; i < getLength(); i++) {
                     if (i > 0)
                         w.write(" ");
-                    double d = Array.getDouble(array,i);
+                    double d = Array.getDouble(array, i);
                     if (i > 0)
                         w.write(" ");
                     if (Double.isNaN(d))
@@ -1705,32 +1692,32 @@ public class K {
                         w.write("0w");
                     else if (d == Double.NEGATIVE_INFINITY)
                         w.write("-0w");
-                    else{
-                        printZ=false;
-                        w.write(sd("yyyy.MM.dd HH:mm:ss.SSS",new Timestamp(((long) (.5 + 8.64e7 * (d + 10957))))));
+                    else {
+                        printZ = false;
+                        w.write(sd("yyyy.MM.dd HH:mm:ss.SSS", new Timestamp(((long) (.5 + 8.64e7 * (d + 10957))))));
                     }
                 }
-                if(printZ)
+                if (printZ)
                     w.write("z");
             }
         }
     }
+
     public static class KTimestampVector extends KBaseVector {
         public String getDataType() {
             return "Timestamp Vector";
         }
-        ;
 
         public KTimestampVector(int length) {
-            super(long.class,length);
+            super(long.class, length);
             type = 12;
         }
 
         public KBase at(int i) {
-            return new KTimestamp(Array.getLong(array,i));
+            return new KTimestamp(Array.getLong(array, i));
         }
 
-        public void toString(LimitedWriter w,boolean showType) throws IOException {
+        public void toString(LimitedWriter w, boolean showType) throws IOException {
             w.write(super.toString(showType));
 
             if (getLength() == 0)
@@ -1738,7 +1725,7 @@ public class K {
             else {
                 if (getLength() == 1)
                     w.write(enlist);
-                for (int i = 0;i < getLength();i++) {
+                for (int i = 0; i < getLength(); i++) {
                     if (i > 0)
                         w.write(" ");
                     w.write(at(i).toString(false));
@@ -1746,22 +1733,22 @@ public class K {
             }
         }
     }
-        public static class KTimespanVector extends KBaseVector {
+
+    public static class KTimespanVector extends KBaseVector {
         public String getDataType() {
             return "Timespan Vector";
         }
-        ;
 
         public KTimespanVector(int length) {
-            super(long.class,length);
+            super(long.class, length);
             type = 16;
         }
 
         public KBase at(int i) {
-            return new KTimespan(Array.getLong(array,i));
+            return new KTimespan(Array.getLong(array, i));
         }
 
-        public void toString(LimitedWriter w,boolean showType) throws IOException {
+        public void toString(LimitedWriter w, boolean showType) throws IOException {
             w.write(super.toString(showType));
 
             if (getLength() == 0)
@@ -1769,7 +1756,7 @@ public class K {
             else {
                 if (getLength() == 1)
                     w.write(enlist);
-                for (int i = 0;i < getLength();i++) {
+                for (int i = 0; i < getLength(); i++) {
                     if (i > 0)
                         w.write(" ");
                     w.write(at(i).toString(false));
@@ -1777,30 +1764,30 @@ public class K {
             }
         }
     }
+
     public static class KSecondVector extends KBaseVector {
         public String getDataType() {
             return "Second Vector";
         }
-        ;
 
         public KSecondVector(int length) {
-            super(int.class,length);
+            super(int.class, length);
             type = 18;
         }
 
         public KBase at(int i) {
-            return new Second(Array.getInt(array,i));
+            return new Second(Array.getInt(array, i));
         }
 
         public void serialise(OutputStream o) throws IOException {
             super.serialise(o);
-            write(o,(byte) 0);
-            write(o,getLength());
-            for (int i = 0;i < getLength();i++)
-                write(o,Array.getInt(array,i));
+            write(o, (byte) 0);
+            write(o, getLength());
+            for (int i = 0; i < getLength(); i++)
+                write(o, Array.getInt(array, i));
         }
 
-        public void toString(LimitedWriter w,boolean showType) throws IOException {
+        public void toString(LimitedWriter w, boolean showType) throws IOException {
             w.write(super.toString(showType));
 
             if (getLength() == 0)
@@ -1808,10 +1795,10 @@ public class K {
             else {
                 if (getLength() == 1)
                     w.write(enlist);
-                for (int i = 0;i < getLength();i++) {
+                for (int i = 0; i < getLength(); i++) {
                     if (i > 0)
                         w.write(" ");
-                    int v = Array.getInt(array,i);
+                    int v = Array.getInt(array, i);
                     if (v == Integer.MIN_VALUE)
                         w.write("0Nv");
                     else if (v == Integer.MAX_VALUE)
@@ -1829,26 +1816,25 @@ public class K {
         public String getDataType() {
             return "Time Vector";
         }
-        ;
 
         public KTimeVector(int length) {
-            super(int.class,length);
+            super(int.class, length);
             type = 19;
         }
 
         public KBase at(int i) {
-            return new KTime(Array.getInt(array,i));
+            return new KTime(Array.getInt(array, i));
         }
 
         public void serialise(OutputStream o) throws IOException {
             super.serialise(o);
-            write(o,(byte) 0);
-            write(o,getLength());
-            for (int i = 0;i < getLength();i++)
-                write(o,Array.getInt(array,i));
+            write(o, (byte) 0);
+            write(o, getLength());
+            for (int i = 0; i < getLength(); i++)
+                write(o, Array.getInt(array, i));
         }
 
-        public void toString(LimitedWriter w,boolean showType) throws IOException {
+        public void toString(LimitedWriter w, boolean showType) throws IOException {
             w.write(super.toString(showType));
 
             if (getLength() == 0)
@@ -1856,10 +1842,10 @@ public class K {
             else {
                 if (getLength() == 1)
                     w.write(enlist);
-                for (int i = 0;i < getLength();i++) {
+                for (int i = 0; i < getLength(); i++) {
                     if (i > 0)
                         w.write(" ");
-                    int v = Array.getInt(array,i);
+                    int v = Array.getInt(array, i);
                     if (v == Integer.MIN_VALUE)
                         w.write("0Nt");
                     else if (v == Integer.MAX_VALUE)
@@ -1867,7 +1853,7 @@ public class K {
                     else if (v == -Integer.MAX_VALUE)
                         w.write("-0Wt");
                     else
-                        w.write(sd("HH:mm:ss.SSS",new Time(v)));
+                        w.write(sd("HH:mm:ss.SSS", new Time(v)));
                 }
             }
         }
@@ -1877,34 +1863,33 @@ public class K {
         public String getDataType() {
             return "Boolean Vector";
         }
-        ;
 
         public KBooleanVector(int length) {
-            super(boolean.class,length);
+            super(boolean.class, length);
             type = 1;
         }
 
         public KBase at(int i) {
-            return new KBoolean(Array.getBoolean(array,i));
+            return new KBoolean(Array.getBoolean(array, i));
         }
 
         public void serialise(OutputStream o) throws IOException {
             super.serialise(o);
-            write(o,(byte) 0);
-            write(o,getLength());
-            for (int i = 0;i < getLength();i++)
-                write(o,(byte) (Array.getBoolean(array,i) ? 1 : 0));
+            write(o, (byte) 0);
+            write(o, getLength());
+            for (int i = 0; i < getLength(); i++)
+                write(o, (byte) (Array.getBoolean(array, i) ? 1 : 0));
         }
 
-        public void toString(LimitedWriter w,boolean showType) throws IOException {
+        public void toString(LimitedWriter w, boolean showType) throws IOException {
             w.write(super.toString(showType));
             if (getLength() == 0)
                 w.write("`boolean$()");
             else {
                 if (getLength() == 1)
                     w.write(enlist);
-                for (int i = 0;i < getLength();i++)
-                    w.write((Array.getBoolean(array,i) ? "1" : "0"));
+                for (int i = 0; i < getLength(); i++)
+                    w.write((Array.getBoolean(array, i) ? "1" : "0"));
                 w.write("b");
             }
         }
@@ -1914,26 +1899,25 @@ public class K {
         public String getDataType() {
             return "Byte Vector";
         }
-        ;
 
         public KByteVector(int length) {
-            super(byte.class,length);
+            super(byte.class, length);
             type = 4;
         }
 
         public KBase at(int i) {
-            return new KByte(Array.getByte(array,i));
+            return new KByte(Array.getByte(array, i));
         }
 
         public void serialise(OutputStream o) throws IOException {
             super.serialise(o);
-            write(o,(byte) 0);
-            write(o,getLength());
-            for (int i = 0;i < getLength();i++)
-                write(o,Array.getByte(array,i));
+            write(o, (byte) 0);
+            write(o, getLength());
+            for (int i = 0; i < getLength(); i++)
+                write(o, Array.getByte(array, i));
         }
 
-        public void toString(LimitedWriter w,boolean showType) throws IOException {
+        public void toString(LimitedWriter w, boolean showType) throws IOException {
             w.write(super.toString(showType));
             if (getLength() == 0)
                 w.write("`byte$()");
@@ -1942,8 +1926,8 @@ public class K {
                     w.write(enlist);
 
                 w.write("0x");
-                for (int i = 0;i < getLength();i++) {
-                    byte b = Array.getByte(array,i);
+                for (int i = 0; i < getLength(); i++) {
+                    byte b = Array.getByte(array, i);
                     w.write(Integer.toHexString((b >> 4) & 0xf) + Integer.toHexString(b & 0xf));
                 }
             }
@@ -1954,26 +1938,25 @@ public class K {
         public String getDataType() {
             return "Symbol Vector";
         }
-        ;
 
         public KSymbolVector(int length) {
-            super(String.class,length);
+            super(String.class, length);
             type = 11;
         }
 
         public KBase at(int i) {
-            return new KSymbol((String) Array.get(array,i));
+            return new KSymbol((String) Array.get(array, i));
         }
 
-        public void toString(LimitedWriter w,boolean showType) throws IOException {
+        public void toString(LimitedWriter w, boolean showType) throws IOException {
             w.write(super.toString(showType));
             if (getLength() == 0)
                 w.write("0#`");
             else if (getLength() == 1)
                 w.write(enlist);
 
-            for (int i = 0;i < getLength();i++)
-                w.write("`" + (String) Array.get(array,i));
+            for (int i = 0; i < getLength(); i++)
+                w.write("`" + Array.get(array, i));
         }
     }
 
@@ -1981,77 +1964,73 @@ public class K {
         public String getDataType() {
             return "Character Vector";
         }
-        
+
 
         public KCharacterVector(int length) {
-            super(char.class,length);
+            super(char.class, length);
             type = 10;
         }
 
         public KCharacterVector(char[] ca) {
-            super(char.class,ca.length);
-            System.arraycopy(ca,0,array,0,ca.length);
+            super(char.class, ca.length);
+            System.arraycopy(ca, 0, array, 0, ca.length);
             type = 10;
         }
 
         public KCharacterVector(String s) {
-            super(char.class,s.toCharArray().length);
-            System.arraycopy(s.toCharArray(),0,array,0,s.toCharArray().length);
+            super(char.class, s.toCharArray().length);
+            System.arraycopy(s.toCharArray(), 0, array, 0, s.toCharArray().length);
             type = 10;
         }
 
         public KBase at(int i) {
-            return new KCharacter(Array.getChar(array,i));
+            return new KCharacter(Array.getChar(array, i));
         }
 
         public void serialise(OutputStream o) throws IOException {
             super.serialise(o);
-            byte[]b =new String((char[])array).getBytes(Config.getInstance().getEncoding());
-            write(o,(byte) 0);
-            write(o,b.length);
+            byte[] b = new String((char[]) array).getBytes(Config.getInstance().getEncoding());
+            write(o, (byte) 0);
+            write(o, b.length);
             o.write(b);
         }
 
-        public void toString(LimitedWriter w,boolean showType) throws IOException {
+        public void toString(LimitedWriter w, boolean showType) throws IOException {
             w.write(super.toString(showType));
             if (getLength() == 1)
                 w.write(enlist);
 
             if (showType)
                 w.write("\"");
-            for (int i = 0;i < getLength();i++)
-                w.write(Array.getChar(array,i));
+            for (int i = 0; i < getLength(); i++)
+                w.write(Array.getChar(array, i));
             if (showType)
                 w.write("\"");
         }
-        
-        public String toString(boolean showType){
-          try{
-            LimitedWriter lw=new LimitedWriter(256);
-            toString(lw,showType);
-            return lw.toString();
-          }
-          catch(IOException e){
-            StringBuilder sb=new StringBuilder(256);
-            if(getLength()==1)
-              sb.append(enlist);
-            sb.append('"').append((char[])array).append('"');
-            return sb.toString();
-          }
+
+        public String toString(boolean showType) {
+            try {
+                LimitedWriter lw = new LimitedWriter(256);
+                toString(lw, showType);
+                return lw.toString();
+            } catch (IOException e) {
+                StringBuilder sb = new StringBuilder(256);
+                if (getLength() == 1)
+                    sb.append(enlist);
+                sb.append('"').append((char[]) array).append('"');
+                return sb.toString();
+            }
         }
     }
 
-    public static String decode(KBase obj,boolean showType) {
+    public static String decode(KBase obj, boolean showType) {
         LimitedWriter w = new LimitedWriter(20000);
         try {
-            obj.toString(w,showType);
-        }
-        catch (IOException e) {
+            obj.toString(w, showType);
+        } catch (IOException e) {
             e.printStackTrace();
+        } catch (LimitedWriter.LimitException ex) {
         }
-        catch (LimitedWriter.LimitException ex) {
-        }
-        ;
 
         return w.toString();
     }
