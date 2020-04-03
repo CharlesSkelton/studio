@@ -96,6 +96,7 @@ public class ServerList extends EscapeDialog {
             public void mousePressed(MouseEvent e) {
                 if (e.getClickCount() != 2) return;
                 DefaultMutableTreeNode node  = (DefaultMutableTreeNode) tree.getLastSelectedPathComponent();
+                if (node == null) return; // no selection
                 if (! node.isLeaf()) return;
                 selectedServer = ((ServerNode) node.getUserObject()).getServer();
                 dispose();
