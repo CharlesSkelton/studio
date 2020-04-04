@@ -1,0 +1,34 @@
+apply plugin: 'idea'
+//and standard one
+apply plugin: 'java'
+apply plugin: 'application'
+
+repositories {
+//    maven { url 'http://mvnrepository.com/maven2' }
+//    maven { url 'https://repo1.maven.org/maven2' }
+    mavenCentral()
+}
+
+dependencies {
+    compile group: 'org.netbeans.api', name: 'org-openide-awt', version: 'RELEASE113'
+//    compile group: 'org.jfree', name: 'jfreechart', version: '1.0.13'
+    compile group: 'org.jfree', name: 'jfreechart', version: '1.0.14'
+    runtime files ('lib/images.jar')
+}
+
+sourceSets {
+    main {
+        java {
+            srcDirs 'src'
+        }
+        resources {
+            srcDir 'src'
+            include 'studio*.properties'
+            include 'org/netbeans/editor/Bundle*.properties'
+        }
+    }
+}
+
+application {
+    mainClassName = 'studio.core.Studio'
+}
