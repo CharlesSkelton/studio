@@ -12,6 +12,8 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import javax.swing.*;
 
+import kx.c;
+
 import static javax.swing.GroupLayout.Alignment.*;
 import static javax.swing.GroupLayout.DEFAULT_SIZE;
 import static javax.swing.GroupLayout.PREFERRED_SIZE;
