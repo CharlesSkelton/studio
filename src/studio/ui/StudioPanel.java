@@ -22,6 +22,7 @@ import javax.swing.undo.UndoManager;
 import kx.c;
 import org.netbeans.editor.*;
 import org.netbeans.editor.Utilities;
+import studio.kdb.ListModel;
 import studio.qeditor.QKit;
 import org.netbeans.editor.ext.ExtKit;
 import org.netbeans.editor.ext.ExtSettingsInitializer;
@@ -2059,26 +2060,22 @@ public class StudioPanel extends JPanel implements Observer,WindowListener {
     private void processK4Results(K.KBase r) throws c.K4Exception {
         if (r != null) {
             exportAction.setEnabled(true);
-
-            if (FlipTableModel.isTable(r)) {
-                QGrid grid = new QGrid(r);
+            KTableModel model = KTableModel.getModel(r);
+            if (model != null) {
+                boolean dictModel = model instanceof DictModel;
+                boolean listModel = model instanceof ListModel;
+                boolean tableModel = ! (dictModel || listModel);
+                QGrid grid = new QGrid(model);
                 table = grid.getTable();
-
                 openInExcel.setEnabled(true);
-                //if(grid.getRowCount()<50000)
-                chartAction.setEnabled(true);
-                //else
-                //    chartAction.setEnabled(false);              
-
-                TabPanel frame = new TabPanel("Table [" + grid.getRowCount() + " rows] ",
-                                              getImage(Config.imageBase2 + "table.png"),
-                                              grid);
-                frame.setTitle(I18n.getString("Table")+" [" + grid.getRowCount() + " "+I18n.getString("rows")+"] ");
-//                frame.setBackground( Color.white);
-
+                chartAction.setEnabled(tableModel);
+                String title = tableModel ? "Table" : (dictModel ? "Dict" : "List");
+                TabPanel frame = new TabPanel( title + " [" + grid.getRowCount() + " rows] ",
+                        getImage(Config.imageBase2 + "table.png"),
+                        grid);
+//                frame.setTitle(I18n.getString("Table")+" [" + grid.getRowCount() + " "+I18n.getString("rows")+"] ");
                 tabbedPane.addTab(frame.getTitle(),frame.getIcon(),frame.getComponent());
-            }
-            else {
+            } else {
                 chartAction.setEnabled(false);
                 openInExcel.setEnabled(false);
                 LimitedWriter lm = new LimitedWriter(50000);
