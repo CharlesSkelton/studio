@@ -27,7 +27,7 @@ public class ServerList extends EscapeDialog {
     private java.util.List<String> filters = new ArrayList<>();
 
     public ServerList(JFrame parent, Server[] servers, Server active) {
-        super(parent, "Server List", true);
+        super(parent, "Server List");
         initComponents();
 
         this.servers = servers;
@@ -35,10 +35,6 @@ public class ServerList extends EscapeDialog {
         selectedServer = active;
 
         refreshServers();
-
-        Util.centerChildOnParent(this, getParent());
-        pack();
-        setVisible(true);
     }
 
     private void refreshFilters(String filterSting) {

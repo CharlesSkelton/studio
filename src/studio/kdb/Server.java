@@ -1,5 +1,7 @@
 package studio.kdb;
 
+import studio.core.Credentials;
+
 import java.awt.Color;
 import java.util.Properties;
 
@@ -60,6 +62,10 @@ public class Server {
     }
 
     public Server() {
+        authenticationMechanism = Config.getInstance().getDefaultAuthMechanism();
+        Credentials credentials = Config.getInstance().getDefaultCredentials(authenticationMechanism);
+        username = credentials.getUsername();
+        password = credentials.getPassword();
     }
 
     @Override

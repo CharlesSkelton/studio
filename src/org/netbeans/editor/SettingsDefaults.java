@@ -60,7 +60,7 @@ public class SettingsDefaults {
     public static Coloring defaultColoring;
     public static final void init()
     {
-    defaultBackColor= Config.getInstance().getColorForToken("BACKGROUND", Color.white);//Color.white;
+    defaultBackColor= Config.getInstance().getDefaultBackgroundColor();
         defaultColoring= new Coloring(defaultFont, defaultForeColor, defaultBackColor);
     }
     static{init();}

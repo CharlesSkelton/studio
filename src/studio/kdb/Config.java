@@ -1,612 +1,273 @@
 package studio.kdb;
 
+import studio.core.Credentials;
 import studio.core.DefaultAuthenticationMechanism;
+
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.List;
 import java.text.NumberFormat;
 import java.text.DecimalFormat;
 import java.awt.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-public class Config
-{
-    public static String imageBase="/de/skelton/images/";
-    public static String imageBase2="/de/skelton/utils/";
-    private static String path;
-    private static String filename="studio.properties";
-    private static String absoluteFilename;
-    private static String version="1.1";
-    private Properties p = null;
-    private static Config instance;
-    private static NumberFormat formatter= null;
+public class Config {
+    public static String imageBase = "/de/skelton/images/";
+    public static String imageBase2 = "/de/skelton/utils/";
 
-    private Config()
-    {
+    private static String PATH = System.getProperties().getProperty("user.home") + "/.studioforkdb/";
+    private static String FILENAME = PATH + "studio.properties";
+    private static String VERSION = "1.1";
+
+    private Properties p = new Properties();
+    private final static Config instance = new Config();
+
+    private Config() {
         init();
     }
 
-    public Font getFont()
-    {
-        Font f= null;
+    public Font getFont() {
+        String name = p.getProperty("font.name", "Monospaced");
+        int  size = Integer.parseInt(p.getProperty("font.size","14"));
 
-        if( p != null)
-        {
-            String name=    p.getProperty("font.name");
-            String size=    p.getProperty("font.size");
-            int s= 14;
-            if( size != null)
-                s= Integer.parseInt(size);
-            String n= "Monospaced";
-            if( name != null)
-                n= name;
-
-            f= new Font(n, Font.PLAIN, s);
-
-            if( f == null)
-                f= new Font("Monospaced", Font.PLAIN, 14);
-            
-            setFont(f);
-        }
+        Font f = new Font(name, Font.PLAIN, size);
+        setFont(f);
 
         return f;
     }
 
-    public String getEncoding()
-    {
-        String s="UTF-8";
-
-        if( p != null)
-            s= p.getProperty("encoding","UTF-8");
-
-        return s;//"GBK";
+    public String getEncoding() {
+        return p.getProperty("encoding", "UTF-8");
     }
 
-    public void setFont(Font f)
-    {
-        if( p != null)
-        {
-            p.setProperty("font.name", f.getFamily());
-            p.setProperty("font.size", ""+f.getSize());
-            save();
-        }
-    }
-    
-    public Color getColorForToken(String tokenType, Color defaultColor)
-    {
-        Color c= Color.black;
-
-        if( p != null)
-        {
-            String s= p.getProperty("token."+tokenType);
-            if(s != null){
-                c= new Color(Integer.parseInt(s.substring(0,2),16),
-                        Integer.parseInt(s.substring(2,4),16),
-                        Integer.parseInt(s.substring(4,6),16));
-            }
-            else {
-                c= defaultColor;
-                setColorForToken(tokenType,c);
-            }
-        }
-
-        return c;
+    public void setFont(Font f) {
+        p.setProperty("font.name", f.getFamily());
+        p.setProperty("font.size", "" + f.getSize());
+        save();
     }
 
-    public void setColorForToken(String tokenType, Color c)
-    {
-        if( p != null)
-        {
-            p.setProperty("token."+tokenType, Integer.toHexString(c.getRGB()).substring(2));
-            save();
+    public Color getColorForToken(String tokenType, Color defaultColor) {
+        String s = p.getProperty("token." + tokenType);
+        if (s != null) {
+            return new Color(Integer.parseInt(s, 16));
         }
-    }
-    
-    public synchronized NumberFormat getNumberFormat()
-    {
-        String key= null;
 
-        if( p != null)
-        {
-            key= p.getProperty( "DecimalFormat","#.#######");
-        }
+        setColorForToken(tokenType, defaultColor);
+        return defaultColor;
+    }
+
+    public void setColorForToken(String tokenType, Color c) {
+        p.setProperty("token." + tokenType, Integer.toHexString(c.getRGB()).substring(2));
+        save();
+    }
+
+    public Color getDefaultBackgroundColor() {
+        return getColorForToken("BACKGROUND", Color.white);
+    }
+
+    public synchronized NumberFormat getNumberFormat() {
+        String key = p.getProperty("DecimalFormat", "#.#######");
 
         return new DecimalFormat(key);
     }
 
-    public static Config getInstance()
-    {
-        if (instance == null)
-        {
-            instance = new Config();
-        }
-
+    public static Config getInstance() {
         return instance;
     }
 
-    private void init()
-    {
-        path= System.getProperties().getProperty( "user.home");
-
-        path= path + "/.studioforkdb";
-
-        File f= new File( path);
-
-        if( ! f.exists())
-        {
-            if( !f.mkdir())
-            {
-                // error creating dir
+    private void init() {
+        Path file = Paths.get(FILENAME);
+        Path dir = file.getParent();
+        if (Files.notExists(dir)) {
+            try {
+                Files.createDirectories(dir);
+            } catch (IOException e) {
+                System.err.println("Can't create configuration folder: " + PATH);
             }
+            return;
         }
 
-        absoluteFilename= path + "/" + filename;
-
-        String candidate= absoluteFilename;
-
-        p = new Properties();
-
-        boolean finished= false;
-
-        while( !finished)
-        {
-            FileInputStream in = null;
-
-            try
-            {
-                in = new FileInputStream(candidate);
-
-                try
-                {
-                    p.load(in);
-                    String v= p.getProperty( "version");
-                    if( (v == null) || (!version.equals( v)))
-                    {
-                        p.clear();
-                    }
-                }
-                catch (IOException e)
-                {
-                }
-                finally
-                {
-                    finished= true;
-                }
-            }
-            catch (FileNotFoundException e)
-            {
-                if( candidate.equals( absoluteFilename))
-                {
-                    candidate= filename;
-                }
-                else {
-                    finished= true;
-                }
-            }
-            finally
-            {
-                try
-                {
-                    if (in != null)
-                    {
-                        in.close();
-                    }
-                }
-                catch (IOException e)
-                {
-                }
-            }
+        try {
+            InputStream in = Files.newInputStream(file);
+            p.load(in);
+            in.close();
+        } catch (IOException e) {
+            System.err.println("Cant't read configuration from file " + FILENAME);
+            e.printStackTrace(System.err);
         }
     }
 
 
-    public void save()
-    {
-        FileOutputStream out = null;
-        try
-        {
-            out = new FileOutputStream(absoluteFilename);
-            try
-            {
-                p.put( "version", version);
-                p.store(out, "Auto-generated by Studio for kdb+");
-            }
-            catch (IOException e)
-            {
-                e.printStackTrace();  //To change body of catch statement use Options | File Templates.
-            }
-        }
-        catch (FileNotFoundException e)
-        {
-            e.printStackTrace();  //To change body of catch statement use Options | File Templates.
-        }
-        finally
-        {
-            try
-            {
-                if (out != null)
-                {
-                    out.close();
-                }
-            }
-            catch (IOException e)
-            {
-                e.printStackTrace();  //To change body of catch statement use Options | File Templates.
-            }
+    public void save() {
+        try {
+            OutputStream out = new FileOutputStream(FILENAME);
+            p.put("version", VERSION);
+            p.store(out, "Auto-generated by Studio for kdb+");
+            out.close();
+        } catch (IOException e) {
+            System.err.println("Can't save configuration to " + FILENAME);
+            e.printStackTrace(System.err);  //To change body of catch statement use Options | File Templates.
         }
     }
 
-    public String[] getQKeywords()
-    {
-        String key= null;
-
-        if( p != null)
-        {
-            key= p.getProperty( "qkeywords");
-        }
-
-        Vector keywords= new Vector();
-
-        if( key != null)
-        {
-            StringTokenizer t= new StringTokenizer( key, ",");
-            while( t.hasMoreTokens())
-            {
-                String token= t.nextToken().trim();
-
-                if( token.length() > 0)
-                {
-                    if( ! keywords.contains( token))
-                    {
-                        keywords.add(token);
-                    }
-                }
-            }
-        }
-
-        return (String []) keywords.toArray( new String[0]);
+    // "".split(",") return {""}; we need to get zero length array
+    private String[] split(String str) {
+        str = str.trim();
+        if (str.length() == 0) return new String[0];
+        return str.split(",");
     }
 
-    public String getLRUServer()
-    {
-        String key= null;
-
-        if( p != null)
-        {
-            key= p.getProperty( "lruServer");
-        }
-
-        return key;
+    public String[] getQKeywords() {
+        String key = p.getProperty("qkeywords", "");
+        return split(key);
     }
 
-    public void setLRUServer(Server s)
-    {
-        if( s != null)
-        {
-            if( p != null)
-            {
-                p.put("lruServer", s.getName());
-            }
-
-            save();
-        }
+    public String getLRUServer() {
+        return p.getProperty("lruServer");
     }
 
+    public void setLRUServer(Server s) {
+        if (s == null) return; // May be it should be an exception ?
 
-    public void saveQKeywords( String [] keywords)
-    {
-        StringBuffer key= new StringBuffer();
-
-        for( int i=0; i < keywords.length; i++)
-        {
-            if( i > 0)
-            {
-                key.append( ",");
-            }
-
-            key.append( keywords[i].trim());
-        }
-
-        if( p != null)
-        {
-            p.put("qkeywords", key.toString());
-        }
-
+        p.put("lruServer", s.getName());
         save();
     }
-    
-    public void setAcceptedLicense(Date d)
-    {
+
+
+    public void saveQKeywords(String[] keywords) {
+        p.put("qkeywords", String.join(",",keywords));
+        save();
+    }
+
+    public void setAcceptedLicense(Date d) {
         p.put("licenseAccepted", d.toString());
         save();
     }
 
-    public boolean getAcceptedLicense()
-    {
-        String s=(String) p.get("licenseAccepted");
-        if(s == null)
-            return false;
-        if( s.length()==0)
-            return false;
-        
-        if(Lm.buildDate.after(new Date(s)))
-            return false;
-        
-        return true;
-    }
-    
-    public int getOffset( Server server)
-    {
-        if( server != null)
-        {
-            String name= server.getName();
-            Server [] servers= getServers();
+    public int getOffset(Server server) {
+        if (server == null) return -1; // or an exception should be raised?
 
-            for( int i= 0; i < servers.length; i++)
-            {
-                if( name.equals( servers[i].getName()))
-                {
-                    return i;
-                }
-            }
-        }
-
-        return -1;
+        return Arrays.asList(getServers()).indexOf(server);
     }
 
-    public String [] getMRUFiles()
-    {
-        String mru= null;
-
-        if( p != null)
-        {
-            mru= p.getProperty( "mrufiles");
-        }
-
-        Vector mruFiles= new Vector();
-
-        if( mru != null)
-        {
-            StringTokenizer t= new StringTokenizer( mru, ",");
-            while( t.hasMoreTokens())
-            {
-                String token= t.nextToken().trim();
-
-                if( token.length() > 0)
-                {
-                    if( ! mruFiles.contains( token))
-                    {
-                        mruFiles.add(token);
-                    }
-                }
-            }
-        }
-
-        return (String []) mruFiles.toArray( new String[0]);
+    public String[] getMRUFiles() {
+        String mru = p.getProperty("mrufiles", "");
+        return split(mru);
     }
 
 
-    public void saveMRUFiles( String [] mruFiles)
-    {
-        StringBuffer mru= new StringBuffer();
-
-        for( int i=0; i < (mruFiles.length>9?9:mruFiles.length); i++)
-        {
-            if( i > 0)
-            {
-                mru.append( ",");
-            }
-
-            mru.append( mruFiles[i].trim());
-        }
-
-        if( p != null)
-        {
-            p.put("mrufiles", mru.toString());
-        }
-
+    public void saveMRUFiles(String[] mruFiles) {
+        String value = Stream.of(mruFiles).limit(9).collect(Collectors.joining(","));
+        p.put("mrufiles", value);
         save();
     }
 
-    public String getLookAndFeel()
-    {
-        String lf= null;
-
-        if( p != null)
-        {
-            lf= p.getProperty( "lookandfeel");
-        }
-
-        return lf;
+    public String getLookAndFeel() {
+        return p.getProperty("lookandfeel");
     }
 
-    public void setLookAndFeel( String lf)
-    {
-        if( p != null)
-        {
-            p.put("lookandfeel", lf);
-        }
-
+    public void setLookAndFeel(String lf) {
+        p.put("lookandfeel", lf);
         save();
     }
 
-    public Server getServer( String server)
-    {
-        Server [] servers= getServers();
-        for( int i= 0; i < servers.length; i++)
-        {
-            if( server.equals( servers[i].getName()))
-            {
-                return servers[i];
-            }
-        }
-
-        return null;
+    public List<String> getServerNames() {
+        return Arrays.asList(split(p.getProperty("Servers")));
     }
 
-    public String[] getServerNames()
-    {
-        Server [] servers= getServers();
-        String [] names= new String[ servers.length];
-        for( int i=0;i<servers.length;i++)
-        {
-            names[i]=servers[i].getName();
-        }
-
-        return names;
+    private void setServerNames(List<String> names) {
+        p.setProperty("Servers", String.join(",",names));
+        save();
     }
 
-    public Server[] getServers()
-    {
-        ArrayList list = new ArrayList();
-
-        String servers = p.getProperty("Servers");
-
-        if (servers != null)
-        {
-            StringTokenizer t = new StringTokenizer(servers, ",");
-
-            while (t.hasMoreTokens())
-            {
-                String name = t.nextToken().trim();
-
-                String host = p.getProperty( "server."+name + "." + "host");
-                int port = Integer.parseInt( p.getProperty( "server."+name + "." + "port", "-1"));
-                String username = p.getProperty( "server."+name + "." + "user");
-                String password = p.getProperty( "server."+name + "." + "password");
-                String backgroundColor= p.getProperty( "server."+name + "." + "backgroundColor", "FFFFFF");
-                String authenticationMechanism = p.getProperty( "server."+name + "." + "authenticationMechanism",new DefaultAuthenticationMechanism().getMechanismName());
-                boolean useTLS=Boolean.parseBoolean(p.getProperty("server."+name+"."+"useTLS", "false"));
-                Color c= new Color(Integer.parseInt(backgroundColor.substring(0,2),16),
-                        Integer.parseInt(backgroundColor.substring(2,4),16),
-                        Integer.parseInt(backgroundColor.substring(4,6),16));
-                if( (host != null) || ( port > 0))
-                {
-                    Server server = new Server(name, host, port, username, password,c, authenticationMechanism,useTLS);
-                    list.add(server);
-                }
-            }
-        }
-
-        return (Server[]) list.toArray(new Server[0]);
+    public Server[] getServers() {
+        return getServerNames().stream()
+                .map(name->getServer(name))
+                .toArray(Server[]::new);
     }
 
-    public void removeServer(Server server)
-    {
-        Server [] servers=getServers();
+    public Server getServer(String name) {
+        String host = p.getProperty("server." + name + ".host");
+        int port = Integer.parseInt(p.getProperty("server." + name + ".port", "-1"));
+        String username = p.getProperty("server." + name + ".user");
+        String password = p.getProperty("server." + name + ".password");
+        String backgroundColor = p.getProperty("server." + name + ".backgroundColor", "FFFFFF");
+        String authenticationMechanism = p.getProperty("server." + name + ".authenticationMechanism", DefaultAuthenticationMechanism.NAME);
+        boolean useTLS = Boolean.parseBoolean(p.getProperty("server." + name + ".useTLS", "false"));
+        Color c = new Color(Integer.parseInt(backgroundColor, 16));
+        return new Server(name, host, port, username, password, c, authenticationMechanism, useTLS);
 
-        ArrayList l= new ArrayList();
-        for( int i= 0; i < servers.length; i ++)
-        {
-            if( ! server.getName().equals( servers[i].getName()))
-            {
-                l.add( servers[i]);
-            }
-        }
-
-        p.remove( "server."+server.getName()+"."+"host");
-        p.remove( "server."+server.getName()+"."+"port");
-        p.remove( "server."+server.getName()+"."+"k4");
-        p.remove( "server."+server.getName()+"."+"user");
-        p.remove( "server."+server.getName()+"."+"password");
-        p.remove( "server."+server.getName()+ "." + "backgroundColor");
-        p.remove( "server."+server.getName()+ "." + "authenticationMechanism");
-        p.remove( "server."+server.getName()+ "." + "useTLS");
-
-        setServers( (Server []) l.toArray( new Server[0]));
     }
 
-    public void saveServer(Server server)
-    {
-        Server [] servers=getServers();
-
-        ArrayList l= new ArrayList();
-        for( int i= 0; i < servers.length; i ++)
-        {
-            if( ! server.getName().equals( servers[i].getName()))
-            {
-                l.add( servers[i]);
-            }
-            else {
-                l.add( server);
-            }
-        }
-
-        setServers( (Server []) l.toArray( new Server[0]));
-    }
-
-    private void setServerDetails( Server server)
-    {
+    public void removeServer(Server server) {
         String name = server.getName();
+        p.remove("server." + name + ".host");
+        p.remove("server." + name + ".port");
+        p.remove("server." + name + ".user");
+        p.remove("server." + name + ".password");
+        p.remove("server." + name + ".backgroundColor");
+        p.remove("server." + name + ".authenticationMechanism");
+        p.remove("server." + name + ".useTLS");
 
-        p.setProperty( "server."+name + "." + "host", server.getHost());
-        p.setProperty( "server."+name + "." + "port", "" + server.getPort());
-        p.setProperty( "server."+name + "." + "user", "" + server.getUsername());
-        p.setProperty( "server."+name + "." + "password", "" + server.getPassword());
-        p.setProperty( "server."+name + "." + "backgroundColor", "" + Integer.toHexString(server.getBackgroundColor().getRGB()).substring(2));
-        p.setProperty( "server."+name + "." + "authenticationMechanism", server.getAuthenticationMechanism());
-        p.setProperty( "server."+name + "." + "useTLS", ""+server.getUseTLS());
+        List<String> list = getServerNames();
+        list.remove(name);
+        setServerNames(list);
     }
 
-    public void addServer(Server server)
-    {
-        setServerDetails( server);
-
-        List serverNames= new ArrayList();
-
-        String servers = p.getProperty("Servers", "");
-
-        boolean found = false;
-
-        StringTokenizer t = new StringTokenizer(servers, ",");
-
-        while (t.hasMoreTokens())
-        {
-            String name = t.nextToken().trim();
-            serverNames.add( name);
+    private void setServerDetails(Server server) {
+        String name = server.getName();
+        if (name.contains(",")) {
+            throw new IllegalArgumentException("Server name can't contains ,");
         }
+        p.setProperty("server." + name + ".host", server.getHost());
+        p.setProperty("server." + name + ".port", "" + server.getPort());
+        p.setProperty("server." + name + ".user", "" + server.getUsername());
+        p.setProperty("server." + name + ".password", "" + server.getPassword());
+        p.setProperty("server." + name + ".backgroundColor", "" + Integer.toHexString(server.getBackgroundColor().getRGB()).substring(2));
+        p.setProperty("server." + name + ".authenticationMechanism", server.getAuthenticationMechanism());
+        p.setProperty("server." + name + ".useTLS", "" + server.getUseTLS());
+    }
 
-        if( !serverNames.contains( server.getName()))
-        {
-            serverNames.add( server.getName());
-            Collections.sort( serverNames);
+    public void addServer(Server server) {
+        setServerDetails(server);
 
-            Iterator i= serverNames.iterator();
-
-            StringBuffer s= new StringBuffer();
-
-            while( i.hasNext())
-            {
-                s.append( (String) i.next());
-                if( i.hasNext())
-                {
-                    s.append( ",");
-                }
-            }
-
-            p.setProperty("Servers", s.toString());
+        String name = server.getName();
+        List<String> list = Stream.of(getServers()).map(s->s.getName()).collect(Collectors.toList());
+        if (! list.contains(name)) {
+            list.add(name);
         }
-
+        Collections.sort(list);
+        p.setProperty("Servers",String.join(",", list));
         save();
     }
 
-    public void setServers(Server[] servers)
-    {
-        String names = "";
+    public void setServers(Server[] servers) {
+        Stream.of(servers).forEach(server -> setServerDetails(server));
+        setServerNames(Stream.of(servers).map(s->s.getName()).collect(Collectors.toList()));
+    }
 
-        for (int i = 0; i < servers.length; i++)
-        {
-            setServerDetails( servers[i]);
+    public Credentials getDefaultCredentials(String authenticationMechanism) {
+        String user = p.getProperty("auth." + authenticationMechanism + ".user", "");
+        String password = p.getProperty("auth." + authenticationMechanism + ".password", "");
+        return new Credentials(user, password);
+    }
 
-            if (i > 0)
-            {
-                names += ",";
-            }
+    public void setDefaultCredentials(String authenticationMechanism, Credentials credentials) {
+        p.setProperty("auth." + authenticationMechanism + ".user", credentials.getUsername());
+        p.setProperty("auth." + authenticationMechanism + ".password", credentials.getPassword());
+        save();
+    }
 
-            names += servers[i].getName().trim();
-        }
+    public String getDefaultAuthMechanism() {
+        return p.getProperty("auth", DefaultAuthenticationMechanism.NAME);
+    }
 
-        p.setProperty("Servers", names);
-
+    public void setDefaultAuthMechanism(String authMechanism) {
+        p.setProperty("auth", authMechanism);
         save();
     }
 }
