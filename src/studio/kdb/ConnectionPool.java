@@ -87,19 +87,7 @@ public class ConnectionPool {
                 else
                     c = new kx.c(s.getHost(),s.getPort(),"",s.getUseTLS());
             }
-            catch (IOException ex) {
-            }
-            catch (ClassNotFoundException ex) {
-            }
-            catch (InstantiationException ex) {
-            }
-            catch (IllegalAccessException ex) {
-            }
-            catch (NoSuchMethodException ex) {
-            }
-            catch (IllegalArgumentException ex) {
-            }
-            catch (InvocationTargetException ex) {
+            catch (InstantiationException | IllegalAccessException | IllegalArgumentException ex) {
             }
         else
             list.remove(c);

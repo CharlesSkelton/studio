@@ -38,37 +38,13 @@ public class ServerForm extends EscapeDialog {
         jCheckBox2.setSelected(s.getUseTLS());
         DefaultComboBoxModel dcbm= (DefaultComboBoxModel)authenticationMechanism.getModel();
         String [] am;
-        try {
-            am = AuthenticationManager.getInstance().getAuthenticationMechanisms();
-            for(int i= 0;i < am.length; i++)
-            {
-                dcbm.addElement(am[i]);
-                if(s.getAuthenticationMechanism().equals(am[i]))
-                    dcbm.setSelectedItem(am[i]);
-            }
+        am = AuthenticationManager.getInstance().getAuthenticationMechanisms();
+        for(int i= 0;i < am.length; i++) {
+            dcbm.addElement(am[i]);
+            if(s.getAuthenticationMechanism().equals(am[i]))
+                dcbm.setSelectedItem(am[i]);
         }
-        catch (IOException ex) {
-            ex.printStackTrace();
-        }
-        catch (ClassNotFoundException ex) {
-            ex.printStackTrace();
-        }
-        catch (InstantiationException ex) {
-            ex.printStackTrace();
-        }
-        catch (IllegalAccessException ex) {
-            ex.printStackTrace();
-        }
-        catch (NoSuchMethodException ex) {
-            ex.printStackTrace();
-        }
-        catch (IllegalArgumentException ex) {
-            ex.printStackTrace();
-        }
-        catch (InvocationTargetException ex) {
-            ex.printStackTrace();
-        }
-        
+
         logicalName.setToolTipText("The logical name for the server");
         hostname.setToolTipText("The hostname or ip address for the server");
         port.setToolTipText("The port for the server");

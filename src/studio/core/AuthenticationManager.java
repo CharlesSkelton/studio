@@ -3,8 +3,6 @@ package studio.core;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.net.JarURLConnection;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -28,7 +26,7 @@ public class AuthenticationManager {
         return (String[]) s.toArray(new String[0]);
     }
 
-    public synchronized static AuthenticationManager getInstance() throws IOException,ClassNotFoundException,InstantiationException,IllegalAccessException,NoSuchMethodException,IllegalArgumentException,InvocationTargetException {
+    public synchronized static AuthenticationManager getInstance() {
         if (instance == null)
             instance = new AuthenticationManager();
 
@@ -38,7 +36,7 @@ public class AuthenticationManager {
          */ return instance;
     }
 
-    private AuthenticationManager() throws IOException,ClassNotFoundException,InstantiationException,IllegalAccessException,NoSuchMethodException,IllegalArgumentException,InvocationTargetException {
+    private AuthenticationManager() {
         DefaultAuthenticationMechanism dam = new DefaultAuthenticationMechanism();
         classMap.put(dam.getMechanismName(),dam.getClass());
 
@@ -61,30 +59,31 @@ public class AuthenticationManager {
         if (children != null)
             for (int child = 0;child < children.length;child++) {
                 String filename = dir.getAbsolutePath() + "/" + children[child];
+                try {
+                    URL url = new URL("jar:file:" + filename + "/!/");
+                    JarURLConnection conn = (JarURLConnection) url.openConnection();
+                    JarFile jarFile = conn.getJarFile();
 
-                URL url = new URL("jar:file:" + filename + "/!/");
-                JarURLConnection conn = (JarURLConnection) url.openConnection();
-                JarFile jarFile = conn.getJarFile();
-
-                Enumeration e = jarFile.entries();
-                while (e.hasMoreElements()) {
-                    JarEntry entry = (JarEntry) e.nextElement();
-                    String name = entry.getName();
-                    if (!entry.isDirectory() && name.endsWith(".class")) {
-                        URLClassLoader loader = new URLClassLoader(new URL[]{url});
-                        String externalName = name.substring(0,name.indexOf('.')).replace('/','.');
-                        Class c = loader.loadClass(externalName);
-                        Class[] interfaces = c.getInterfaces();
-                        for (int i = 0;i < interfaces.length;i++)
-                            if (IAuthenticationMechanism.class == interfaces[0]) {
-                                Method addURL = URLClassLoader.class.getDeclaredMethod("addURL",new Class[]{URL.class});
-                                addURL.setAccessible(true);
-                                ClassLoader cl = ClassLoader.getSystemClassLoader();
-                                addURL.invoke(cl,new Object[]{url});
-                                IAuthenticationMechanism am = (IAuthenticationMechanism) c.newInstance();
-                                classMap.put(am.getMechanismName(),c);
+                    Enumeration e = jarFile.entries();
+                    while (e.hasMoreElements()) {
+                        JarEntry entry = (JarEntry) e.nextElement();
+                        String name = entry.getName();
+                        if (!entry.isDirectory() && name.endsWith(".class")) {
+                            URLClassLoader loader = new URLClassLoader(new URL[]{url});
+                            String externalName = name.substring(0, name.indexOf('.')).replace('/', '.');
+                            try {
+                                Class c = loader.loadClass(externalName);
+                                if (IAuthenticationMechanism.class.isAssignableFrom(c)) {
+                                    IAuthenticationMechanism am = (IAuthenticationMechanism) c.newInstance();
+                                    classMap.put(am.getMechanismName(), c);
+                                }
+                            } catch (ClassNotFoundException | IllegalAccessException | InstantiationException | Error e1) {
                             }
+                        }
                     }
+                } catch (IOException e) {
+                    System.err.println("Error loading plugin: " + filename);
+                    e.printStackTrace(System.err);
                 }
             }
     }
