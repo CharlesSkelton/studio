@@ -127,7 +127,7 @@ public class Config {
     }
 
     public String getLRUServer() {
-        return p.getProperty("lruServer");
+        return p.getProperty("lruServer", "");
     }
 
     public void setLRUServer(Server s) {
@@ -146,12 +146,6 @@ public class Config {
     public void setAcceptedLicense(Date d) {
         p.put("licenseAccepted", d.toString());
         save();
-    }
-
-    public int getOffset(Server server) {
-        if (server == null) return -1; // or an exception should be raised?
-
-        return Arrays.asList(getServers()).indexOf(server);
     }
 
     public String[] getMRUFiles() {
@@ -176,7 +170,7 @@ public class Config {
     }
 
     public List<String> getServerNames() {
-        return Arrays.asList(split(p.getProperty("Servers")));
+        return Arrays.asList(split(p.getProperty("Servers", "")));
     }
 
     private void setServerNames(List<String> names) {
@@ -188,6 +182,47 @@ public class Config {
         return getServerNames().stream()
                 .map(name->getServer(name))
                 .toArray(Server[]::new);
+    }
+
+
+    // Resolve or create a new server by connection string.
+    // Accept possible various connectionString such as:
+    // `:host:port:user:password
+    // host:port
+    // If user and password are not found, defaults form default AuthenticationMechanism are used
+    public Server getServerByConnectionString(String connectionString) {
+        connectionString = connectionString.trim();
+        if (connectionString.startsWith("`")) connectionString = connectionString.substring(1);
+        if (connectionString.startsWith(":")) connectionString = connectionString.substring(1);
+
+        String[] nodes = connectionString.split(":");
+        if (nodes.length < 2) {
+            throw new IllegalArgumentException("Wrong format of connection string");
+        }
+
+        String host = nodes[0];
+        int port = Integer.parseInt(nodes[1]); // could throw NumberFormatException
+
+        String auth = getDefaultAuthMechanism();
+        String user, password;
+        if (nodes.length == 2) {
+            Credentials credentials = getDefaultCredentials(auth);
+            user = credentials.getUsername();
+            password = credentials.getPassword();
+        } else {
+            user = nodes[2];
+            password = nodes.length > 3 ? Stream.of(nodes).skip(3).collect(Collectors.joining(":")) : "";
+        }
+
+        Color bgColor = Config.getInstance().getDefaultBackgroundColor();
+
+        for (Server s: getServers()) {
+            if (s.getHost().equals(host) && s.getPort() == port && s.getUsername().equals(user) && s.getPassword().equals(password)) {
+                return s;
+            }
+        }
+
+        return new Server("", host, port, user, password, bgColor, auth, false);
     }
 
     public Server getServer(String name) {
@@ -220,6 +255,9 @@ public class Config {
 
     private void setServerDetails(Server server) {
         String name = server.getName();
+        if (name.trim().length() == 0) {
+            throw new IllegalArgumentException("Server name can't be empty");
+        }
         if (name.contains(",")) {
             throw new IllegalArgumentException("Server name can't contains ,");
         }

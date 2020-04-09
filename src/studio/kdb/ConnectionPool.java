@@ -3,78 +3,48 @@ package studio.kdb;
 import studio.core.AuthenticationManager;
 import studio.core.Credentials;
 import studio.core.IAuthenticationMechanism;
-import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.io.IOException;
 import kx.c.K4Exception;
 
 public class ConnectionPool {
-    private static ConnectionPool instance;
-    private Map freeMap = new HashMap();
-    private Map busyMap = new HashMap();
+    private final static ConnectionPool instance = new ConnectionPool();
+    private Map<Server,List<kx.c>> freeMap = new HashMap<>();
+    private Map<Server,List<kx.c>> busyMap = new HashMap<>();
 
-    private ConnectionPool() {
-    }
-
-    public synchronized void purge(Server s) {
-        List list = (List) freeMap.get(s.toString());
-
-        if (list != null) {
-            Iterator i = list.iterator();
-            while (i.hasNext()) {
-                kx.c c = (kx.c) i.next();
-                c.close();
-            }
-        }
-
-        busyMap.put(s.toString(),new LinkedList());
-
-        if (list != null)
-            list.clear();
-
-    //    primeConnectionPool();
-    }
-
-    public static synchronized ConnectionPool getInstance() {
-        if (instance == null)
-            instance = new ConnectionPool();
-
+    public static ConnectionPool getInstance() {
         return instance;
     }
 
-    public synchronized kx.c leaseConnection(Server s) // throws IOException, c.K4Exception
-    {
-        kx.c c = null;
+    private ConnectionPool() {}
 
-        List list = (List) freeMap.get(s.toString());
-        List dead = new LinkedList();
-
-        if (list != null) {
-            Iterator i = list.iterator();
-            while (i.hasNext()) {
-                c = (kx.c) i.next();
-
-                if (c.isClosed()) {
-//                    i.remove();
-                    dead.add(c);
-                    c = null;
-                }
-                else
-                    break;
-            }
+    public synchronized void purge(Server s) {
+        List<kx.c> list = freeMap.computeIfAbsent(s, k -> new LinkedList<>());
+        for (kx.c c: list) {
+            c.close();
         }
-        else {
-            list = new LinkedList();
-            freeMap.put(s.toString(),list);
+        list.clear();
+        busyMap.put(s,new LinkedList<>());
+    }
+
+    public synchronized kx.c leaseConnection(Server s) throws IOException, K4Exception {
+        List<kx.c> list =  freeMap.computeIfAbsent(s, k -> new LinkedList<>());
+        List<kx.c> dead = new LinkedList<>();
+
+        kx.c c = null;
+        for (kx.c value : list) {
+            if (!value.isClosed()) {
+                c = value;
+                break;
+            }
+            dead.add(c);
         }
 
         list.removeAll(dead);
 
-        if (c == null)
+        if (c == null) {
             try {
                 Class clazz = AuthenticationManager.getInstance().lookup(s.getAuthenticationMechanism());
-                if (clazz == null) {
-                }
                 IAuthenticationMechanism authenticationMechanism = (IAuthenticationMechanism) clazz.newInstance();
 
                 authenticationMechanism.setProperties(s.getAsProperties());
@@ -82,40 +52,36 @@ public class ConnectionPool {
                 if (credentials.getUsername().length() > 0) {
                     String p = credentials.getPassword();
 
-                    c = new kx.c(s.getHost(),s.getPort(),credentials.getUsername() + ((p.length() == 0) ? "" : ":" + p),s.getUseTLS());
-                }
-                else
-                    c = new kx.c(s.getHost(),s.getPort(),"",s.getUseTLS());
+                    c = new kx.c(s.getHost(), s.getPort(), credentials.getUsername() + ((p.length() == 0) ? "" : ":" + p), s.getUseTLS());
+                } else
+                    c = new kx.c(s.getHost(), s.getPort(), "", s.getUseTLS());
+            } catch (InstantiationException | IllegalAccessException | IllegalArgumentException ex) {
+                System.err.println("Failed to initialize connection: " + ex);
+                ex.printStackTrace(System.err);
+                return null;
             }
-            catch (InstantiationException | IllegalAccessException | IllegalArgumentException ex) {
-            }
-        else
+        } else
             list.remove(c);
 
-        list = (List) busyMap.get(s.toString());
-        if (list == null) {
-            list = new LinkedList();
-            busyMap.put(s.toString(),list);
-        }
-
+        list = busyMap.computeIfAbsent(s, k -> new LinkedList<>());
         list.add(c);
 
+        if (c.isClosed())
+            c.reconnect(true);
         return c;
     }
 
     public synchronized void freeConnection(Server s,kx.c c) {
-        if (c == null)
-            return;
+        if (c == null) return;
 
-        List list = (List) busyMap.get(s.toString());
+        List<kx.c> list = busyMap.computeIfAbsent(s, k -> new LinkedList<>());
 
         // If c not in our busy list it has been purged, so close it
-        if (list != null)
-            if (!list.remove(c))
-                c.close();
+        if (!list.remove(c))
+            c.close();
 
         if (!c.isClosed()) {
-            list = (List) freeMap.get(s.toString());
+            list = freeMap.get(s);
             if (list == null)
                 c.close();
             else
@@ -123,8 +89,4 @@ public class ConnectionPool {
         }
     }
 
-    public void checkConnected(kx.c c) throws IOException,K4Exception {
-        if (c.isClosed())
-            c.reconnect(true);
-    }
 }

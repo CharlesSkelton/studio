@@ -51,6 +51,9 @@ public class StudioPanel extends JPanel implements Observer,WindowListener {
         Settings.addInitializer(new QSettingsInitializer());
         Settings.reset();
     }
+
+    private JComboBox<String> comboServer;
+    private JTextField txtServer;
     private JTable table;
     private String exportFilename;
     private String lastQuery = null;
@@ -1000,10 +1003,9 @@ public class StudioPanel extends JPanel implements Observer,WindowListener {
             Utilities.getEditorUI(textArea).getComponent().setBackground(server.getBackgroundColor());
         }
 
-        if (server != null) {
-            new ReloadQKeywords(server);
-            Config.getInstance().setLRUServer(server);
-        }
+        new ReloadQKeywords(server);
+        Config.getInstance().setLRUServer(server);
+
         refreshFrameTitle();
         windowListMonitor.fireMyEvent(new WindowListChangedEvent(this));
     }
@@ -1083,7 +1085,7 @@ public class StudioPanel extends JPanel implements Observer,WindowListener {
         };
 
         serverListAction = new UserAction(I18n.getString("ServerList"),
-                getImage(Config.imageBase2 + "blank.png"),
+                getImage(Config.imageBase + "text_tree.png"),
                 "Show sever list",
                 new Integer(KeyEvent.VK_L),
                 KeyStroke.getKeyStroke(KeyEvent.VK_L, menuShortcutKeyMask | Event.SHIFT_MASK) ) {
@@ -1627,71 +1629,77 @@ public class StudioPanel extends JPanel implements Observer,WindowListener {
         f.show();
     }
 
+    private void selectConnectionString() {
+        String connection = txtServer.getText().trim();
+        if (connection.length() == 0) return;
+        if (server != null && server.getConnectionString(false).equals(connection)) return;
+
+        try {
+            setServer(Config.getInstance().getServerByConnectionString(connection));
+
+            rebuildToolbar();
+            toolbar.validate();
+            toolbar.repaint();
+        } catch (IllegalArgumentException e) {
+            refreshConnection();
+        }
+    }
+
+    private void selectServerName() {
+        String selection = comboServer.getSelectedItem().toString();
+        if(! Config.getInstance().getServerNames().contains(selection)) return;
+
+        setServer(Config.getInstance().getServer(selection));
+        rebuildToolbar();
+        toolbar.validate();
+        toolbar.repaint();
+    }
+
+    private void refreshConnection() {
+        if (server == null) {
+            txtServer.setText("");
+            txtServer.setToolTipText("Select connection details");
+        } else {
+            txtServer.setText(server.getConnectionString(false));
+            txtServer.setToolTipText(server.getConnectionString(true));
+        }
+    }
+
+    private void toolbarAddServerSelection() {
+        List<String> names = Config.getInstance().getServerNames();
+        String name = server == null ? "" : server.getName();
+        if (!names.contains(name)) {
+            List<String> newNames = new ArrayList<>();
+            newNames.add(name);
+            newNames.addAll(names);
+            names = newNames;
+        }
+        comboServer = new JComboBox<>(names.toArray(new String[0]));
+        comboServer.setToolTipText("Select the server context");
+        comboServer.setSelectedItem(name);
+        comboServer.addActionListener(e->selectServerName());
+
+        txtServer = new JTextField();
+        txtServer.addActionListener(e -> selectConnectionString());
+        txtServer.addFocusListener(new FocusAdapter() {
+            @Override
+            public void focusLost(FocusEvent e) {
+                selectConnectionString();
+            }
+        });
+        refreshConnection();
+
+        toolbar.add(new JLabel(I18n.getString("Server")));
+        toolbar.add(comboServer);
+        toolbar.add(txtServer);
+        toolbar.add(serverListAction);
+        toolbar.addSeparator();
+    }
+
     private void rebuildToolbar() {
         if (toolbar != null) {
             toolbar.removeAll();
-
-            List<String> names = Config.getInstance().getServerNames();
-
-            if (names.size() > 0) {
-                toolbar.add(new JLabel(I18n.getString("Server")));
-
-                JComboBox combo = new JComboBox(names.toArray()) {
-                    
-                    public Dimension getMinimumSize() {
-                        return getPreferredSize();
-                    }
-
-                    
-                    public Dimension getMaximumSize() {
-                        return getPreferredSize();
-                    }
-                };
-
-                int offset = Config.getInstance().getOffset(server);
-
-                if (offset == -1) {
-                    Server[] servers = Config.getInstance().getServers();
-
-                    if (servers.length > 0)
-                        setServer(servers[0]);
-
-                    offset = 0;
-                }
-
-                combo.setSelectedIndex(offset);
-                combo.setToolTipText("Select the server context");
-
-                final Observer o = this;
-
-                ActionListener al = new ActionListener() {
-                    
-                    public void actionPerformed(ActionEvent e) {
-                        String selection = (String) ((JComboBox) e.getSource()).getSelectedItem();
-
-                        setServer(Config.getInstance().getServer(selection));
-
-                        //  setLanguage(Language.Q);
-
-                        SwingUtilities.invokeLater(new Runnable() {
-                            
-                                                   public void run() {
-                                                       rebuildToolbar();
-                                                       toolbar.validate();
-                                                       toolbar.repaint();
-                                                   }
-                                               });
-                    }
-                };
-
-                combo.addActionListener(al);
-
-                combo.setRequestFocusEnabled(false);
-
-                toolbar.add(combo);
-                toolbar.addSeparator();
-            }
-
+            toolbarAddServerSelection();
             if (server == null) {
                 addServerAction.setEnabled(true);
                 editServerAction.setEnabled(false);
@@ -1843,7 +1851,6 @@ public class StudioPanel extends JPanel implements Observer,WindowListener {
     }
 
     public StudioPanel(Server server,String filename) {
-        super(true);
 
         registerForMacOSXEvents();
 
@@ -1971,9 +1978,9 @@ public class StudioPanel extends JPanel implements Observer,WindowListener {
 
             Server s = null;
             String lruServer = Config.getInstance().getLRUServer();
-            if (lruServer != null)
+            if (Config.getInstance().getServerNames().contains(lruServer)){
                 s = Config.getInstance().getServer(lruServer);
-
+            }
             new StudioPanel(s,filename);
         }
         catch (Exception e) {
@@ -2164,7 +2171,6 @@ public class StudioPanel extends JPanel implements Observer,WindowListener {
                 try {
                     this.s = server;
                     c = ConnectionPool.getInstance().leaseConnection(s);
-                    ConnectionPool.getInstance().checkConnected(c);
                     c.setFrame(frame);
                     long startTime=System.currentTimeMillis();
                     c.k(new K.KCharacterVector(text));
@@ -2172,6 +2178,8 @@ public class StudioPanel extends JPanel implements Observer,WindowListener {
                     execTime=System.currentTimeMillis()-startTime;
                 }
                 catch (Throwable e) {
+                    System.err.println("Error occurred during query execution: " + e);
+                    e.printStackTrace(System.err);
                     exception = e;
                 }
 

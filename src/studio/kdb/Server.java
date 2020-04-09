@@ -71,7 +71,19 @@ public class Server {
     @Override
     public boolean equals(Object obj) {
         if (! (obj instanceof Server)) return false;
-        return ((Server) obj).getName().equals(getName());
+        Server s = (Server) obj;
+        return s.name.equals(name)
+                && s.host.equals(host)
+                && s.port == port
+                && s.username.equals(username)
+                && s.password.equals(password)
+                && s.authenticationMechanism.equals(authenticationMechanism)
+                && s.useTLS == useTLS;
+    }
+
+    @Override
+    public int hashCode() {
+        return name.hashCode();
     }
 
     public Server(Server s) {
@@ -123,6 +135,15 @@ public class Server {
     public String toString() {
         return name;
     }
+
+    public String getConnectionString(boolean includeCreditional) {
+        String connection = "`:" + host + ":" + port;
+        if (! includeCreditional) return connection;
+
+        return connection + ":" + username + ":" + password;
+
+    }
+
     public boolean getUseTLS(){
       return useTLS;
     }
