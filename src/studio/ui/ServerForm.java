@@ -12,8 +12,6 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import javax.swing.*;
 
-import kx.c;
-
 import static javax.swing.GroupLayout.Alignment.*;
 import static javax.swing.GroupLayout.DEFAULT_SIZE;
 import static javax.swing.GroupLayout.PREFERRED_SIZE;
@@ -22,16 +20,9 @@ import static javax.swing.LayoutStyle.ComponentPlacement.RELATED;
 public class ServerForm extends EscapeDialog {
     private int result= DialogResult.CANCELLED;
     private Server s;
-    private JFrame frame;
 
-    public ServerForm(JFrame frame)
-    {
-        this(frame, new Server());
-    }
-    
-    public ServerForm(JFrame frame,Server server){
-        super(frame);
-        this.frame=frame;
+    public ServerForm(JFrame frame,String title, Server server){
+        super(frame, title, false);
         s=new Server(server);
         
         initComponents();

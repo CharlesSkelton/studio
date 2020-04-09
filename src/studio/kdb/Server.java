@@ -62,6 +62,12 @@ public class Server {
     public Server() {
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        if (! (obj instanceof Server)) return false;
+        return ((Server) obj).getName().equals(getName());
+    }
+
     public Server(Server s) {
         this.name = s.name;
         this.host = s.host;
