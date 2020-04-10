@@ -52,7 +52,6 @@ public class QCompletionQuery implements CompletionQuery
                      try
                      {
                          c=ConnectionPool.getInstance().leaseConnection(s);
-                         ConnectionPool.getInstance().checkConnected(c);
 
                          if(text.endsWith("."))
                          {

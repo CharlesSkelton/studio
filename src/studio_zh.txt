@@ -44,3 +44,4 @@ About=关于
 ConsoleView=控制台视图
 Table=表
 rows=行
+ServerList=服务器清单

@@ -1,6 +1,8 @@
 
 package studio.ui;
 
+import studio.core.Credentials;
+import studio.kdb.Config;
 import studio.kdb.Server;
 import studio.core.AuthenticationManager;
 import java.awt.Color;
@@ -12,28 +14,18 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import javax.swing.*;
 
-import kx.c;
-
 import static javax.swing.GroupLayout.Alignment.*;
 import static javax.swing.GroupLayout.DEFAULT_SIZE;
 import static javax.swing.GroupLayout.PREFERRED_SIZE;
 import static javax.swing.LayoutStyle.ComponentPlacement.RELATED;
 
 public class ServerForm extends EscapeDialog {
-    private int result= DialogResult.CANCELLED;
     private Server s;
-    private JFrame frame;
 
-    public ServerForm(JFrame frame)
-    {
-        this(frame, new Server());
-    }
-    
-    public ServerForm(JFrame frame,Server server){
-        super(frame);
-        this.frame=frame;
+    public ServerForm(JFrame frame,String title, Server server){
+        super(frame, title);
         s=new Server(server);
-        
+
         initComponents();
 
         logicalName.setText(s.getName());
@@ -47,37 +39,20 @@ public class ServerForm extends EscapeDialog {
         jCheckBox2.setSelected(s.getUseTLS());
         DefaultComboBoxModel dcbm= (DefaultComboBoxModel)authenticationMechanism.getModel();
         String [] am;
-        try {
-            am = AuthenticationManager.getInstance().getAuthenticationMechanisms();
-            for(int i= 0;i < am.length; i++)
-            {
-                dcbm.addElement(am[i]);
-                if(s.getAuthenticationMechanism().equals(am[i]))
-                    dcbm.setSelectedItem(am[i]);
-            }
+        am = AuthenticationManager.getInstance().getAuthenticationMechanisms();
+        for(int i= 0;i < am.length; i++) {
+            dcbm.addElement(am[i]);
+            if(s.getAuthenticationMechanism().equals(am[i]))
+                dcbm.setSelectedItem(am[i]);
         }
-        catch (IOException ex) {
-            ex.printStackTrace();
-        }
-        catch (ClassNotFoundException ex) {
-            ex.printStackTrace();
-        }
-        catch (InstantiationException ex) {
-            ex.printStackTrace();
-        }
-        catch (IllegalAccessException ex) {
-            ex.printStackTrace();
-        }
-        catch (NoSuchMethodException ex) {
-            ex.printStackTrace();
-        }
-        catch (IllegalArgumentException ex) {
-            ex.printStackTrace();
-        }
-        catch (InvocationTargetException ex) {
-            ex.printStackTrace();
-        }
-        
+
+        authenticationMechanism.addItemListener(e -> {
+            String auth = authenticationMechanism.getSelectedItem().toString();
+            Credentials credentials = Config.getInstance().getDefaultCredentials(auth);
+            username.setText(credentials.getUsername());
+            password.setText(credentials.getPassword());
+        });
+
         logicalName.setToolTipText("The logical name for the server");
         hostname.setToolTipText("The hostname or ip address for the server");
         port.setToolTipText("The port for the server");
@@ -345,16 +320,14 @@ public class ServerForm extends EscapeDialog {
                 }
             }
 */        }
-        dispose();
-        result= DialogResult.ACCEPTED;
+        accept();
     }//GEN-LAST:event_onOk
 
 
-    public int getResult(){return result;}
     public Server getServer(){return s;}
     
     private void onCancel(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_onCancel
-        dispose();
+        cancel();
     }//GEN-LAST:event_onCancel
 
     Color c;

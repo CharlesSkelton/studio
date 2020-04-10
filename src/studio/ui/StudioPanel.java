@@ -6,8 +6,12 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.*;
 import java.util.*;
+import java.util.List;
 import javax.swing.*;
 import static javax.swing.JSplitPane.VERTICAL_SPLIT;
+import static studio.ui.EscapeDialog.DialogResult.ACCEPTED;
+import static studio.ui.EscapeDialog.DialogResult.CANCELLED;
+
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.event.UndoableEditEvent;
@@ -22,6 +26,8 @@ import javax.swing.undo.UndoManager;
 import kx.c;
 import org.netbeans.editor.*;
 import org.netbeans.editor.Utilities;
+import studio.core.Credentials;
+import studio.kdb.ListModel;
 import studio.qeditor.QKit;
 import org.netbeans.editor.ext.ExtKit;
 import org.netbeans.editor.ext.ExtSettingsInitializer;
@@ -45,6 +51,9 @@ public class StudioPanel extends JPanel implements Observer,WindowListener {
         Settings.addInitializer(new QSettingsInitializer());
         Settings.reset();
     }
+
+    private JComboBox<String> comboServer;
+    private JTextField txtServer;
     private JTable table;
     private String exportFilename;
     private String lastQuery = null;
@@ -60,6 +69,7 @@ public class StudioPanel extends JPanel implements Observer,WindowListener {
     private UserAction openFileAction;
     private UserAction openInExcel;
     private UserAction codeKxComAction;
+    private UserAction serverListAction;
     private UserAction openFileInNewWindowAction;
     private UserAction saveFileAction;
     private UserAction saveAsFileAction;
@@ -79,6 +89,7 @@ public class StudioPanel extends JPanel implements Observer,WindowListener {
     private UserAction refreshAction;
     private UserAction aboutAction;
     private UserAction exitAction;
+    private UserAction settingsAction;
     private UserAction toggleDividerOrientationAction;
     private UserAction minMaxDividerAction;
     private UserAction editServerAction;
@@ -89,6 +100,8 @@ public class StudioPanel extends JPanel implements Observer,WindowListener {
     private JFrame frame;
     public static java.util.List windowList = Collections.synchronizedList(new LinkedList());
     private int menuShortcutKeyMask = java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
+
+    private final static int MAX_SERVERS_TO_CLONE = 20;
 
     public void refreshFrameTitle() {
         String s = (String) textArea.getDocument().getProperty("filename");
@@ -280,6 +293,7 @@ public class StudioPanel extends JPanel implements Observer,WindowListener {
         newFileAction.setEnabled(true);
         arrangeAllAction.setEnabled(true);
         openFileAction.setEnabled(true);
+        serverListAction.setEnabled(true);
         openFileInNewWindowAction.setEnabled(true);
         saveFileAction.setEnabled(true);
         saveAsFileAction.setEnabled(true);
@@ -294,6 +308,7 @@ public class StudioPanel extends JPanel implements Observer,WindowListener {
 //        helpAction.setEnabled(true);
         aboutAction.setEnabled(true);
         exitAction.setEnabled(true);
+        settingsAction.setEnabled(true);
     }
 
     private String getFilename() {
@@ -988,10 +1003,9 @@ public class StudioPanel extends JPanel implements Observer,WindowListener {
             Utilities.getEditorUI(textArea).getComponent().setBackground(server.getBackgroundColor());
         }
 
-        if (server != null) {
-            new ReloadQKeywords(server);
-            Config.getInstance().setLRUServer(server);
-        }
+        new ReloadQKeywords(server);
+        Config.getInstance().setLRUServer(server);
+
         refreshFrameTitle();
         windowListMonitor.fireMyEvent(new WindowListChangedEvent(this));
     }
@@ -1064,10 +1078,26 @@ public class StudioPanel extends JPanel implements Observer,WindowListener {
                                                    getImage(Config.imageBase2 + "blank.png"),
                                                    "Open a new window",
                                                    new Integer(KeyEvent.VK_N),
-                                                   null) {
+                                                   KeyStroke.getKeyStroke(KeyEvent.VK_N, menuShortcutKeyMask) ) {
             public void actionPerformed(ActionEvent e) {
                 new StudioPanel(server,null);
             }
+        };
+
+        serverListAction = new UserAction(I18n.getString("ServerList"),
+                getImage(Config.imageBase + "text_tree.png"),
+                "Show sever list",
+                new Integer(KeyEvent.VK_L),
+                KeyStroke.getKeyStroke(KeyEvent.VK_L, menuShortcutKeyMask | Event.SHIFT_MASK) ) {
+                        public void actionPerformed(ActionEvent e) {
+                            ServerList serverList = new ServerList(frame, Config.getInstance().getServers(), server);
+                            serverList.alignAndShow();
+                            Server selectedServer = serverList.getSelectedServer();
+                            if (selectedServer.equals(server)) return;
+
+                            setServer(selectedServer);
+                            rebuildToolbar();
+                        }
         };
 
         editServerAction = new UserAction(I18n.getString("Edit"),
@@ -1079,12 +1109,8 @@ public class StudioPanel extends JPanel implements Observer,WindowListener {
                 Server s = new Server(server);
 
                 EditServerForm f = new EditServerForm(frame,s);
-                f.setModal(true);
-                f.pack();
-                Util.centerChildOnParent(f,frame);
-                f.show();
-
-                if (f.getResult() == DialogResult.ACCEPTED) {
+                f.alignAndShow();
+                if (f.getResult() == ACCEPTED) {
                     if (stopAction.isEnabled())
                         stopAction.actionPerformed(e);
 
@@ -1110,12 +1136,8 @@ public class StudioPanel extends JPanel implements Observer,WindowListener {
                                          null) {
             public void actionPerformed(ActionEvent e) {
                 AddServerForm f = new AddServerForm(frame);
-                f.setModal(true);
-                f.pack();
-                Util.centerChildOnParent(f,frame);
-                f.show();
-
-                if (f.getResult() == DialogResult.ACCEPTED) {
+                f.alignAndShow();
+                if (f.getResult() == ACCEPTED) {
                     Server s = f.getServer();
                     Config.getInstance().addServer(s);
                     ConnectionPool.getInstance().purge(s);   //?
@@ -1292,6 +1314,17 @@ public class StudioPanel extends JPanel implements Observer,WindowListener {
             }
         };
 
+        settingsAction = new UserAction("Settings",
+                getImage(Config.imageBase2 + "blank.png"),
+                "Settings",
+                new Integer(KeyEvent.VK_S),
+                null) {
+
+            public void actionPerformed(ActionEvent e) {
+                settings();
+            }
+        };
+
         codeKxComAction = new UserAction("code.kx.com",
                                          Util.getImage(Config.imageBase2 + "text.png"),
                                          "Open code.kx.com",
@@ -1306,6 +1339,16 @@ public class StudioPanel extends JPanel implements Observer,WindowListener {
                     }
             }
         };
+    }
+
+    public void settings() {
+        SettingsDialog dialog = new SettingsDialog(frame);
+        dialog.alignAndShow();
+        if (dialog.getResult() == CANCELLED) return;
+
+        String auth = dialog.getDefaultAuthenticationMechanism();
+        Config.getInstance().setDefaultAuthMechanism(auth);
+        Config.getInstance().setDefaultCredentials(auth, new Credentials(dialog.getUser(), dialog.getPassword()));
     }
 
     public void about() {
@@ -1401,6 +1444,9 @@ public class StudioPanel extends JPanel implements Observer,WindowListener {
 
         menu.add(new JMenuItem(closeFileAction));
 
+        if (!MAC_OS_X) {
+            menu.add(new JMenuItem(settingsAction));
+        }
         menu.addSeparator();
 //        menu.add(new JMenuItem(importAction));
         menu.add(new JMenuItem(openInExcel));
@@ -1464,10 +1510,12 @@ public class StudioPanel extends JPanel implements Observer,WindowListener {
         if (servers.length > 0) {
             JMenu subMenu = new JMenu(I18n.getString("Clone"));
             subMenu.setIcon(Util.getImage(Config.imageBase2 + "data_copy.png"));
-           
+
+            int count = MAX_SERVERS_TO_CLONE;
             for (int i = 0;i < servers.length;i++) {
                 final Server s = servers[i];
-
+                if (!s.equals(server) && count <= 0) continue;
+                count--;
                 JMenuItem item = new JMenuItem(s.getName());
                 item.addActionListener(new ActionListener() {
                                         
@@ -1476,14 +1524,9 @@ public class StudioPanel extends JPanel implements Observer,WindowListener {
                                            clone.setName("Clone of " + clone.getName());
 
                                            EditServerForm f = new EditServerForm(frame,clone);
-                                           f.setModal(true);
-                                           f.pack();
-                                           Util.centerChildOnParent(f,frame);
-                                           //   f.setStartLocation(frame);
+                                           f.alignAndShow();
 
-                                           f.setVisible(true);
-
-                                           if (f.getResult() == DialogResult.ACCEPTED) {
+                                           if (f.getResult() == ACCEPTED) {
                                                clone = f.getServer();
                                                Config.getInstance().addServer(clone);
                                                //ebuildToolbar();
@@ -1517,6 +1560,7 @@ public class StudioPanel extends JPanel implements Observer,WindowListener {
         menu.add(new JMenuItem(toggleDividerOrientationAction));
         menu.add(new JMenuItem(openFileInNewWindowAction));
         menu.add(new JMenuItem(arrangeAllAction));
+        menu.add(new JMenuItem(serverListAction));
 
         if (windowList.size() > 0) {
             menu.addSeparator();
@@ -1585,71 +1629,77 @@ public class StudioPanel extends JPanel implements Observer,WindowListener {
         f.show();
     }
 
+    private void selectConnectionString() {
+        String connection = txtServer.getText().trim();
+        if (connection.length() == 0) return;
+        if (server != null && server.getConnectionString(false).equals(connection)) return;
+
+        try {
+            setServer(Config.getInstance().getServerByConnectionString(connection));
+
+            rebuildToolbar();
+            toolbar.validate();
+            toolbar.repaint();
+        } catch (IllegalArgumentException e) {
+            refreshConnection();
+        }
+    }
+
+    private void selectServerName() {
+        String selection = comboServer.getSelectedItem().toString();
+        if(! Config.getInstance().getServerNames().contains(selection)) return;
+
+        setServer(Config.getInstance().getServer(selection));
+        rebuildToolbar();
+        toolbar.validate();
+        toolbar.repaint();
+    }
+
+    private void refreshConnection() {
+        if (server == null) {
+            txtServer.setText("");
+            txtServer.setToolTipText("Select connection details");
+        } else {
+            txtServer.setText(server.getConnectionString(false));
+            txtServer.setToolTipText(server.getConnectionString(true));
+        }
+    }
+
+    private void toolbarAddServerSelection() {
+        List<String> names = Config.getInstance().getServerNames();
+        String name = server == null ? "" : server.getName();
+        if (!names.contains(name)) {
+            List<String> newNames = new ArrayList<>();
+            newNames.add(name);
+            newNames.addAll(names);
+            names = newNames;
+        }
+        comboServer = new JComboBox<>(names.toArray(new String[0]));
+        comboServer.setToolTipText("Select the server context");
+        comboServer.setSelectedItem(name);
+        comboServer.addActionListener(e->selectServerName());
+
+        txtServer = new JTextField();
+        txtServer.addActionListener(e -> selectConnectionString());
+        txtServer.addFocusListener(new FocusAdapter() {
+            @Override
+            public void focusLost(FocusEvent e) {
+                selectConnectionString();
+            }
+        });
+        refreshConnection();
+
+        toolbar.add(new JLabel(I18n.getString("Server")));
+        toolbar.add(comboServer);
+        toolbar.add(txtServer);
+        toolbar.add(serverListAction);
+        toolbar.addSeparator();
+    }
+
     private void rebuildToolbar() {
         if (toolbar != null) {
             toolbar.removeAll();
-
-            String[] names = Config.getInstance().getServerNames();
-
-            if ((names != null) && (names.length > 0)) {
-                toolbar.add(new JLabel(I18n.getString("Server")));
-
-                JComboBox combo = new JComboBox(names) {
-                    
-                    public Dimension getMinimumSize() {
-                        return getPreferredSize();
-                    }
-
-                    
-                    public Dimension getMaximumSize() {
-                        return getPreferredSize();
-                    }
-                };
-
-                int offset = Config.getInstance().getOffset(server);
-
-                if (offset == -1) {
-                    Server[] servers = Config.getInstance().getServers();
-
-                    if (servers.length > 0)
-                        setServer(servers[0]);
-
-                    offset = 0;
-                }
-
-                combo.setSelectedIndex(offset);
-                combo.setToolTipText("Select the server context");
-
-                final Observer o = this;
-
-                ActionListener al = new ActionListener() {
-                    
-                    public void actionPerformed(ActionEvent e) {
-                        String selection = (String) ((JComboBox) e.getSource()).getSelectedItem();
-
-                        setServer(Config.getInstance().getServer(selection));
-
-                        //  setLanguage(Language.Q);
-
-                        SwingUtilities.invokeLater(new Runnable() {
-                            
-                                                   public void run() {
-                                                       rebuildToolbar();
-                                                       toolbar.validate();
-                                                       toolbar.repaint();
-                                                   }
-                                               });
-                    }
-                };
-
-                combo.addActionListener(al);
-
-                combo.setRequestFocusEnabled(false);
-
-                toolbar.add(combo);
-                toolbar.addSeparator();
-            }
-
+            toolbarAddServerSelection();
             if (server == null) {
                 addServerAction.setEnabled(true);
                 editServerAction.setEnabled(false);
@@ -1801,7 +1851,6 @@ public class StudioPanel extends JPanel implements Observer,WindowListener {
     }
 
     public StudioPanel(Server server,String filename) {
-        super(true);
 
         registerForMacOSXEvents();
 
@@ -1899,8 +1948,9 @@ public class StudioPanel extends JPanel implements Observer,WindowListener {
             try {
                 // Generate and register the OSXAdapter, passing it a hash of all the methods we wish to
                 // use as delegates for various com.apple.eawt.ApplicationListener methods
-                OSXAdapter.setQuitHandler(new QuitHandler(this),QuitHandler.class.getDeclaredMethod("quit",(Class[]) null));
-                OSXAdapter.setAboutHandler(new AboutHandler(this),AboutHandler.class.getDeclaredMethod("about",(Class[]) null));
+                OSXAdapter.setQuitHandler(this, StudioPanel.class.getDeclaredMethod("quit",(Class[]) null));
+                OSXAdapter.setAboutHandler(this, StudioPanel.class.getDeclaredMethod("about",(Class[]) null));
+                OSXAdapter.setPreferencesHandler(this, StudioPanel.class.getDeclaredMethod("settings",(Class[]) null));
                 registeredForMaxOSXEvents = true;
             }
             catch (Exception e) {
@@ -1928,9 +1978,9 @@ public class StudioPanel extends JPanel implements Observer,WindowListener {
 
             Server s = null;
             String lruServer = Config.getInstance().getLRUServer();
-            if (lruServer != null)
+            if (Config.getInstance().getServerNames().contains(lruServer)){
                 s = Config.getInstance().getServer(lruServer);
-
+            }
             new StudioPanel(s,filename);
         }
         catch (Exception e) {
@@ -2041,26 +2091,22 @@ public class StudioPanel extends JPanel implements Observer,WindowListener {
     private void processK4Results(K.KBase r) throws c.K4Exception {
         if (r != null) {
             exportAction.setEnabled(true);
-
-            if (FlipTableModel.isTable(r)) {
-                QGrid grid = new QGrid(r);
+            KTableModel model = KTableModel.getModel(r);
+            if (model != null) {
+                boolean dictModel = model instanceof DictModel;
+                boolean listModel = model instanceof ListModel;
+                boolean tableModel = ! (dictModel || listModel);
+                QGrid grid = new QGrid(model);
                 table = grid.getTable();
-
                 openInExcel.setEnabled(true);
-                //if(grid.getRowCount()<50000)
-                chartAction.setEnabled(true);
-                //else
-                //    chartAction.setEnabled(false);              
-
-                TabPanel frame = new TabPanel("Table [" + grid.getRowCount() + " rows] ",
-                                              getImage(Config.imageBase2 + "table.png"),
-                                              grid);
-                frame.setTitle(I18n.getString("Table")+" [" + grid.getRowCount() + " "+I18n.getString("rows")+"] ");
-//                frame.setBackground( Color.white);
-
+                chartAction.setEnabled(tableModel);
+                String title = tableModel ? "Table" : (dictModel ? "Dict" : "List");
+                TabPanel frame = new TabPanel( title + " [" + grid.getRowCount() + " rows] ",
+                        getImage(Config.imageBase2 + "table.png"),
+                        grid);
+//                frame.setTitle(I18n.getString("Table")+" [" + grid.getRowCount() + " "+I18n.getString("rows")+"] ");
                 tabbedPane.addTab(frame.getTitle(),frame.getIcon(),frame.getComponent());
-            }
-            else {
+            } else {
                 chartAction.setEnabled(false);
                 openInExcel.setEnabled(false);
                 LimitedWriter lm = new LimitedWriter(50000);
@@ -2125,7 +2171,6 @@ public class StudioPanel extends JPanel implements Observer,WindowListener {
                 try {
                     this.s = server;
                     c = ConnectionPool.getInstance().leaseConnection(s);
-                    ConnectionPool.getInstance().checkConnected(c);
                     c.setFrame(frame);
                     long startTime=System.currentTimeMillis();
                     c.k(new K.KCharacterVector(text));
@@ -2133,6 +2178,8 @@ public class StudioPanel extends JPanel implements Observer,WindowListener {
                     execTime=System.currentTimeMillis()-startTime;
                 }
                 catch (Throwable e) {
+                    System.err.println("Error occurred during query execution: " + e);
+                    e.printStackTrace(System.err);
                     exception = e;
                 }
 
