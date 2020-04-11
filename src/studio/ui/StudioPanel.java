@@ -7,6 +7,7 @@ import java.beans.PropertyChangeListener;
 import java.io.*;
 import java.util.*;
 import java.util.List;
+import java.util.stream.Stream;
 import javax.swing.*;
 import static javax.swing.JSplitPane.VERTICAL_SPLIT;
 import static studio.ui.EscapeDialog.DialogResult.ACCEPTED;
@@ -62,6 +63,7 @@ public class StudioPanel extends JPanel implements Observer,WindowListener {
     private JEditorPane textArea;
     private JSplitPane splitpane;
     private JTabbedPane tabbedPane;
+    private ServerList serverList;
     private Font font = null;
     private UserAction arrangeAllAction;
     private UserAction closeFileAction;
@@ -1090,8 +1092,34 @@ public class StudioPanel extends JPanel implements Observer,WindowListener {
                 new Integer(KeyEvent.VK_L),
                 KeyStroke.getKeyStroke(KeyEvent.VK_L, menuShortcutKeyMask | Event.SHIFT_MASK) ) {
                         public void actionPerformed(ActionEvent e) {
-                            ServerList serverList = new ServerList(frame, Config.getInstance().getServers(), server);
-                            serverList.alignAndShow();
+                            if (serverList == null) {
+
+                                Point location = frame.getLocation();
+                                GraphicsDevice devices[] = GraphicsEnvironment.getLocalGraphicsEnvironment().getScreenDevices();
+                                Rectangle screenBounds = Stream.of(devices)
+                                                                    .map(d -> d.getDefaultConfiguration().getBounds())
+                                                                    .filter(b -> b.contains(location))
+                                                                    .findFirst().orElse(null);
+
+                                Rectangle bounds = Config.getInstance().getServerListBounds();
+                                bounds.translate(frame.getX(), frame.getY());
+
+                                serverList = new ServerList(frame, Config.getInstance().getServers(), server);
+
+                                if (screenBounds != null && screenBounds.contains(bounds)) {
+                                    serverList.setBounds(bounds);
+                                    serverList.setVisible(true);
+                                } else {
+                                    serverList.alignAndShow();
+                                }
+                            } else {
+                                serverList.setVisible(true);
+                            }
+
+                            Rectangle bounds = serverList.getBounds();
+                            bounds.translate( -frame.getX(), -frame.getY());
+                            Config.getInstance().setServerListBounds(bounds);
+
                             Server selectedServer = serverList.getSelectedServer();
                             if (selectedServer.equals(server)) return;
 

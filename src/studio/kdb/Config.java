@@ -2,6 +2,7 @@ package studio.kdb;
 
 import studio.core.Credentials;
 import studio.core.DefaultAuthenticationMechanism;
+import studio.ui.ServerList;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -170,7 +171,7 @@ public class Config {
     }
 
     public List<String> getServerNames() {
-        return new ArrayList<>(Arrays.asList(split(p.getProperty("Servers", ""))));
+        return Arrays.asList(split(p.getProperty("Servers", "")));
     }
 
     private void setServerNames(List<String> names) {
@@ -248,7 +249,7 @@ public class Config {
         p.remove("server." + name + ".authenticationMechanism");
         p.remove("server." + name + ".useTLS");
 
-        List<String> list = getServerNames();
+        List<String> list = new ArrayList<>(getServerNames());
         list.remove(name);
         setServerNames(list);
     }
@@ -308,4 +309,37 @@ public class Config {
         p.setProperty("auth", authMechanism);
         save();
     }
+
+    public void setServerListBounds(Rectangle rectangle) {
+        p.setProperty("serverList.x", "" + (int)rectangle.getX());
+        p.setProperty("serverList.y", "" + (int)rectangle.getY());
+        p.setProperty("serverList.width", "" + (int)rectangle.getWidth());
+        p.setProperty("serverList.height", "" + (int)rectangle.getHeight());
+        save();
+    }
+
+    public Rectangle getServerListBounds() {
+        String strX = p.getProperty("serverList.x");
+        String strY = p.getProperty("serverList.y");
+        String strWidth = p.getProperty("serverList.width");
+        String strHeight = p.getProperty("serverList.height");
+
+        if (strX != null && strY != null && strWidth != null && strHeight != null) {
+            return new Rectangle(Integer.parseInt(strX), Integer.parseInt(strY),
+                                Integer.parseInt(strWidth), Integer.parseInt(strHeight));
+        }
+
+        DisplayMode displayMode = GraphicsEnvironment.getLocalGraphicsEnvironment()
+                                            .getDefaultScreenDevice().getDisplayMode();
+
+        int width = displayMode.getWidth();
+        int height = displayMode.getHeight();
+
+        int w = Math.min(width / 2, ServerList.DEFAULT_WIDTH);
+        int h = Math.min(height / 2, ServerList.DEFAULT_HEIGHT);
+        int x = (width - w) / 2;
+        int y = (height - h) / 2;
+        return new Rectangle(x,y,w,h);
+    }
+
 }
