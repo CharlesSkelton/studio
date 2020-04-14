@@ -1,41 +1,24 @@
 package studio.ui;
 
-import studio.kdb.*;
+import studio.kdb.Config;
+import studio.kdb.K;
+import studio.kdb.TableHeaderRenderer;
+import studio.kdb.TableRowHeader;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Font;
-import java.awt.Point;
-import java.awt.Toolkit;
+import javax.swing.*;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+import javax.swing.table.*;
+import java.awt.*;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import javax.swing.JLabel;
-import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JPopupMenu;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
-import javax.swing.JViewport;
-import javax.swing.ListSelectionModel;
-import javax.swing.SwingConstants;
-import javax.swing.ToolTipManager;
-import javax.swing.UIManager;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
-import javax.swing.table.DefaultTableCellRenderer;
-import javax.swing.table.TableCellEditor;
-import javax.swing.table.TableCellRenderer;
-import javax.swing.table.TableColumn;
-import javax.swing.table.TableModel;
 
 public class QGrid extends JPanel {
-    private TableModel model;
-    private JTable table;
+    private final TableModel model;
+    private final JTable table;
 
     public JTable getTable() {
         return table;
@@ -47,13 +30,15 @@ public class QGrid extends JPanel {
     public int getRowCount() {
         return model.getRowCount();
     }
-    private JPopupMenu popupMenu = new JPopupMenu();
 
-    class MYJTable extends JTable {
+    private final JPopupMenu popupMenu = new JPopupMenu();
+
+    static class MYJTable extends JTable {
         public MYJTable(TableModel m) {
             super(m);
         }
-        Color col = new Color(0xff,0xff,0xcc);
+
+        Color col = new Color(0xff, 0xff, 0xcc);
         //Color col = UIManager.getColor("Table.selectionBackground").brighter();
         Color bgSelCache = UIManager.getColor("Table.selectionBackground");
         Color fgSelCache = UIManager.getColor("Table.selectionForeground");
@@ -65,14 +50,15 @@ public class QGrid extends JPanel {
             Color bg = null;
             //Color fg= UIManager.getColor("Table.foreground");;
 
-            Component c = super.prepareRenderer(renderer,rowIndex,vColIndex);
+            Component c = super.prepareRenderer(renderer, rowIndex, vColIndex);
             c.setFont(this.getFont());
 
-            if (isCellSelected(rowIndex,vColIndex))
+            if (isCellSelected(rowIndex, vColIndex))
                 bg = bgSelCache;
 
             return c;
         }
+
         private Font originalFont;
         private int originalRowHeight;
         private float zoomFactor = 1.0f;
@@ -122,19 +108,19 @@ public class QGrid extends JPanel {
             super.setRowHeight((int) Math.ceil(originalRowHeight * zoomFactor));
             ((TableHeaderRenderer) getTableHeader().getDefaultRenderer()).setFont(font);
 
-            firePropertyChange("zoom",oldZoomFactor,zoomFactor);
+            firePropertyChange("zoom", oldZoomFactor, zoomFactor);
 
             WidthAdjuster wa = new WidthAdjuster(this);
             wa.resizeAllColumns();
             invalidate();
         }
 
-        public Component prepareEditor(TableCellEditor editor,int row,int column) {
-            Component comp = super.prepareEditor(editor,row,column);
+        public Component prepareEditor(TableCellEditor editor, int row, int column) {
+            Component comp = super.prepareEditor(editor, row, column);
             comp.setFont(this.getFont());
             return comp;
         }
-    };
+    }
 
     public QGrid(TableModel model) {
         this.model = model;
@@ -161,7 +147,7 @@ public class QGrid extends JPanel {
         //    dcr.setHorizontalAlignment(SwingConstants.RIGHT);
         //    dcr.setVerticalAlignment(SwingConstants.CENTER);
 
-        for (int i = 0;i < model.getColumnCount();i++) {
+        for (int i = 0; i < model.getColumnCount(); i++) {
             TableColumn col = table.getColumnModel().getColumn(i);
             col.setCellRenderer(dcr);
         }
@@ -178,16 +164,17 @@ public class QGrid extends JPanel {
             scrollPane.setRowHeaderView(trh);
 
             scrollPane.getRowHeader().addChangeListener(new ChangeListener() {
-                                                        public void stateChanged(ChangeEvent ev) {
-                                                            Point header_pt = ((JViewport) ev.getSource()).getViewPosition();
-                                                            Point main_pt = main.getViewPosition();
-                                                            if (header_pt.y != main_pt.y) {
-                                                                main_pt.y = header_pt.y;
-                                                                main.setViewPosition(main_pt);
-                                                            }
-                                                        }
-                                                        JViewport main = scrollPane.getViewport();
-                                                    });
+                public void stateChanged(ChangeEvent ev) {
+                    Point header_pt = ((JViewport) ev.getSource()).getViewPosition();
+                    Point main_pt = main.getViewPosition();
+                    if (header_pt.y != main_pt.y) {
+                        main_pt.y = header_pt.y;
+                        main.setViewPosition(main_pt);
+                    }
+                }
+
+                final JViewport main = scrollPane.getViewport();
+            });
 
         }
         WidthAdjuster wa = new WidthAdjuster(table);
@@ -205,7 +192,7 @@ public class QGrid extends JPanel {
         rowCountLabel.setFont(UIManager.getFont("Table.font"));
         rowCountLabel.setBackground(UIManager.getColor("TableHeader.background"));
         rowCountLabel.setForeground(UIManager.getColor("TableHeader.foreground"));
-        scrollPane.setCorner(JScrollPane.UPPER_LEFT_CORNER,rowCountLabel);
+        scrollPane.setCorner(JScrollPane.UPPER_LEFT_CORNER, rowCountLabel);
 
         rowCountLabel = new JLabel("");
         rowCountLabel.setHorizontalAlignment(SwingConstants.RIGHT);
@@ -215,27 +202,24 @@ public class QGrid extends JPanel {
         rowCountLabel.setFont(UIManager.getFont("Table.font"));
         rowCountLabel.setBackground(UIManager.getColor("TableHeader.background"));
         rowCountLabel.setForeground(UIManager.getColor("TableHeader.foreground"));
-        scrollPane.setCorner(JScrollPane.UPPER_RIGHT_CORNER,rowCountLabel);
+        scrollPane.setCorner(JScrollPane.UPPER_RIGHT_CORNER, rowCountLabel);
 
 
         setLayout(new BorderLayout());
-        this.add(scrollPane,BorderLayout.CENTER);
+        this.add(scrollPane, BorderLayout.CENTER);
 
         UserAction copyExcelFormatAction = new UserAction("Copy (Excel format)",
                 Util.getImage(Config.imageBase2 + "copy.png"),
                 "Copy the selected cells to the clipboard using Excel format",
-                new Integer(KeyEvent.VK_E),
+                KeyEvent.VK_E,
                 null) {
             public void actionPerformed(ActionEvent e) {
-                StringBuffer sb = new StringBuffer();
+                StringBuilder sb = new StringBuilder();
                 int numcols = table.getSelectedColumnCount();
                 int numrows = table.getSelectedRowCount();
                 int[] rowsselected = table.getSelectedRows();
                 int[] colsselected = table.getSelectedColumns();
-                if (!((numrows - 1 == rowsselected[rowsselected.length - 1] - rowsselected[0] &&
-                        numrows == rowsselected.length) &&
-                        (numcols - 1 == colsselected[colsselected.length - 1] - colsselected[0] &&
-                                numcols == colsselected.length))) {
+                if (!isTableSelectionValid()) {
                     JOptionPane.showMessageDialog(null,
                             "Invalid Copy Selection",
                             "Invalid Copy Selection",
@@ -274,22 +258,86 @@ public class QGrid extends JPanel {
             }
         };
 
+        UserAction copyHtmlFormatAction = new UserAction("Copy (HTML)",
+                Util.getImage(Config.imageBase2 + "copy.png"),
+                "Copy the selected cells to the clipboard using HTML",
+                KeyEvent.VK_H,
+                null) {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                StringBuilder sb = new StringBuilder();
+                int numcols = table.getSelectedColumnCount();
+                int numrows = table.getSelectedRowCount();
+
+                int[] rowsselected = table.getSelectedRows();
+                int[] colsselected = table.getSelectedColumns();
+
+                if (!isTableSelectionValid()) {
+                    JOptionPane.showMessageDialog(null,
+                            "Invalid Copy Selection",
+                            "Invalid Copy Selection",
+                            JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+
+                sb.append("<meta http-equiv=\"content-type\" content=\"text/html\"><table>");
+
+                if (table.getSelectedRowCount() == table.getRowCount()) {
+                    sb.append("<tr>");
+                    for (int col = 0; col < numcols; col++) {
+                        sb.append("<th>").append(table.getColumnName(colsselected[col])).append("</th>");
+                    }
+                    sb.append("</tr>").append(newline);
+                }
+
+                for (int row = 0; row < numrows; row++) {
+                    if (row > 0) {
+                        sb.append(newline);
+                    }
+                    sb.append("<tr>");
+                    for (int col = 0; col < numcols; col++) {
+                        K.KBase b = (K.KBase) table.getValueAt(rowsselected[row], colsselected[col]);
+                        sb.append("<td>");
+                        if (!b.isNull())
+                            sb.append(b.toString(false));
+                        sb.append("</td>");
+                    }
+                    sb.append("</tr>");
+                }
+
+                sb.append("</table>");
+                Toolkit.getDefaultToolkit().getSystemClipboard().setContents(new HtmlSelection(sb.toString()), null);
+            }
+        };
+
         popupMenu.add(new JMenuItem(copyExcelFormatAction));
+        popupMenu.add(new JMenuItem(copyHtmlFormatAction));
 
         table.addMouseListener(new MouseAdapter() {
-                               public void mousePressed(MouseEvent e) {
-                                   maybeShowPopup(e);
-                               }
+            public void mousePressed(MouseEvent e) {
+                maybeShowPopup(e);
+            }
 
-                               public void mouseReleased(MouseEvent e) {
-                                   maybeShowPopup(e);
-                               }
+            public void mouseReleased(MouseEvent e) {
+                maybeShowPopup(e);
+            }
 
-                               private void maybeShowPopup(MouseEvent e) {
-                                   if (e.isPopupTrigger())
-                                       popupMenu.show(e.getComponent(),
-                                                      e.getX(),e.getY());
-                               }
-                           });
+            private void maybeShowPopup(MouseEvent e) {
+                if (e.isPopupTrigger())
+                    popupMenu.show(e.getComponent(),
+                            e.getX(), e.getY());
+            }
+        });
+    }
+
+    private boolean isTableSelectionValid() {
+        int numcols = table.getSelectedColumnCount();
+        int numrows = table.getSelectedRowCount();
+        int[] rowsselected = table.getSelectedRows();
+        int[] colsselected = table.getSelectedColumns();
+        return ((numrows - 1 == rowsselected[rowsselected.length - 1] - rowsselected[0] &&
+                numrows == rowsselected.length) &&
+                (numcols - 1 == colsselected[colsselected.length - 1] - colsselected[0] &&
+                        numcols == colsselected.length));
     }
 }
