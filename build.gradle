@@ -3,6 +3,11 @@ apply plugin: 'idea'
 apply plugin: 'java'
 apply plugin: 'application'
 
+compileJava {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+}
+
 repositories {
 //    maven { url 'http://mvnrepository.com/maven2' }
 //    maven { url 'https://repo1.maven.org/maven2' }
