@@ -8,11 +8,8 @@ import java.sql.Timestamp;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
+import java.util.function.ToLongFunction;
 
 public class K {
     private static SimpleDateFormat formatter = new SimpleDateFormat();
@@ -584,7 +581,7 @@ public class K {
         }
     }
 
-    public static class KLong extends KBase implements ToDouble {
+    public static class KLong extends KBase implements ToDouble, ToLongFunction<KLong> {
         public String getDataType() {
             return "Long";
         }
@@ -592,6 +589,11 @@ public class K {
         public long j;
 
         public double toDouble() {
+            return j;
+        }
+
+        @Override
+        public long applyAsLong(KLong o) {
             return j;
         }
 
@@ -976,7 +978,7 @@ public class K {
 
         public void toString(LimitedWriter w, boolean showType) throws IOException {
             boolean useBrackets = getAttr() != 0 || x instanceof Flip;
-            super.toString(w, showType);
+            w.write(super.toString(showType));
             if (useBrackets)
                 w.write("(");
             x.toString(w, showType);
@@ -984,6 +986,11 @@ public class K {
                 w.write(")");
             w.write("!");
             y.toString(w, showType);
+        }
+
+        @Override
+        public String toString(boolean showType) {
+            return "(" + x.toString(showType) + ")!" + y.toString(showType);
         }
     }
 
@@ -1352,6 +1359,25 @@ public class K {
             }
             if (getLength() != 1)
                 w.write(")");
+        }
+
+        @Override
+        public String toString(boolean showType) {
+            StringBuilder sb = new StringBuilder();
+            sb.append(super.toString(showType));
+            if (getLength() == 1) {
+                sb.append(enlist);
+            } else {
+                sb.append("(");
+            }
+            for (int i = 0; i < getLength(); i++) {
+                if (i > 0)
+                    sb.append(";");
+                sb.append(at(i).toString(showType));
+            }
+            if (getLength() != 1)
+                sb.append(")");
+            return sb.toString();
         }
     }
 
@@ -1950,13 +1976,32 @@ public class K {
 
         public void toString(LimitedWriter w, boolean showType) throws IOException {
             w.write(super.toString(showType));
-            if (getLength() == 0)
-                w.write("0#`");
-            else if (getLength() == 1)
-                w.write(enlist);
+            toString(w);
+        }
+
+        private void toString(Appendable appendable) throws IOException {
+            if (getLength() == 0) {
+                appendable.append("0#`");
+                return;
+            }
+
+            if (getLength() == 1) {
+                appendable.append(enlist);
+            }
 
             for (int i = 0; i < getLength(); i++)
-                w.write("`" + Array.get(array, i));
+                appendable.append("`").append(Array.get(array, i).toString());
+        }
+
+        @Override
+        public String toString(boolean showType) {
+            try {
+                StringBuilder sb = new StringBuilder();
+                toString(sb);
+                return sb.toString();
+            } catch (IOException e) {
+                return super.toString(showType);
+            }
         }
     }
 
