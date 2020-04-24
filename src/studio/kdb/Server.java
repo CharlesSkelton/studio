@@ -2,27 +2,28 @@ package studio.kdb;
 
 import studio.core.Credentials;
 
-import java.awt.Color;
+import java.awt.*;
+import java.util.Objects;
 import java.util.Properties;
 
 public class Server {
-    private String authenticationMechanism = "";
+    private String authenticationMechanism;
     private Color backgroundColor = Color.white;
     private String name = "";
     private String host = "";
     private int port = 0;
-    private String username = "";
-    private String password = "";
-    private boolean useTLS=false;
+    private String username;
+    private String password;
+    private boolean useTLS = false;
 
     public Properties getAsProperties() {
         Properties p = new Properties();
-        p.put("NAME",name);
-        p.put("HOST",host);
-        p.put("PORT",new Integer(port));
-        p.put("USERNAME",username);
-        p.put("PASSWORD",password);
-        p.put("USETLS",useTLS);
+        p.put("NAME", name);
+        p.put("HOST", host);
+        p.put("PORT", port);
+        p.put("USERNAME", username);
+        p.put("PASSWORD", password);
+        p.put("USETLS", useTLS);
         return p;
     }
 
@@ -57,8 +58,9 @@ public class Server {
     public void setUsername(String username) {
         this.username = username;
     }
-    public void setUseTLS(boolean useTLS){
-      this.useTLS=useTLS;
+
+    public void setUseTLS(boolean useTLS) {
+        this.useTLS = useTLS;
     }
 
     public Server() {
@@ -70,14 +72,14 @@ public class Server {
 
     @Override
     public boolean equals(Object obj) {
-        if (! (obj instanceof Server)) return false;
+        if (!(obj instanceof Server)) return false;
         Server s = (Server) obj;
         return s.name.equals(name)
-                && s.host.equals(host)
+                && Objects.equals(s.host, host)
                 && s.port == port
-                && s.username.equals(username)
-                && s.password.equals(password)
-                && s.authenticationMechanism.equals(authenticationMechanism)
+                && Objects.equals(s.username, username)
+                && Objects.equals(s.password, password)
+                && Objects.equals(s.authenticationMechanism ,authenticationMechanism)
                 && s.useTLS == useTLS;
     }
 
@@ -94,10 +96,10 @@ public class Server {
         this.password = s.password;
         this.backgroundColor = s.backgroundColor;
         this.authenticationMechanism = s.authenticationMechanism;
-        this.useTLS=s.useTLS;
+        this.useTLS = s.useTLS;
     }
 
-    public Server(String name,String host,int port,String username,String password,Color backgroundColor,String authenticationMechanism,boolean useTLS) {
+    public Server(String name, String host, int port, String username, String password, Color backgroundColor, String authenticationMechanism, boolean useTLS) {
         this.name = name;
         this.host = host;
         this.port = port;
@@ -105,7 +107,7 @@ public class Server {
         this.password = password;
         this.backgroundColor = backgroundColor;
         this.authenticationMechanism = authenticationMechanism;
-        this.useTLS=useTLS;
+        this.useTLS = useTLS;
     }
 
     public void setHost(String host) {
@@ -138,13 +140,13 @@ public class Server {
 
     public String getConnectionString(boolean includeCreditional) {
         String connection = "`:" + host + ":" + port;
-        if (! includeCreditional) return connection;
+        if (!includeCreditional) return connection;
 
         return connection + ":" + username + ":" + password;
 
     }
 
-    public boolean getUseTLS(){
-      return useTLS;
+    public boolean getUseTLS() {
+        return useTLS;
     }
 }

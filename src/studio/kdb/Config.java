@@ -19,11 +19,11 @@ public class Config {
     public static String imageBase = "/de/skelton/images/";
     public static String imageBase2 = "/de/skelton/utils/";
 
-    private static String PATH = System.getProperties().getProperty("user.home") + "/.studioforkdb/";
-    private static String FILENAME = PATH + "studio.properties";
-    private static String VERSION = "1.1";
+    private static final String PATH = System.getProperties().getProperty("user.home") + "/.studioforkdb/";
+    private static final String FILENAME = PATH + "studio.properties";
+    private static final String VERSION = "1.1";
 
-    private Properties p = new Properties();
+    private final Properties p = new Properties();
     private final static Config instance = new Config();
 
     private Config() {
@@ -180,7 +180,7 @@ public class Config {
 
     public Server[] getServers() {
         return getServerNames().stream()
-                .map(name->getServer(name))
+                .map(this::getServer)
                 .toArray(Server[]::new);
     }
 
@@ -226,10 +226,10 @@ public class Config {
     }
 
     public Server getServer(String name) {
-        String host = p.getProperty("server." + name + ".host");
+        String host = p.getProperty("server." + name + ".host", "");
         int port = Integer.parseInt(p.getProperty("server." + name + ".port", "-1"));
-        String username = p.getProperty("server." + name + ".user");
-        String password = p.getProperty("server." + name + ".password");
+        String username = p.getProperty("server." + name + ".user", "");
+        String password = p.getProperty("server." + name + ".password", "");
         String backgroundColor = p.getProperty("server." + name + ".backgroundColor", "FFFFFF");
         String authenticationMechanism = p.getProperty("server." + name + ".authenticationMechanism", DefaultAuthenticationMechanism.NAME);
         boolean useTLS = Boolean.parseBoolean(p.getProperty("server." + name + ".useTLS", "false"));
@@ -274,7 +274,7 @@ public class Config {
         setServerDetails(server);
 
         String name = server.getName();
-        List<String> list = Stream.of(getServers()).map(s->s.getName()).collect(Collectors.toList());
+        List<String> list = Stream.of(getServers()).map(Server::getName).collect(Collectors.toList());
         if (! list.contains(name)) {
             list.add(name);
         }
@@ -284,8 +284,8 @@ public class Config {
     }
 
     public void setServers(Server[] servers) {
-        Stream.of(servers).forEach(server -> setServerDetails(server));
-        setServerNames(Stream.of(servers).map(s->s.getName()).collect(Collectors.toList()));
+        Stream.of(servers).forEach(this::setServerDetails);
+        setServerNames(Stream.of(servers).map(Server::getName).collect(Collectors.toList()));
     }
 
     public Credentials getDefaultCredentials(String authenticationMechanism) {
