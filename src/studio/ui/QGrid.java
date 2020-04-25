@@ -282,13 +282,11 @@ public class QGrid extends JPanel {
 
                 sb.append("<meta http-equiv=\"content-type\" content=\"text/html\"><table>");
 
-                if (table.getSelectedRowCount() == table.getRowCount()) {
-                    sb.append("<tr>");
-                    for (int col = 0; col < numcols; col++) {
-                        sb.append("<th>").append(table.getColumnName(colsselected[col])).append("</th>");
-                    }
-                    sb.append("</tr>").append(newline);
+                sb.append("<tr>");
+                for (int col = 0; col < numcols; col++) {
+                    sb.append("<th>").append(table.getColumnName(colsselected[col])).append("</th>");
                 }
+                sb.append("</tr>").append(newline);
 
                 for (int row = 0; row < numrows; row++) {
                     if (row > 0) {
