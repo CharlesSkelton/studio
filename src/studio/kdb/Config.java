@@ -12,13 +12,15 @@ import java.util.*;
 import java.text.NumberFormat;
 import java.text.DecimalFormat;
 import java.awt.*;
+import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class Config {
     private final static String PATH = System.getProperties().getProperty("user.home") + "/.studioforkdb/";
     private final static String FILENAME = PATH + "studio.properties";
-    private final static String VERSION = "1.1";
+    private final static String VERSION = "1.2";
+    private final static String OLD_VERSION = "1.1";
 
     private Properties p = new Properties();
     private final Map<String, Server> servers = new HashMap<>();
@@ -280,19 +282,49 @@ public class Config {
         return serverTree;
     }
 
-    private Server initServerFromProperties(int number) {
-        String host = p.getProperty("server." + number + ".host", "");
-        int port = Integer.parseInt(p.getProperty("server." + number + ".port", "-1"));
-        String username = p.getProperty("server." + number + ".user", "");
-        String password = p.getProperty("server." + number + ".password", "");
-        String backgroundColor = p.getProperty("server." + number + ".backgroundColor", "FFFFFF");
-        String authenticationMechanism = p.getProperty("server." + number + ".authenticationMechanism", DefaultAuthenticationMechanism.NAME);
-        boolean useTLS = Boolean.parseBoolean(p.getProperty("server." + number + ".useTLS", "false"));
+
+    private Server initServerFromKey(String key) {
+        String host = p.getProperty("server." + key + ".host", "");
+        int port = Integer.parseInt(p.getProperty("server." + key + ".port", "-1"));
+        String username = p.getProperty("server." + key + ".user", "");
+        String password = p.getProperty("server." + key + ".password", "");
+        String backgroundColor = p.getProperty("server." + key + ".backgroundColor", "FFFFFF");
+        String authenticationMechanism = p.getProperty("server." + key + ".authenticationMechanism", DefaultAuthenticationMechanism.NAME);
+        boolean useTLS = Boolean.parseBoolean(p.getProperty("server." + key + ".useTLS", "false"));
         Color c = new Color(Integer.parseInt(backgroundColor, 16));
         return new Server("", host, port, username, password, c, authenticationMechanism, useTLS);
     }
 
+    private Server initServerFromProperties(int number) {
+        return initServerFromKey("" + number);
+    }
+
+    private void convertFromOldVerion() {
+        try {
+            System.out.println("Found old config. Converting...");
+            String[] names = p.getProperty("Servers").split(",");
+            List<Server> list = new ArrayList<>();
+            for (String name : names) {
+                Server server = initServerFromKey(name);
+                server.setName(name);
+                list.add(server);
+            }
+            p.remove("Servers");
+            p.entrySet().removeIf(e -> e.getKey().toString().startsWith("server."));
+            p.setProperty("version", VERSION);
+            initServers();
+            addServers(list.toArray(new Server[0]));
+            System.out.println("Done");
+        } catch (IllegalArgumentException e) {
+            System.err.println("Ups... Can't convert: " + e);
+            e.printStackTrace(System.err);
+        }
+    }
+
     private void initServers() {
+        if (p.getProperty("version").equals(OLD_VERSION)) {
+            convertFromOldVerion();
+        }
         serverNames = new ArrayList<>();
         serverTree = new ServerTreeNode();
         initServerTree("serverTree.", serverTree, 0);
