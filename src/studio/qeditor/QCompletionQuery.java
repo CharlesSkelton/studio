@@ -66,7 +66,7 @@ public class QCompletionQuery implements CompletionQuery
                                      result.add(new BooleanAttribItem(((K.KSymbol)tables.at(i)).s, offset, 0, false));
                                  }
 
-                                 currentIcon= Util.getImage(Config.imageBase2+"column.png");
+                                 currentIcon= Util.COLUMN_ICON;
 
                                  r = new CompletionQuery.DefaultResult(component, "Columns", result, offset, 0);
                              }
@@ -84,7 +84,7 @@ public class QCompletionQuery implements CompletionQuery
                                      result.add(new BooleanAttribItem(((K.KSymbol)tables.at(i)).s, offset, 0, false));
                                  }
 
-                                 currentIcon= Util.getImage(Config.imageBase2+"table.png");
+                                 currentIcon= Util.TABLE_ICON;
 
                                  r = new CompletionQuery.DefaultResult(component, "Tables", result, offset, 0);
                              }

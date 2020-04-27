@@ -33,7 +33,7 @@ public class LineChart {
 
             frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
-            frame.setIconImage(Util.getImage(Config.imageBase2 + "chart_24.png").getImage());
+            frame.setIconImage(Util.CHART_BIG_ICON.getImage());
 
             frame.pack();
             frame.setVisible(true);

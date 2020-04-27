@@ -9,7 +9,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
-import java.util.List;
 import java.text.NumberFormat;
 import java.text.DecimalFormat;
 import java.awt.*;
@@ -17,14 +16,15 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class Config {
-    public static String imageBase = "/de/skelton/images/";
-    public static String imageBase2 = "/de/skelton/utils/";
+    private final static String PATH = System.getProperties().getProperty("user.home") + "/.studioforkdb/";
+    private final static String FILENAME = PATH + "studio.properties";
+    private final static String VERSION = "1.1";
 
-    private static final String PATH = System.getProperties().getProperty("user.home") + "/.studioforkdb/";
-    private static final String FILENAME = PATH + "studio.properties";
-    private static final String VERSION = "1.1";
+    private Properties p = new Properties();
+    private final Map<String, Server> servers = new HashMap<>();
+    private Collection<String> serverNames;
+    private ServerTreeNode serverTree;
 
-    private final Properties p = new Properties();
     private final static Config instance = new Config();
 
     private Config() {
@@ -100,6 +100,7 @@ public class Config {
             System.err.println("Cant't read configuration from file " + FILENAME);
             e.printStackTrace(System.err);
         }
+        initServers();
     }
 
 
@@ -134,7 +135,7 @@ public class Config {
     public void setLRUServer(Server s) {
         if (s == null) return; // May be it should be an exception ?
 
-        p.put("lruServer", s.getName());
+        p.put("lruServer", s.getFullName());
         save();
     }
 
@@ -169,22 +170,6 @@ public class Config {
         p.put("lookandfeel", lf);
         save();
     }
-
-    public List<String> getServerNames() {
-        return Arrays.asList(split(p.getProperty("Servers", "")));
-    }
-
-    private void setServerNames(List<String> names) {
-        p.setProperty("Servers", String.join(",",names));
-        save();
-    }
-
-    public Server[] getServers() {
-        return getServerNames().stream()
-                .map(this::getServer)
-                .toArray(Server[]::new);
-    }
-
 
     // Resolve or create a new server by connection string.
     // Accept possible various connectionString such as:
@@ -224,69 +209,6 @@ public class Config {
         }
 
         return new Server("", host, port, user, password, bgColor, auth, false);
-    }
-
-    public Server getServer(String name) {
-        String host = p.getProperty("server." + name + ".host", "");
-        int port = Integer.parseInt(p.getProperty("server." + name + ".port", "-1"));
-        String username = p.getProperty("server." + name + ".user", "");
-        String password = p.getProperty("server." + name + ".password", "");
-        String backgroundColor = p.getProperty("server." + name + ".backgroundColor", "FFFFFF");
-        String authenticationMechanism = p.getProperty("server." + name + ".authenticationMechanism", DefaultAuthenticationMechanism.NAME);
-        boolean useTLS = Boolean.parseBoolean(p.getProperty("server." + name + ".useTLS", "false"));
-        Color c = new Color(Integer.parseInt(backgroundColor, 16));
-        return new Server(name, host, port, username, password, c, authenticationMechanism, useTLS);
-
-    }
-
-    public void removeServer(Server server) {
-        String name = server.getName();
-        p.remove("server." + name + ".host");
-        p.remove("server." + name + ".port");
-        p.remove("server." + name + ".user");
-        p.remove("server." + name + ".password");
-        p.remove("server." + name + ".backgroundColor");
-        p.remove("server." + name + ".authenticationMechanism");
-        p.remove("server." + name + ".useTLS");
-
-        List<String> list = new ArrayList<>(getServerNames());
-        list.remove(name);
-        setServerNames(list);
-    }
-
-    private void setServerDetails(Server server) {
-        String name = server.getName();
-        if (name.trim().length() == 0) {
-            throw new IllegalArgumentException("Server name can't be empty");
-        }
-        if (name.contains(",")) {
-            throw new IllegalArgumentException("Server name can't contains ,");
-        }
-        p.setProperty("server." + name + ".host", server.getHost());
-        p.setProperty("server." + name + ".port", "" + server.getPort());
-        p.setProperty("server." + name + ".user", "" + server.getUsername());
-        p.setProperty("server." + name + ".password", "" + server.getPassword());
-        p.setProperty("server." + name + ".backgroundColor", "" + Integer.toHexString(server.getBackgroundColor().getRGB()).substring(2));
-        p.setProperty("server." + name + ".authenticationMechanism", server.getAuthenticationMechanism());
-        p.setProperty("server." + name + ".useTLS", "" + server.getUseTLS());
-    }
-
-    public void addServer(Server server) {
-        setServerDetails(server);
-
-        String name = server.getName();
-        List<String> list = Stream.of(getServers()).map(Server::getName).collect(Collectors.toList());
-        if (! list.contains(name)) {
-            list.add(name);
-        }
-        Collections.sort(list);
-        p.setProperty("Servers",String.join(",", list));
-        save();
-    }
-
-    public void setServers(Server[] servers) {
-        Stream.of(servers).forEach(this::setServerDetails);
-        setServerNames(Stream.of(servers).map(Server::getName).collect(Collectors.toList()));
     }
 
     public Credentials getDefaultCredentials(String authenticationMechanism) {
@@ -340,6 +262,208 @@ public class Config {
         int x = (width - w) / 2;
         int y = (height - h) / 2;
         return new Rectangle(x,y,w,h);
+    }
+
+    public Collection<String> getServerNames() {
+        return Collections.unmodifiableCollection(serverNames);
+    }
+
+    public Server[] getServers() {
+        return servers.values().toArray(new Server[servers.size()]);
+    }
+
+    public Server getServer(String name) {
+        return servers.get(name);
+    }
+
+    public ServerTreeNode getServerTree() {
+        return serverTree;
+    }
+
+    private Server initServerFromProperties(int number) {
+        String host = p.getProperty("server." + number + ".host", "");
+        int port = Integer.parseInt(p.getProperty("server." + number + ".port", "-1"));
+        String username = p.getProperty("server." + number + ".user", "");
+        String password = p.getProperty("server." + number + ".password", "");
+        String backgroundColor = p.getProperty("server." + number + ".backgroundColor", "FFFFFF");
+        String authenticationMechanism = p.getProperty("server." + number + ".authenticationMechanism", DefaultAuthenticationMechanism.NAME);
+        boolean useTLS = Boolean.parseBoolean(p.getProperty("server." + number + ".useTLS", "false"));
+        Color c = new Color(Integer.parseInt(backgroundColor, 16));
+        return new Server("", host, port, username, password, c, authenticationMechanism, useTLS);
+    }
+
+    private void initServers() {
+        serverNames = new ArrayList<>();
+        serverTree = new ServerTreeNode();
+        initServerTree("serverTree.", serverTree, 0);
+    }
+
+    private int initServerTree(String keyPrefix, ServerTreeNode parent, int number) {
+        for (int index = 0; ; index++) {
+            String key = keyPrefix + index;
+            String folderKey = key + "folder";
+            if (p.containsKey(folderKey)) {
+                ServerTreeNode node = parent.add(p.getProperty(folderKey));
+                number = initServerTree(key + ".", node, number);
+            } else if (p.containsKey(key)) {
+                Server server = initServerFromProperties(number);
+                server.setFolder(parent);
+                String name = p.getProperty(key);
+                server.setName(name);
+                String fullName = server.getFullName();
+                servers.put(fullName, server);
+                serverNames.add(fullName);
+                parent.add(server);
+                number++;
+            } else {
+                break;
+            }
+        }
+        return number;
+    }
+
+    private void saveAllServers() {
+        p.entrySet().removeIf(e -> e.getKey().toString().startsWith("serverTree."));
+        p.entrySet().removeIf(e -> e.getKey().toString().startsWith("server."));
+        saveServerTree("serverTree.", serverTree, 0);
+
+        save();
+    }
+
+    private void saveServerDetails(Server server, int number) {
+        p.setProperty("server." + number + ".host", server.getHost());
+        p.setProperty("server." + number + ".port", "" + server.getPort());
+        p.setProperty("server." + number + ".user", "" + server.getUsername());
+        p.setProperty("server." + number + ".password", "" + server.getPassword());
+        p.setProperty("server." + number + ".backgroundColor", "" + Integer.toHexString(server.getBackgroundColor().getRGB()).substring(2));
+        p.setProperty("server." + number + ".authenticationMechanism", server.getAuthenticationMechanism());
+        p.setProperty("server." + number + ".useTLS", "" + server.getUseTLS());
+    }
+
+    private int saveServerTree(String keyPrefix, ServerTreeNode node, int number) {
+        int count = node.getChildCount();
+        for(int index = 0; index<count; index++) {
+            String key = keyPrefix + index;
+            ServerTreeNode child = node.getChild(index);
+            if (child.isFolder()) {
+                p.setProperty(key + "folder", child.getFolder());
+                number = saveServerTree(key + ".", child, number);
+            } else {
+                Server server = child.getServer();
+                p.setProperty(key, server.getName());
+                saveServerDetails(server, number);
+                number++;
+            }
+        }
+        return number;
+    }
+
+    public void removeServer(Server server) {
+        String name = server.getFullName();
+        serverNames.remove(name);
+        servers.remove(name);
+        ServerTreeNode folder = server.getFolder();
+        if (folder != null) {
+            folder.remove(server);
+        }
+
+        saveAllServers();
+    }
+
+    private void purgeAll() {
+        servers.clear();
+        serverNames.clear();
+        serverTree = new ServerTreeNode();
+    }
+
+    public void removeAllServers() {
+        purgeAll();
+        saveAllServers();
+    }
+
+    private void addServerInternal(Server server) {
+        String name = server.getName();
+        String fullName = server.getFullName();
+        if (serverNames.contains(fullName)) {
+            throw new IllegalArgumentException("Server with full name " + fullName + " already exist");
+        }
+        if (name.trim().length() == 0) {
+            throw new IllegalArgumentException("Server name can't be empty");
+        }
+        if (name.contains(",")) {
+            throw new IllegalArgumentException("Server name can't contains ,");
+        }
+        if (name.contains("/")) {
+            throw new IllegalArgumentException("Server name can't contains /");
+        }
+        servers.put(fullName, server);
+        serverNames.add(fullName);
+    }
+
+
+    public void addServer(Server server) {
+        addServers(server);
+    }
+
+    public void addServers(Server... newServers) {
+        Properties backup = new Properties();
+        backup.putAll(p);
+        try {
+            for (Server server : newServers) {
+                ServerTreeNode folder = server.getFolder();
+                if (folder == null) {
+                    server.setFolder(serverTree);
+                    serverTree.add(server);
+                } else {
+                    folder.add(server);
+                }
+                addServerInternal(server);
+            }
+
+            saveAllServers();
+        } catch (IllegalArgumentException e) {
+            p = backup;
+            initServers();
+            throw e;
+        }
+
+    }
+
+    public void setServerTree(ServerTreeNode serverTree) {
+        Properties backup = new Properties();
+        backup.putAll(p);
+        try {
+            purgeAll();
+            this.serverTree = serverTree;
+
+            for(Enumeration e = serverTree.depthFirstEnumeration(); e.hasMoreElements();) {
+                ServerTreeNode node = (ServerTreeNode) e.nextElement();
+                if (node.isRoot()) continue;
+
+                if (node.isFolder()) {
+                    String folder = node.getFolder();
+                    if (folder.trim().length()==0) {
+                        throw new IllegalArgumentException("Can't add folder with empty name");
+                    }
+                    if (folder.contains("/")) {
+                        throw new IllegalArgumentException("Folder can't contain /");
+                    }
+                    if ( ((ServerTreeNode)node.getParent()).getChild(node.getFolder())!= node ) {
+                        throw new IllegalArgumentException("Duplicate folder is found: " + node.fullPath());
+                    }
+                } else {
+                    Server server = node.getServer();
+                    server.setFolder((ServerTreeNode) node.getParent());
+                    addServerInternal(server);
+                }
+            }
+
+            saveAllServers();
+        } catch (IllegalArgumentException e) {
+            p = backup;
+            initServers();
+            throw e;
+        }
     }
 
 }

@@ -209,7 +209,7 @@ public class QGrid extends JPanel {
         this.add(scrollPane, BorderLayout.CENTER);
 
         UserAction copyExcelFormatAction = new UserAction("Copy (Excel format)",
-                Util.getImage(Config.imageBase2 + "copy.png"),
+                Util.COPY_ICON,
                 "Copy the selected cells to the clipboard using Excel format",
                 KeyEvent.VK_E,
                 null) {
@@ -259,7 +259,7 @@ public class QGrid extends JPanel {
         };
 
         UserAction copyHtmlFormatAction = new UserAction("Copy (HTML)",
-                Util.getImage(Config.imageBase2 + "copy.png"),
+                Util.COPY_ICON,
                 "Copy the selected cells to the clipboard using HTML",
                 KeyEvent.VK_H,
                 null) {
