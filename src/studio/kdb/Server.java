@@ -154,8 +154,8 @@ public class Server {
 
     }
 
-    public String getDescription() {
-        return name + " (" + host + ":" + port + ")";
+    public String getDescription(boolean fullName) {
+        return (fullName ? getFullName() : name) + " (" + host + ":" + port + ")";
     }
 
     public boolean getUseTLS(){

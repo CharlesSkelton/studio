@@ -1119,7 +1119,7 @@ public class StudioPanel extends JPanel implements Observer,WindowListener {
                             Config.getInstance().setServerListBounds(bounds);
 
                             Server selectedServer = serverList.getSelectedServer();
-                            if (selectedServer.equals(server)) return;
+                            if (selectedServer == null || selectedServer.equals(server)) return;
 
                             setServer(selectedServer);
                             rebuildToolbar();
@@ -1470,7 +1470,7 @@ public class StudioPanel extends JPanel implements Observer,WindowListener {
 
         menu.add(new JMenuItem(closeFileAction));
 
-        if (!MAC_OS_X) {
+        if (! Util.MAC_OS_X) {
             menu.add(new JMenuItem(settingsAction));
         }
         menu.addSeparator();
@@ -1503,7 +1503,7 @@ public class StudioPanel extends JPanel implements Observer,WindowListener {
             }
         }
 
-        if (!MAC_OS_X) {
+        if (! Util.MAC_OS_X) {
             menu.addSeparator();
             menu.add(new JMenuItem(exitAction));
         }
@@ -1641,7 +1641,7 @@ public class StudioPanel extends JPanel implements Observer,WindowListener {
         menu = new JMenu(I18n.getString("Help"));
         menu.setMnemonic(KeyEvent.VK_H);
         menu.add(new JMenuItem(codeKxComAction));
-        if (!MAC_OS_X)
+        if (! Util.MAC_OS_X)
             menu.add(new JMenuItem(aboutAction));
         menubar.add(menu);
 
@@ -1963,14 +1963,13 @@ public class StudioPanel extends JPanel implements Observer,WindowListener {
 
     public void update(Observable obs,Object obj) {
     }
-    public static boolean MAC_OS_X = (System.getProperty("os.name").toLowerCase().startsWith("mac os x"));
     private static boolean registeredForMaxOSXEvents = false;
 
     public void registerForMacOSXEvents() {
         if (registeredForMaxOSXEvents)
             return;
 
-        if (MAC_OS_X)
+        if (Util.MAC_OS_X)
             try {
                 // Generate and register the OSXAdapter, passing it a hash of all the methods we wish to
                 // use as delegates for various com.apple.eawt.ApplicationListener methods
