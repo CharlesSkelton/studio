@@ -170,7 +170,7 @@ public class Config {
     }
 
     public List<String> getServerNames() {
-        return Arrays.asList(split(p.getProperty("Servers", "")));
+        return new ArrayList<>(Arrays.asList(split(p.getProperty("Servers", ""))));
     }
 
     private void setServerNames(List<String> names) {
