@@ -10,6 +10,8 @@ import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 import java.awt.*;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
@@ -22,9 +24,9 @@ public class ServerList extends EscapeDialog {
     private DefaultMutableTreeNode root;
 
     private Server selectedServer;
-    private Server activeServer;
-    private Server[] servers;
-    private java.util.List<String> filters = new ArrayList<>();
+    private final Server activeServer;
+    private final Server[] servers;
+    private final java.util.List<String> filters = new ArrayList<>();
 
     public ServerList(JFrame parent, Server[] servers, Server active) {
         super(parent, "Server List");
@@ -39,10 +41,10 @@ public class ServerList extends EscapeDialog {
 
     private void refreshFilters(String filterSting) {
         filters.clear();
-        StringTokenizer st = new StringTokenizer(filterSting," \t");
+        StringTokenizer st = new StringTokenizer(filterSting, " \t");
         while (st.hasMoreTokens()) {
             String word = st.nextToken().trim();
-            if (word.length()>0) filters.add(word.toLowerCase());
+            if (word.length() > 0) filters.add(word.toLowerCase());
         }
     }
 
@@ -50,15 +52,15 @@ public class ServerList extends EscapeDialog {
         if (filters.size() == 0) return false;
         if (server.equals(activeServer)) return false;
         String name = server.getName().toLowerCase();
-        for(String filter:filters) {
-            if (! name.contains(filter)) return true;
+        for (String filter : filters) {
+            if (!name.contains(filter)) return true;
         }
         return false;
     }
 
     private void refreshServers() {
         root.removeAllChildren();
-        for (Server server:servers) {
+        for (Server server : servers) {
             if (filterServer(server)) continue;
             ServerNode node = new ServerNode(server);
             if (activeServer != null && activeServer.equals(server)) {
@@ -67,7 +69,7 @@ public class ServerList extends EscapeDialog {
             root.add(new DefaultMutableTreeNode(node));
         }
         tree.expandPath(new TreePath(root.getPath()));
-        ((DefaultTreeModel)tree.getModel()).reload();
+        ((DefaultTreeModel) tree.getModel()).reload();
         tree.invalidate();
     }
 
@@ -91,11 +93,15 @@ public class ServerList extends EscapeDialog {
             @Override
             public void mousePressed(MouseEvent e) {
                 if (e.getClickCount() != 2) return;
-                DefaultMutableTreeNode node  = (DefaultMutableTreeNode) tree.getLastSelectedPathComponent();
-                if (node == null) return; // no selection
-                if (! node.isLeaf()) return;
-                selectedServer = ((ServerNode) node.getUserObject()).getServer();
-                dispose();
+                updateSelectedServer();
+            }
+        });
+        tree.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                    updateSelectedServer();
+                }
             }
         });
         add(new JScrollPane(tree), BorderLayout.CENTER);
@@ -105,29 +111,45 @@ public class ServerList extends EscapeDialog {
             public void insertUpdate(DocumentEvent e) {
                 filterChanged();
             }
+
             @Override
             public void removeUpdate(DocumentEvent e) {
                 filterChanged();
             }
+
             @Override
             public void changedUpdate(DocumentEvent e) {
                 filterChanged();
             }
         });
         add(filter, BorderLayout.NORTH);
-        setPreferredSize(new Dimension(300,400));
+        setPreferredSize(new Dimension(300, 400));
+    }
+
+    private void updateSelectedServer() {
+        DefaultMutableTreeNode node = (DefaultMutableTreeNode) tree.getLastSelectedPathComponent();
+        if (node == null) return; // no selection
+        if (!node.isLeaf()) return;
+        selectedServer = ((ServerNode) node.getUserObject()).getServer();
+        dispose();
     }
 
 
     private static class ServerNode {
-        private Server server;
+        private final Server server;
         private boolean active = false;
 
         ServerNode(Server server) {
             this.server = server;
         }
-        Server getServer() {return server;}
-        void setActive(boolean active) {this.active = active;}
+
+        Server getServer() {
+            return server;
+        }
+
+        void setActive(boolean active) {
+            this.active = active;
+        }
 
         @Override
         public String toString() {
