@@ -234,6 +234,15 @@ public class Config {
         save();
     }
 
+    public boolean isShowServerComboBox() {
+        return Boolean.parseBoolean(p.getProperty("showServerComboBox","true"));
+    }
+
+    public void setShowServerComboBox(boolean value) {
+        p.setProperty("showServerComboBox", "" + value);
+        save();
+    }
+
     public void setServerListBounds(Rectangle rectangle) {
         p.setProperty("serverList.x", "" + (int)rectangle.getX());
         p.setProperty("serverList.y", "" + (int)rectangle.getY());
@@ -281,7 +290,6 @@ public class Config {
     public ServerTreeNode getServerTree() {
         return serverTree;
     }
-
 
     private Server initServerFromKey(String key) {
         String host = p.getProperty("server." + key + ".host", "");

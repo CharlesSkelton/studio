@@ -1375,6 +1375,8 @@ public class StudioPanel extends JPanel implements Observer,WindowListener {
         String auth = dialog.getDefaultAuthenticationMechanism();
         Config.getInstance().setDefaultAuthMechanism(auth);
         Config.getInstance().setDefaultCredentials(auth, new Credentials(dialog.getUser(), dialog.getPassword()));
+        Config.getInstance().setShowServerComboBox(dialog.isShowServerComboBox());
+        rebuildToolbar();
     }
 
     public void about() {
@@ -1704,8 +1706,11 @@ public class StudioPanel extends JPanel implements Observer,WindowListener {
         comboServer.setToolTipText("Select the server context");
         comboServer.setSelectedItem(name);
         comboServer.addActionListener(e->selectServerName());
+        // Cut the width if it is too wide.
+        comboServer.setMinimumSize(new Dimension(0, 0));
+        comboServer.setVisible(Config.getInstance().isShowServerComboBox());
 
-        txtServer = new JTextField();
+        txtServer = new JTextField(32);
         txtServer.addActionListener(e -> selectConnectionString());
         txtServer.addFocusListener(new FocusAdapter() {
             @Override
