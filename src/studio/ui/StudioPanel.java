@@ -2171,6 +2171,7 @@ public class StudioPanel extends JPanel implements Observer,WindowListener {
                 try {
                     this.s = server;
                     c = ConnectionPool.getInstance().leaseConnection(s);
+                    ConnectionPool.getInstance().checkConnected(c);
                     c.setFrame(frame);
                     long startTime=System.currentTimeMillis();
                     c.k(new K.KCharacterVector(text));

@@ -32,13 +32,13 @@ public class QCompletionQuery implements CompletionQuery
          {
              if (component instanceof JEditorPane)
              {
-                 Server s = (Server) ((JEditorPane) component).getDocument().getProperty("server");
+                 Server s = (Server) component.getDocument().getProperty("server");
 
                  if (s != null)
                  {
-                     List result = new ArrayList();
+                     List<QResultItem> result = new ArrayList<>();
 
-                     String text = ((JEditorPane) component).getDocument().getText(0, offset);
+                     String text = component.getDocument().getText(0, offset);
 
                      StringTokenizer t= new StringTokenizer(text, " %$!&()=~#;:><?,+-'\"/*");
 
@@ -52,6 +52,7 @@ public class QCompletionQuery implements CompletionQuery
                      try
                      {
                          c=ConnectionPool.getInstance().leaseConnection(s);
+                         ConnectionPool.getInstance().checkConnected(c);
 
                          if(text.endsWith("."))
                          {
