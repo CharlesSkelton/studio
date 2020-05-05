@@ -4,7 +4,9 @@ import java.io.CharArrayWriter;
 import java.io.IOException;
 
 public class LimitedWriter extends CharArrayWriter {
-    private int limit;
+    private static final String TOO_LONG = " ... ";
+
+    private final int limit;
 
     public static class LimitException extends RuntimeException {
     }
@@ -15,18 +17,20 @@ public class LimitedWriter extends CharArrayWriter {
 
     public void write(char c) throws IOException {
         if ((1 + size()) > limit) {
-            super.write(" ... ");
+            super.write(TOO_LONG);
             throw new LimitException();
         }
         super.write(c);
     }
 
-    public void write(String s) throws IOException {
+    @Override
+    public void write(String s, int off, int len) {
         if ((size() + s.length()) > limit) {
-            super.write(s.substring(0,limit - size()));
-            super.write(" ... ");
+            String substring = s.substring(0, limit - size());
+            super.write(substring, 0, substring.length());
+            super.write(TOO_LONG, 0, TOO_LONG.length());
             throw new LimitException();
         }
-        super.write(s);
+        super.write(s, off, len);
     }
 }

@@ -2245,6 +2245,7 @@ public class StudioPanel extends JPanel implements Observer,WindowListener {
                             processK4Results(r);
                         }
                         catch (Exception e) {
+                            e.printStackTrace(System.err);
                             JOptionPane.showMessageDialog(frame,
                                                           "\nAn unexpected error occurred whilst communicating with " + server.getHost() + ":" + server.getPort() + "\n\nError detail is\n\n" + e.getMessage() + "\n\n",
                                                           "Studio for kdb+",
