@@ -23,8 +23,8 @@ public class ServerTreeNode extends DefaultMutableTreeNode {
     public ServerTreeNode copy() {
         if (isFolder()) {
             ServerTreeNode parent = new ServerTreeNode(getFolder());
-            for (ServerTreeNode child: childNodes()) {
-                parent.add(child.copy());
+            for (TreeNode child: childNodes()) {
+                parent.add(((ServerTreeNode) child).copy());
             }
             return parent;
         } else {
@@ -94,14 +94,16 @@ public class ServerTreeNode extends DefaultMutableTreeNode {
     }
 
     public ServerTreeNode getChild(String folder) {
-        for(ServerTreeNode child: childNodes()) {
+        for(TreeNode node: childNodes()) {
+            ServerTreeNode child = (ServerTreeNode) node;
             if (child.isFolder() && child.getFolder().equals(folder)) return child;
         }
         return null;
     }
 
     public ServerTreeNode getChild(Server server) {
-        for(ServerTreeNode child: childNodes()) {
+        for(TreeNode node: childNodes()) {
+            ServerTreeNode child = (ServerTreeNode) node;
             if (!child.isFolder() && child.getServer().equals(server)) return child;
         }
         return null;
@@ -111,7 +113,7 @@ public class ServerTreeNode extends DefaultMutableTreeNode {
         return (ServerTreeNode) getChildAt(index);
     }
 
-    public Iterable<ServerTreeNode> childNodes() {
+    public Iterable<TreeNode> childNodes() {
         if (children != null) return children;
         return Collections.emptyList();
     }
@@ -119,8 +121,8 @@ public class ServerTreeNode extends DefaultMutableTreeNode {
     // Recursively find ServerTreeNode with passed Server
     public ServerTreeNode findServerNode(Server server) {
         if (isFolder()) {
-            for(ServerTreeNode child: childNodes()) {
-                ServerTreeNode node = child.findServerNode(server);
+            for(TreeNode child: childNodes()) {
+                ServerTreeNode node = ((ServerTreeNode) child).findServerNode(server);
                 if (node != null) return node;
             }
         } else {
@@ -139,8 +141,8 @@ public class ServerTreeNode extends DefaultMutableTreeNode {
         if (! theSame( (ServerTreeNode)nodes[head])) return null;
         if (head == nodes.length-1) return this;
 
-        for (ServerTreeNode child: childNodes()) {
-            ServerTreeNode node = child.findPath(nodes, head+1);
+        for (TreeNode child: childNodes()) {
+            ServerTreeNode node = ((ServerTreeNode) child).findPath(nodes, head+1);
             if (node != null) return node;
         }
         return null;
