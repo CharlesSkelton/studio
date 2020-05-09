@@ -48,20 +48,20 @@ public class TableHeaderRenderer extends DefaultTableCellRenderer {
             if (ktm.isSortedDesc()) {
                 if (column == ktm.getSortByColumn())
                     if (ktm.getColumnClass(column) == K.KSymbolVector.class)
-                        icon = new ScaledIcon(Util.getImage(Config.imageBase + "sort_az_ascending.png"),targetHeight);
+                        icon = new ScaledIcon(Util.SORT_AZ_ASC_ICON,targetHeight);
                     else
-                        icon = new ScaledIcon(Util.getImage(Config.imageBase + "sort_descending.png"),targetHeight);
+                        icon = new ScaledIcon(Util.SORT_DESC_ICON,targetHeight);
             }
             else if (ktm.isSortedAsc())
                 if (column == ktm.getSortByColumn())
                     if (ktm.getColumnClass(column) == K.KSymbolVector.class)
-                        icon = new ScaledIcon(Util.getImage(Config.imageBase + "sort_az_descending.png"),targetHeight);
+                        icon = new ScaledIcon(Util.SORT_AZ_DESC_ICON,targetHeight);
                     else
-                        icon = new ScaledIcon(Util.getImage(Config.imageBase + "sort_ascending.png"),targetHeight);
+                        icon = new ScaledIcon(Util.SORT_ASC_ICON,targetHeight);
             if (icon != null)
                 setIcon(icon);
             else {
-                icon = new ScaledIcon(Util.getImage(Config.imageBase + "sort_ascending.png"),targetHeight);
+                icon = new ScaledIcon(Util.SORT_ASC_ICON,targetHeight);
                 setIcon(new BlankIcon(icon));
             }
         }
