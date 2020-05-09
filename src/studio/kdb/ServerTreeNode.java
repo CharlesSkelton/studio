@@ -3,6 +3,7 @@ package studio.kdb;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeNode;
 import java.util.Collections;
+import java.util.Vector;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -111,8 +112,9 @@ public class ServerTreeNode extends DefaultMutableTreeNode {
         return (ServerTreeNode) getChildAt(index);
     }
 
+    @SuppressWarnings("unchecked")
     public Iterable<ServerTreeNode> childNodes() {
-        if (children != null) return children;
+        if (children != null) return (Vector) children;
         return Collections.emptyList();
     }
 
