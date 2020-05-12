@@ -1376,6 +1376,13 @@ public class StudioPanel extends JPanel implements Observer,WindowListener {
         Config.getInstance().setDefaultAuthMechanism(auth);
         Config.getInstance().setDefaultCredentials(auth, new Credentials(dialog.getUser(), dialog.getPassword()));
         Config.getInstance().setShowServerComboBox(dialog.isShowServerComboBox());
+
+        String lfClass = dialog.getLookAndFeelClassName();
+        if (!lfClass.equals(UIManager.getLookAndFeel().getClass().getName())) {
+            Config.getInstance().setLookAndFeel(lfClass);
+            JOptionPane.showMessageDialog(frame, "Look and Feel was changed. New L&F will take effect on the next start up.", "Look and Feel Setting Changed", JOptionPane.INFORMATION_MESSAGE);
+        }
+
         rebuildToolbar();
     }
 
@@ -1792,6 +1799,7 @@ public class StudioPanel extends JPanel implements Observer,WindowListener {
 
     private JToolBar createToolbar() {
         toolbar = new JToolBar();
+        toolbar.setLayout(new BoxLayout(toolbar, BoxLayout.X_AXIS));
         toolbar.setFloatable(false);
         rebuildToolbar();
         return toolbar;
