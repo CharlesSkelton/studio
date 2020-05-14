@@ -243,6 +243,15 @@ public class Config {
         save();
     }
 
+    public int getResultTabsCount() {
+        return Integer.parseInt(p.getProperty("resultTabsCount","5"));
+    }
+
+    public void setResultTabsCount(int value) {
+        p.setProperty("resultTabsCount", "" + value);
+        save();
+    }
+
     public void setServerListBounds(Rectangle rectangle) {
         p.setProperty("serverList.x", "" + (int)rectangle.getX());
         p.setProperty("serverList.y", "" + (int)rectangle.getY());
