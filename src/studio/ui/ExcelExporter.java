@@ -212,7 +212,7 @@ class ExcelExporter {
                             "\nThere was an error encoding the K types into Excel types.\n\n" + e.getMessage() + "\n\n",
                             "Studio for kdb+",
                             JOptionPane.OK_OPTION,
-                            Util.getImage(Config.imageBase + "32x32/error.png"));
+                            Util.ERROR_ICON);
                 } finally {
                     pm.close();
                 }
@@ -368,7 +368,7 @@ class ExcelExporter {
                     "\nThere was an error opening excel.\n\n" + e.getMessage() + "\n\nPerhaps you do not have Excel installed,\nor .xls files are not associated with Excel",
                     "Studio for kdb+",
                     JOptionPane.OK_OPTION,
-                    Util.getImage(Config.imageBase + "32x32/error.png"));
+                    Util.ERROR_ICON);
 
         }
     }

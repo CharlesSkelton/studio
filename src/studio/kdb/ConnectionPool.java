@@ -9,8 +9,8 @@ import kx.c.K4Exception;
 
 public class ConnectionPool {
     private final static ConnectionPool instance = new ConnectionPool();
-    private Map<Server,List<kx.c>> freeMap = new HashMap<>();
-    private Map<Server,List<kx.c>> busyMap = new HashMap<>();
+    private final Map<Server,List<kx.c>> freeMap = new HashMap<>();
+    private final Map<Server,List<kx.c>> busyMap = new HashMap<>();
 
     public static ConnectionPool getInstance() {
         return instance;
@@ -44,7 +44,7 @@ public class ConnectionPool {
 
         if (c == null) {
             try {
-                Class clazz = AuthenticationManager.getInstance().lookup(s.getAuthenticationMechanism());
+                Class<?> clazz = AuthenticationManager.getInstance().lookup(s.getAuthenticationMechanism());
                 IAuthenticationMechanism authenticationMechanism = (IAuthenticationMechanism) clazz.newInstance();
 
                 authenticationMechanism.setProperties(s.getAsProperties());
@@ -60,14 +60,13 @@ public class ConnectionPool {
                 ex.printStackTrace(System.err);
                 return null;
             }
-        } else
+        } else {
             list.remove(c);
+        }
 
         list = busyMap.computeIfAbsent(s, k -> new LinkedList<>());
         list.add(c);
 
-        if (c.isClosed())
-            c.reconnect(true);
         return c;
     }
 
@@ -89,4 +88,8 @@ public class ConnectionPool {
         }
     }
 
+    public void checkConnected(kx.c c) throws IOException,K4Exception {
+        if (c.isClosed())
+            c.reconnect(true);
+    }
 }

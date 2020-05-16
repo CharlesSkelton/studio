@@ -2,10 +2,10 @@ package studio.ui;
 
 import studio.kdb.Server;
 
-import javax.swing.JFrame;
+import java.awt.*;
 
 public class AddServerForm extends ServerForm {
-    public AddServerForm(JFrame owner) {
+    public AddServerForm(Window owner) {
         super(owner, "Add a new server", new Server());
     }
 }

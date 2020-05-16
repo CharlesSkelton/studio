@@ -13,6 +13,9 @@ public class SettingsDialog extends EscapeDialog {
     private JComboBox comboBoxAuthMechanism;
     private JTextField txtUser;
     private JPasswordField txtPassword;
+    private JCheckBox chBoxShowServerCombo;
+    private JButton btnOk;
+    private JButton btnCancel;
 
     private final static int FIELD_SIZE = 150;
 
@@ -33,11 +36,22 @@ public class SettingsDialog extends EscapeDialog {
         return new String(txtPassword.getPassword());
     }
 
+    public boolean isShowServerComboBox() {
+        return chBoxShowServerCombo.isSelected();
+    }
+
     private void refreshCredentials() {
         Credentials credentials = Config.getInstance().getDefaultCredentials(getDefaultAuthenticationMechanism());
 
         txtUser.setText(credentials.getUsername());
         txtPassword.setText(credentials.getPassword());
+        chBoxShowServerCombo.setSelected(Config.getInstance().isShowServerComboBox());
+    }
+
+    @Override
+    public void align() {
+        super.align();
+        btnOk.requestFocusInWindow();
     }
 
     private void initComponents() {
@@ -48,19 +62,22 @@ public class SettingsDialog extends EscapeDialog {
         comboBoxAuthMechanism = new JComboBox(AuthenticationManager.getInstance().getAuthenticationMechanisms());
         comboBoxAuthMechanism.getModel().setSelectedItem(Config.getInstance().getDefaultAuthMechanism());
         comboBoxAuthMechanism.addItemListener(e -> refreshCredentials());
-        refreshCredentials();
 
+        chBoxShowServerCombo = new JCheckBox("Show server drop down list in the toolbar");
         JLabel lblAuthMechanism = new JLabel("Authentication:");
         JLabel lblUser = new JLabel("  User:");
         JLabel lblPassword = new JLabel("  Password:");
 
         Component glue = Box.createGlue();
         Component glue1 = Box.createGlue();
-        JButton btnOk = new JButton("OK");
-        JButton btnCancel = new JButton("Cancel");
+
+        btnOk = new JButton("OK");
+        btnCancel = new JButton("Cancel");
 
         btnOk.addActionListener(e->accept());
         btnCancel.addActionListener(e->cancel());
+
+        refreshCredentials();
 
         GroupLayout layout = new GroupLayout(root);
         root.setLayout(layout);
@@ -69,6 +86,7 @@ public class SettingsDialog extends EscapeDialog {
 
         layout.setHorizontalGroup(
                 layout.createParallelGroup()
+                        .addComponent(chBoxShowServerCombo)
                         .addGroup(
                             layout.createSequentialGroup()
                                         .addComponent(lblAuthMechanism)
@@ -89,6 +107,7 @@ public class SettingsDialog extends EscapeDialog {
 
         layout.setVerticalGroup(
                 layout.createSequentialGroup()
+                    .addComponent(chBoxShowServerCombo)
                     .addGroup(
                         layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
                                 .addComponent(lblAuthMechanism)
