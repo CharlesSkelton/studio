@@ -23,7 +23,9 @@ public class LimitedWriter extends CharArrayWriter {
 
     public void write(String s) throws IOException {
         if ((size() + s.length()) > limit) {
-            super.write(s.substring(0,limit - size()));
+            if (limit>size()) {
+                super.write(s.substring(0,limit - size()));
+            }
             super.write(" ... ");
             throw new LimitException();
         }

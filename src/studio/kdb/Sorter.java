@@ -233,6 +233,14 @@ public class Sorter {
             sort((byte[]) data,0,length - 1,permutation,scratch);
         else if (data instanceof String[])
             sort((String[]) data,0,length - 1,permutation,scratch);
+        else if (data instanceof K.KBase[]) {
+            K.KBase[] generalList = (K.KBase[]) data;
+            String[] list = new String[generalList.length];
+            for (int index = 0; index < generalList.length; index++) {
+                list[index] = generalList[index].toString(false);
+            }
+            sort(list,0, length-1, permutation, scratch);
+        }
 
         return permutation;
     }

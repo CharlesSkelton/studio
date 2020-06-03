@@ -252,6 +252,24 @@ public class Config {
         save();
     }
 
+    public int getMaxCharsInResult() {
+        return Integer.parseInt(p.getProperty("maxCharsInResult", "50000"));
+    }
+
+    public void setMaxCharsInResult(int value) {
+        p.setProperty("maxCharsInResult", "" + value);
+        save();
+    }
+
+    public int getMaxCharsInTableCell() {
+        return Integer.parseInt(p.getProperty("maxCharsInTableCell", "256"));
+    }
+
+    public void setMaxCharsInTableCell(int value) {
+        p.setProperty("maxCharsInTableCell", "" + value);
+        save();
+    }
+
     public void setServerListBounds(Rectangle rectangle) {
         p.setProperty("serverList.x", "" + (int)rectangle.getX());
         p.setProperty("serverList.y", "" + (int)rectangle.getY());

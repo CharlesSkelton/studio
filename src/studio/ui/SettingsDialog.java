@@ -19,6 +19,8 @@ public class SettingsDialog extends EscapeDialog {
     private JCheckBox chBoxShowServerCombo;
     private JComboBox comboBoxLookAndFeel;
     private JFormattedTextField txtTabsCount;
+    private JFormattedTextField txtMaxCharsInResult;
+    private JFormattedTextField txtMaxCharsInTableCell;
     private JButton btnOk;
     private JButton btnCancel;
 
@@ -51,6 +53,14 @@ public class SettingsDialog extends EscapeDialog {
 
     public int getResultTabsCount() {
         return (Integer) txtTabsCount.getValue();
+    }
+
+    public int getMaxCharsInResult() {
+        return (Integer) txtMaxCharsInResult.getValue();
+    }
+
+    public int getMaxCharsInTableCell() {
+        return (Integer) txtMaxCharsInTableCell.getValue();
     }
 
     private void refreshCredentials() {
@@ -92,6 +102,12 @@ public class SettingsDialog extends EscapeDialog {
         txtTabsCount = new JFormattedTextField(formatter);
         txtTabsCount.setValue(Config.getInstance().getResultTabsCount());
         chBoxShowServerCombo = new JCheckBox("Show server drop down list in the toolbar");
+        JLabel lblMaxCharsInResult = new JLabel("Max chars in result");
+        txtMaxCharsInResult = new JFormattedTextField(formatter);
+        txtMaxCharsInResult.setValue(Config.getInstance().getMaxCharsInResult());
+        JLabel lblMaxCharsInTableCell = new JLabel("Max chars in table cell");
+        txtMaxCharsInTableCell = new JFormattedTextField(formatter);
+        txtMaxCharsInTableCell.setValue(Config.getInstance().getMaxCharsInTableCell());
         JLabel lblAuthMechanism = new JLabel("Authentication:");
         JLabel lblUser = new JLabel("  User:");
         JLabel lblPassword = new JLabel("  Password:");
@@ -128,6 +144,12 @@ public class SettingsDialog extends EscapeDialog {
                                         .addComponent(chBoxShowServerCombo)
                         ).addGroup(
                             layout.createSequentialGroup()
+                                        .addComponent(lblMaxCharsInResult)
+                                        .addComponent(txtMaxCharsInResult)
+                                        .addComponent(lblMaxCharsInTableCell)
+                                        .addComponent(txtMaxCharsInTableCell)
+                        ).addGroup(
+                            layout.createSequentialGroup()
                                         .addComponent(lblAuthMechanism)
                                         .addComponent(comboBoxAuthMechanism, PREFERRED_SIZE, PREFERRED_SIZE, PREFERRED_SIZE)
                                         .addComponent(lblUser)
@@ -158,6 +180,12 @@ public class SettingsDialog extends EscapeDialog {
                                 .addComponent(chBoxShowServerCombo)
                     ).addGroup(
                         layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+                                .addComponent(lblMaxCharsInResult)
+                                .addComponent(txtMaxCharsInResult)
+                                .addComponent(lblMaxCharsInTableCell)
+                                .addComponent(txtMaxCharsInTableCell)
+                ).addGroup(
+                        layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
                                 .addComponent(lblAuthMechanism)
                                 .addComponent(comboBoxAuthMechanism)
                                 .addComponent(lblUser)
@@ -172,7 +200,7 @@ public class SettingsDialog extends EscapeDialog {
                                 .addComponent(btnCancel)
                     )
         );
-        layout.linkSize(SwingConstants.HORIZONTAL, txtUser, txtPassword, txtTabsCount);
+        layout.linkSize(SwingConstants.HORIZONTAL, txtUser, txtPassword, txtTabsCount, txtMaxCharsInResult, txtMaxCharsInTableCell);
         layout.linkSize(SwingConstants.HORIZONTAL, btnOk, btnCancel);
         setContentPane(root);
     }
