@@ -122,11 +122,6 @@ public class K {
             type = 102;
         }
 
-        @Override
-        public String toString(boolean showType) {
-            return getPrimitive();
-        }
-
         public void toString(LimitedWriter w, boolean showType) throws IOException {
             w.write(getPrimitive());
         }
@@ -258,6 +253,12 @@ public class K {
         public Primitive(String[] ops, int i) {
             primitive = i;
             s =  (i >= 0 && i < ops.length) ? ops[i] : " ";
+        }
+
+
+        @Override
+        public String toString(boolean showType) {
+            return getPrimitive();
         }
 
         public String getPrimitive() {
