@@ -23,11 +23,12 @@ public class LimitedWriter extends CharArrayWriter {
         super.write(c);
     }
 
-    @Override
     public void write(String s, int off, int len) {
         if ((size() + s.length()) > limit) {
-            String substring = s.substring(0, limit - size());
-            super.write(substring, 0, substring.length());
+            if (limit > size()) {
+                String substring = s.substring(0, limit - size());
+                super.write(substring, 0, substring.length());
+            }
             super.write(TOO_LONG, 0, TOO_LONG.length());
             throw new LimitException();
         }

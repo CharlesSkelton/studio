@@ -113,7 +113,10 @@ public class TableRowHeader extends JList {
             setHorizontalAlignment(RIGHT);
             setVerticalAlignment(CENTER);
             setOpaque(true);
-            setBorder(UIManager.getBorder("TableHeader.cellBorder"));
+            setBorder(BorderFactory.createCompoundBorder(
+                        UIManager.getBorder("TableHeader.cellBorder"),
+                        BorderFactory.createEmptyBorder(0,0,0,5)
+                      ));
             //setFont(UIManager.getFont("Table.font"));
             setFont(table.getFont());
             setBackground(UIManager.getColor("TableHeader.background"));

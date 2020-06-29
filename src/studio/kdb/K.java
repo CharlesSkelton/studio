@@ -1,7 +1,9 @@
 package studio.kdb;
 
+import java.io.CharArrayWriter;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.Writer;
 import java.lang.reflect.Array;
 import java.sql.Time;
 import java.sql.Timestamp;
@@ -87,7 +89,7 @@ public class K {
             return "";
         }
 
-        public void toString(LimitedWriter w, boolean showType) throws IOException {
+        public void toString(Writer w, boolean showType) throws IOException {
             w.write(toString(showType));
         }
 
@@ -122,7 +124,7 @@ public class K {
             type = 102;
         }
 
-        public void toString(LimitedWriter w, boolean showType) throws IOException {
+        public void toString(Writer w, boolean showType) throws IOException {
             w.write(getPrimitive());
         }
     }
@@ -150,7 +152,7 @@ public class K {
             type = 111;
         }
 
-        public void toString(LimitedWriter w, boolean showType) throws IOException {
+        public void toString(Writer w, boolean showType) throws IOException {
             o.toString(w, showType);
             w.write("\\:");
         }
@@ -162,7 +164,7 @@ public class K {
             type = 110;
         }
 
-        public void toString(LimitedWriter w, boolean showType) throws IOException {
+        public void toString(Writer w, boolean showType) throws IOException {
             o.toString(w, showType);
             w.write("/:");
         }
@@ -174,7 +176,7 @@ public class K {
             type = 109;
         }
 
-        public void toString(LimitedWriter w, boolean showType) throws IOException {
+        public void toString(Writer w, boolean showType) throws IOException {
             o.toString(w, showType);
             w.write("':");
         }
@@ -186,7 +188,7 @@ public class K {
             type = 106;
         }
 
-        public void toString(LimitedWriter w, boolean showType) throws IOException {
+        public void toString(Writer w, boolean showType) throws IOException {
             o.toString(w, showType);
             w.write("'");
         }
@@ -198,7 +200,7 @@ public class K {
             type = 107;
         }
 
-        public void toString(LimitedWriter w, boolean showType) throws IOException {
+        public void toString(Writer w, boolean showType) throws IOException {
             o.toString(w, showType);
             w.write("/");
         }
@@ -211,7 +213,7 @@ public class K {
             this.o = o;
         }
 
-        public void toString(LimitedWriter w, boolean showType) throws IOException {
+        public void toString(Writer w, boolean showType) throws IOException {
             o.toString(w, showType);
             w.write("\\");
         }
@@ -237,7 +239,7 @@ public class K {
             return body;
         }
 
-        public void toString(LimitedWriter w, boolean showType) throws IOException {
+        public void toString(Writer w, boolean showType) throws IOException {
             w.write(body);
         }
     }
@@ -282,7 +284,7 @@ public class K {
             this.objs = objs;
         }
 
-        public void toString(LimitedWriter w, boolean showType) throws IOException {
+        public void toString(Writer w, boolean showType) throws IOException {
             boolean listProjection = false;
             if ((objs.getLength() > 0) && (objs.at(0) instanceof UnaryPrimitive)) {
                 UnaryPrimitive up = (UnaryPrimitive) objs.at(0);
@@ -365,7 +367,7 @@ public class K {
             return primitive;
         }
 
-        public void toString(LimitedWriter w, boolean showType) throws IOException {
+        public void toString(Writer w, boolean showType) throws IOException {
             w.write(charVal);
         }
     }
@@ -378,7 +380,7 @@ public class K {
             type = 101;
         }
 
-        public void toString(LimitedWriter w, boolean showType) throws IOException {
+        public void toString(Writer w, boolean showType) throws IOException {
             if (getPrimitiveAsInt() == -1)
                 return;
             w.write(getPrimitive());
@@ -437,7 +439,7 @@ public class K {
             return s;
         }
 
-        public void toString(LimitedWriter w, boolean showType) throws IOException {
+        public void toString(Writer w, boolean showType) throws IOException {
             w.write(toString(showType));
         }
 
@@ -470,7 +472,7 @@ public class K {
             return "0x" + Integer.toHexString((b >> 4) & 0xf) + Integer.toHexString(b & 0xf);
         }
 
-        public void toString(LimitedWriter w, boolean showType) throws IOException {
+        public void toString(Writer w, boolean showType) throws IOException {
             w.write(toString(showType));
         }
     }
@@ -510,7 +512,7 @@ public class K {
             return t;
         }
 
-        public void toString(LimitedWriter w, boolean showType) throws IOException {
+        public void toString(Writer w, boolean showType) throws IOException {
             w.write(toString(showType));
         }
     }
@@ -550,7 +552,7 @@ public class K {
             return s;
         }
 
-        public void toString(LimitedWriter w, boolean showType) throws IOException {
+        public void toString(Writer w, boolean showType) throws IOException {
             w.write(toString(showType));
         }
     }
@@ -575,7 +577,7 @@ public class K {
             return s.length() == 0;
         }
 
-        public void toString(LimitedWriter w, boolean showType) throws IOException {
+        public void toString(Writer w, boolean showType) throws IOException {
             if (showType)
                 w.write("`");
             w.write(s);
@@ -628,7 +630,7 @@ public class K {
             return s;
         }
 
-        public void toString(LimitedWriter w, boolean showType) throws IOException {
+        public void toString(Writer w, boolean showType) throws IOException {
             w.write(toString(showType));
         }
 
@@ -661,7 +663,7 @@ public class K {
                 return "" + c;
         }
 
-        public void toString(LimitedWriter w, boolean showType) throws IOException {
+        public void toString(Writer w, boolean showType) throws IOException {
             w.write(toString(showType));
         }
 
@@ -710,7 +712,7 @@ public class K {
             }
         }
 
-        public void toString(LimitedWriter w, boolean showType) throws IOException {
+        public void toString(Writer w, boolean showType) throws IOException {
             w.write(toString(showType));
         }
 
@@ -760,7 +762,7 @@ public class K {
             }
         }
 
-        public void toString(LimitedWriter w, boolean showType) throws IOException {
+        public void toString(Writer w, boolean showType) throws IOException {
             w.write(toString(showType));
         }
 
@@ -798,7 +800,7 @@ public class K {
                 return sd("yyyy.MM.dd", new Date(86400000L * (date + 10957)));
         }
 
-        public void toString(LimitedWriter w, boolean showType) throws IOException {
+        public void toString(Writer w, boolean showType) throws IOException {
             w.write(toString(showType));
         }
 
@@ -829,7 +831,7 @@ public class K {
             return uuid.toString();
         }
 
-        public void toString(LimitedWriter w, boolean showType) throws IOException {
+        public void toString(Writer w, boolean showType) throws IOException {
             w.write(toString(showType));
         }
     }
@@ -861,7 +863,7 @@ public class K {
                 return sd("HH:mm:ss.SSS", new Time(time));
         }
 
-        public void toString(LimitedWriter w, boolean showType) throws IOException {
+        public void toString(Writer w, boolean showType) throws IOException {
             w.write(toString(showType));
         }
 
@@ -897,7 +899,7 @@ public class K {
                 return sd("yyyy.MM.dd HH:mm:ss.SSS", toTimestamp());
         }
 
-        public void toString(LimitedWriter w, boolean showType) throws IOException {
+        public void toString(Writer w, boolean showType) throws IOException {
             w.write(toString(showType));
         }
 
@@ -936,7 +938,7 @@ public class K {
             }
         }
 
-        public void toString(LimitedWriter w, boolean showType) throws IOException {
+        public void toString(Writer w, boolean showType) throws IOException {
             w.write(toString(showType));
         }
 
@@ -981,7 +983,7 @@ public class K {
             cy.append(updy);
         }
 
-        public void toString(LimitedWriter w, boolean showType) throws IOException {
+        public void toString(Writer w, boolean showType) throws IOException {
             boolean useBrackets = getAttr() != 0 || x instanceof Flip;
             w.write(super.toString(showType));
             if (useBrackets)
@@ -1013,7 +1015,7 @@ public class K {
             y = (K.KBaseVector) X.y;
         }
 
-        public void toString(LimitedWriter w, boolean showType) throws IOException {
+        public void toString(Writer w, boolean showType) throws IOException {
             boolean usebracket = x.getLength() == 1;
             w.write(flip);
             if (usebracket)
@@ -1070,7 +1072,7 @@ public class K {
             return cal.getTime();
         }
 
-        public void toString(LimitedWriter w, boolean showType) throws IOException {
+        public void toString(Writer w, boolean showType) throws IOException {
             w.write(toString(showType));
         }
     }
@@ -1102,7 +1104,7 @@ public class K {
                 return i2(i / 60) + ":" + i2(i % 60);
         }
 
-        public void toString(LimitedWriter w, boolean showType) throws IOException {
+        public void toString(Writer w, boolean showType) throws IOException {
             w.write(toString(showType));
         }
 
@@ -1141,7 +1143,7 @@ public class K {
                 return new Minute(i / 60).toString() + ':' + i2(i % 60);
         }
 
-        public void toString(LimitedWriter w, boolean showType) throws IOException {
+        public void toString(Writer w, boolean showType) throws IOException {
             w.write(toString(showType));
         }
 
@@ -1194,7 +1196,7 @@ public class K {
             }
         }
 
-        public void toString(LimitedWriter w, boolean showType) throws IOException {
+        public void toString(Writer w, boolean showType) throws IOException {
             w.write(toString(showType));
         }
 
@@ -1267,7 +1269,7 @@ public class K {
             return new KShort(Array.getShort(array, i));
         }
 
-        public void toString(LimitedWriter w, boolean showType) throws IOException {
+        public void toString(Writer w, boolean showType) throws IOException {
             w.write(super.toString(showType));
 
             if (getLength() == 0)
@@ -1309,7 +1311,7 @@ public class K {
             return new KInteger(Array.getInt(array, i));
         }
 
-        public void toString(LimitedWriter w, boolean showType) throws IOException {
+        public void toString(Writer w, boolean showType) throws IOException {
             w.write(super.toString(showType));
 
             if (getLength() == 0)
@@ -1350,7 +1352,7 @@ public class K {
             return (KBase) Array.get(array, i);
         }
 
-        public void toString(LimitedWriter w, boolean showType) throws IOException {
+        public void toString(Writer w, boolean showType) throws IOException {
             w.write(super.toString(showType));
 
             if (getLength() == 1)
@@ -1400,7 +1402,7 @@ public class K {
             return new KDouble(Array.getDouble(array, i));
         }
 
-        public void toString(LimitedWriter w, boolean showType) throws IOException {
+        public void toString(Writer w, boolean showType) throws IOException {
             w.write(super.toString(showType));
 
             if (getLength() == 0)
@@ -1452,7 +1454,7 @@ public class K {
             return new KFloat(Array.getFloat(array, i));
         }
 
-        public void toString(LimitedWriter w, boolean showType) throws IOException {
+        public void toString(Writer w, boolean showType) throws IOException {
             w.write(super.toString(showType));
 
             if (getLength() == 0)
@@ -1502,7 +1504,7 @@ public class K {
             return new KLong(Array.getLong(array, i));
         }
 
-        public void toString(LimitedWriter w, boolean showType) throws IOException {
+        public void toString(Writer w, boolean showType) throws IOException {
             w.write(super.toString(showType));
 
             if (getLength() == 0)
@@ -1544,7 +1546,7 @@ public class K {
             return new Month(Array.getInt(array, i));
         }
 
-        public void toString(LimitedWriter w, boolean showType) throws IOException {
+        public void toString(Writer w, boolean showType) throws IOException {
             w.write(super.toString(showType));
 
             if (getLength() == 0)
@@ -1588,7 +1590,7 @@ public class K {
             return new KDate(Array.getInt(array, i));
         }
 
-        public void toString(LimitedWriter w, boolean showType) throws IOException {
+        public void toString(Writer w, boolean showType) throws IOException {
             w.write(super.toString(showType));
 
             if (getLength() == 0)
@@ -1632,7 +1634,7 @@ public class K {
             return new KGuid((UUID) Array.get(array, i));
         }
 
-        public void toString(LimitedWriter w, boolean showType) throws IOException {
+        public void toString(Writer w, boolean showType) throws IOException {
             w.write(super.toString(showType));
 
             if (getLength() == 0)
@@ -1663,7 +1665,7 @@ public class K {
             return new Minute(Array.getInt(array, i));
         }
 
-        public void toString(LimitedWriter w, boolean showType) throws IOException {
+        public void toString(Writer w, boolean showType) throws IOException {
             w.write(super.toString(showType));
 
             if (getLength() == 0)
@@ -1702,7 +1704,7 @@ public class K {
             return new KDatetime(Array.getDouble(array, i));
         }
 
-        public void toString(LimitedWriter w, boolean showType) throws IOException {
+        public void toString(Writer w, boolean showType) throws IOException {
             w.write(super.toString(showType));
 
             if (getLength() == 0)
@@ -1748,7 +1750,7 @@ public class K {
             return new KTimestamp(Array.getLong(array, i));
         }
 
-        public void toString(LimitedWriter w, boolean showType) throws IOException {
+        public void toString(Writer w, boolean showType) throws IOException {
             w.write(super.toString(showType));
 
             if (getLength() == 0)
@@ -1779,7 +1781,7 @@ public class K {
             return new KTimespan(Array.getLong(array, i));
         }
 
-        public void toString(LimitedWriter w, boolean showType) throws IOException {
+        public void toString(Writer w, boolean showType) throws IOException {
             w.write(super.toString(showType));
 
             if (getLength() == 0)
@@ -1818,7 +1820,7 @@ public class K {
                 write(o, Array.getInt(array, i));
         }
 
-        public void toString(LimitedWriter w, boolean showType) throws IOException {
+        public void toString(Writer w, boolean showType) throws IOException {
             w.write(super.toString(showType));
 
             if (getLength() == 0)
@@ -1865,7 +1867,7 @@ public class K {
                 write(o, Array.getInt(array, i));
         }
 
-        public void toString(LimitedWriter w, boolean showType) throws IOException {
+        public void toString(Writer w, boolean showType) throws IOException {
             w.write(super.toString(showType));
 
             if (getLength() == 0)
@@ -1912,7 +1914,7 @@ public class K {
                 write(o, (byte) (Array.getBoolean(array, i) ? 1 : 0));
         }
 
-        public void toString(LimitedWriter w, boolean showType) throws IOException {
+        public void toString(Writer w, boolean showType) throws IOException {
             w.write(super.toString(showType));
             if (getLength() == 0)
                 w.write("`boolean$()");
@@ -1948,7 +1950,7 @@ public class K {
                 write(o, Array.getByte(array, i));
         }
 
-        public void toString(LimitedWriter w, boolean showType) throws IOException {
+        public void toString(Writer w, boolean showType) throws IOException {
             w.write(super.toString(showType));
             if (getLength() == 0)
                 w.write("`byte$()");
@@ -1979,7 +1981,7 @@ public class K {
             return new KSymbol((String) Array.get(array, i));
         }
 
-        public void toString(LimitedWriter w, boolean showType) throws IOException {
+        public void toString(Writer w, boolean showType) throws IOException {
             w.write(super.toString(showType));
             toString(w);
         }
@@ -2045,7 +2047,7 @@ public class K {
             o.write(b);
         }
 
-        public void toString(LimitedWriter w, boolean showType) throws IOException {
+        public void toString(Writer w, boolean showType) throws IOException {
             w.write(super.toString(showType));
             if (getLength() == 1)
                 w.write(enlist);
@@ -2059,27 +2061,22 @@ public class K {
         }
 
         public String toString(boolean showType) {
+            CharArrayWriter w = new CharArrayWriter();
             try {
-                LimitedWriter lw = new LimitedWriter(256);
-                toString(lw, showType);
-                return lw.toString();
+                toString(w, showType);
             } catch (IOException e) {
-                StringBuilder sb = new StringBuilder(256);
-                if (getLength() == 1)
-                    sb.append(enlist);
-                sb.append('"').append((char[]) array).append('"');
-                return sb.toString();
+                e.printStackTrace(System.err);
             }
+            return w.toString();
         }
     }
 
     public static String decode(KBase obj, boolean showType) {
-        LimitedWriter w = new LimitedWriter(20000);
+        CharArrayWriter w = new CharArrayWriter();
         try {
             obj.toString(w, showType);
         } catch (IOException e) {
-            e.printStackTrace();
-        } catch (LimitedWriter.LimitException ex) {
+            e.printStackTrace(System.err);
         }
 
         return w.toString();
