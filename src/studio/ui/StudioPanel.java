@@ -64,7 +64,6 @@ public class StudioPanel extends JPanel implements Observer,WindowListener {
     private JSplitPane splitpane;
     private JTabbedPane tabbedPane;
     private ServerList serverList;
-    private Font font = null;
     private UserAction arrangeAllAction;
     private UserAction closeFileAction;
     private UserAction newFileAction;
@@ -1376,6 +1375,16 @@ public class StudioPanel extends JPanel implements Observer,WindowListener {
         Config.getInstance().setDefaultAuthMechanism(auth);
         Config.getInstance().setDefaultCredentials(auth, new Credentials(dialog.getUser(), dialog.getPassword()));
         Config.getInstance().setShowServerComboBox(dialog.isShowServerComboBox());
+        Config.getInstance().setResultTabsCount(dialog.getResultTabsCount());
+        Config.getInstance().setMaxCharsInResult(dialog.getMaxCharsInResult());
+        Config.getInstance().setMaxCharsInTableCell(dialog.getMaxCharsInTableCell());
+
+        String lfClass = dialog.getLookAndFeelClassName();
+        if (!lfClass.equals(UIManager.getLookAndFeel().getClass().getName())) {
+            Config.getInstance().setLookAndFeel(lfClass);
+            JOptionPane.showMessageDialog(frame, "Look and Feel was changed. New L&F will take effect on the next start up.", "Look and Feel Setting Changed", JOptionPane.INFORMATION_MESSAGE);
+        }
+
         rebuildToolbar();
     }
 
@@ -1792,6 +1801,7 @@ public class StudioPanel extends JPanel implements Observer,WindowListener {
 
     private JToolBar createToolbar() {
         toolbar = new JToolBar();
+        toolbar.setLayout(new BoxLayout(toolbar, BoxLayout.X_AXIS));
         toolbar.setFloatable(false);
         rebuildToolbar();
         return toolbar;
@@ -2139,7 +2149,7 @@ public class StudioPanel extends JPanel implements Observer,WindowListener {
             } else {
                 chartAction.setEnabled(false);
                 openInExcel.setEnabled(false);
-                LimitedWriter lm = new LimitedWriter(50000);
+                LimitedWriter lm = new LimitedWriter(Config.getInstance().getMaxCharsInResult());
                 try {
                   if(!(r instanceof K.UnaryPrimitive&&0==((K.UnaryPrimitive)r).getPrimitiveAsInt()))
                     r.toString(lm,true);
@@ -2150,19 +2160,13 @@ public class StudioPanel extends JPanel implements Observer,WindowListener {
                 catch (LimitedWriter.LimitException ex) {
                 }
 
-                JEditorPane pane = new JEditorPane("text/plain",lm.toString());
-                pane.setFont(font);
-
-//pane.setLineWrap( false);
-//pane.setWrapStyleWord( false);
-
-                JScrollPane scrollpane = new JScrollPane(pane,
-                                                         ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
-                                                         ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+                JEditorPane textArea = new JEditorPane("text/q",lm.toString());
+                textArea.setEditable(false);
 
                 TabPanel frame = new TabPanel("Console View ",
-                                              Util.CONSOLE_ICON,
-                                              scrollpane);
+                        Util.CONSOLE_ICON,
+                        Utilities.getEditorUI(textArea).getExtComponent());
+
 
                 frame.setTitle(I18n.getString("ConsoleView"));
 
@@ -2172,6 +2176,7 @@ public class StudioPanel extends JPanel implements Observer,WindowListener {
         else {
             // Log that execute was successful
         }
+        tabbedPane.setSelectedIndex(tabbedPane.getTabCount()-1);
     }
     Server server = null;
 
@@ -2179,7 +2184,11 @@ public class StudioPanel extends JPanel implements Observer,WindowListener {
         final Cursor cursor = textArea.getCursor();
 
         textArea.setCursor(new java.awt.Cursor(java.awt.Cursor.WAIT_CURSOR));
-        tabbedPane.removeAll();
+
+          if(tabbedPane.getTabCount()>=Config.getInstance().getResultTabsCount()) {
+              tabbedPane.remove(0);
+          }
+
         worker = new SwingWorker() {
             Server s = null;
             c c = null;
@@ -2248,8 +2257,7 @@ public class StudioPanel extends JPanel implements Observer,WindowListener {
                             frame.setTitle("Error Details ");
 
                             tabbedPane.addTab(frame.getTitle(),frame.getIcon(),frame.getComponent());
-
-                        //            tabbedPane.setSelectedComponent(resultsTabbedPane);
+                            tabbedPane.setSelectedIndex(tabbedPane.getTabCount()-1);
                         }
                         catch (java.lang.OutOfMemoryError ex) {
                             JOptionPane.showMessageDialog(frame,
@@ -2276,6 +2284,7 @@ public class StudioPanel extends JPanel implements Observer,WindowListener {
                             processK4Results(r);
                         }
                         catch (Exception e) {
+                            e.printStackTrace(System.err);
                             JOptionPane.showMessageDialog(frame,
                                                           "\nAn unexpected error occurred whilst communicating with " + server.getHost() + ":" + server.getPort() + "\n\nError detail is\n\n" + e.getMessage() + "\n\n",
                                                           "Studio for kdb+",

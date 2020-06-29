@@ -13,7 +13,7 @@ import javax.swing.table.DefaultTableCellRenderer;
 public class TableHeaderRenderer extends DefaultTableCellRenderer {
     public TableHeaderRenderer() {
         super();
-        setHorizontalAlignment(SwingConstants.RIGHT);
+        setHorizontalAlignment(SwingConstants.LEFT);
         setVerticalAlignment(SwingConstants.CENTER);
         setOpaque(true);
         final Border border = UIManager.getBorder("TableHeader.cellBorder");

@@ -265,6 +265,7 @@ public class ServerList extends EscapeDialog implements TreeExpansionListener  {
         tglBtnBoxTree.setFocusable(false);
         tglBtnBoxTree.addActionListener(e->refreshServers());
         JToolBar toolbar = new JToolBar();
+        toolbar.setLayout(new BoxLayout(toolbar, BoxLayout.X_AXIS));
         toolbar.setFloatable(false);
         toolbar.add(tglBtnBoxTree);
         toolbar.addSeparator();
