@@ -357,7 +357,7 @@ public class Config {
     }
 
     private void initServers() {
-        if (p.getProperty("version").equals(OLD_VERSION)) {
+        if (p.contains("version") && p.getProperty("version").equals(OLD_VERSION)) {
             convertFromOldVerion();
         }
         serverNames = new ArrayList<>();
