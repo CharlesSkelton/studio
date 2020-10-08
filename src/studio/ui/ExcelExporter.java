@@ -17,7 +17,6 @@ import javax.swing.ProgressMonitor;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.table.TableModel;
-import studio.kdb.Config;
 
 class ExcelExporter {
     /*   public void exportTable1(JTable table, File file) throws IOException {
@@ -171,7 +170,7 @@ class ExcelExporter {
                                 } else if (table.getColumnClass(j) == K.KCharacterVector.class) {
                                     writer.write("<ss:Cell><ss:Data ss:Type=\"String\">" + escape(new String(new char[]{((K.KCharacter) b).c})));
                                 } else {
-                                    writer.write("<ss:Cell><ss:Data ss:Type=\"String\">" + escape(K.decode(b, false)));
+                                    writer.write("<ss:Cell><ss:Data ss:Type=\"String\">" + escape(b.toString(false)));
                                 }
                             } else {
                                 writer.write("<ss:Cell><ss:Data ss:Type=\"String\">");

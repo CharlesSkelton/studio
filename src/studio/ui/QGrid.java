@@ -1,6 +1,5 @@
 package studio.ui;
 
-import studio.kdb.Config;
 import studio.kdb.K;
 import studio.kdb.TableHeaderRenderer;
 import studio.kdb.TableRowHeader;
@@ -324,6 +323,14 @@ public class QGrid extends JPanel {
                 if (e.isPopupTrigger())
                     popupMenu.show(e.getComponent(),
                             e.getX(), e.getY());
+            }
+
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (e.getClickCount() != 2) return;
+                K.KBase b = (K.KBase) table.getValueAt(table.getSelectedRow(), table.getSelectedColumn());
+                Toolkit.getDefaultToolkit().getSystemClipboard().setContents(new StringSelection(b.toString(b instanceof K.KBaseVector)), null);
+
             }
         });
     }

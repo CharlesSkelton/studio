@@ -2149,18 +2149,12 @@ public class StudioPanel extends JPanel implements Observer,WindowListener {
             } else {
                 chartAction.setEnabled(false);
                 openInExcel.setEnabled(false);
-                LimitedWriter lm = new LimitedWriter(Config.getInstance().getMaxCharsInResult());
-                try {
-                  if(!(r instanceof K.UnaryPrimitive&&0==((K.UnaryPrimitive)r).getPrimitiveAsInt()))
-                    r.toString(lm,true);
+                String text;
+                if ((r instanceof K.UnaryPrimitive&&0==((K.UnaryPrimitive)r).getPrimitiveAsInt())) text = "";
+                else {
+                    text = Util.limitString(r.toString(), Config.getInstance().getMaxCharsInResult());
                 }
-                catch (IOException ex) {
-                    ex.printStackTrace();
-                }
-                catch (LimitedWriter.LimitException ex) {
-                }
-
-                JEditorPane textArea = new JEditorPane("text/q",lm.toString());
+                JEditorPane textArea = new JEditorPane("text/q", text);
                 textArea.setEditable(false);
 
                 TabPanel frame = new TabPanel("Console View ",
