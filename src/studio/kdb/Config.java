@@ -191,7 +191,7 @@ public class Config {
         String host = nodes[0];
         int port = Integer.parseInt(nodes[1]); // could throw NumberFormatException
 
-        String auth = getDefaultAuthMechanism();
+        String auth = nodes.length == 2 ? getDefaultAuthMechanism() : DefaultAuthenticationMechanism.NAME;
         String user, password;
         if (nodes.length == 2) {
             Credentials credentials = getDefaultCredentials(auth);
