@@ -263,28 +263,13 @@ public class K {
         public StringBuilder format(StringBuilder builder, boolean showType) {
             builder = super.format(builder, showType);
             if (objs.getLength() == 0) return builder; // not sure if such is possible
-
-            KBase first = objs.at(0);
-
-            boolean listProjection = false;
-            if (first instanceof UnaryPrimitive) {
-                UnaryPrimitive up = (UnaryPrimitive) objs.at(0);
-                if (up.getPrimitiveAsInt() == 41) // plist
-                    listProjection = true;
-            }
-
-            boolean isFunction = false;
-            if ((first instanceof Function) || (first instanceof UnaryPrimitive) || (first instanceof BinaryPrimitive) || (first instanceof TernaryOperator)) {
-                if (!listProjection) isFunction = true;
-            }
-
-            if (!listProjection) first.format(builder, showType);
-            builder.append(isFunction ? "[" : "(");
+            objs.at(0).format(builder, showType);
+            builder.append("[");
             for (int i = 1; i < objs.getLength(); i++) {
                 if (i > 1) builder.append(";");
                 objs.at(i).format(builder, showType);
             }
-            builder.append(isFunction ? "]" : ")");
+            builder.append("]");
             return builder;
         }
     }

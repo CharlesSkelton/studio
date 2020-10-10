@@ -313,7 +313,10 @@ public class KTest {
         check(new K.Projection((K.KList)vector(K.KList.class, new K.BinaryPrimitive(1), new K.KLong(1))), "+[1]", "+[1]");
         //output from '[;]
         check(new K.Projection((K.KList)vector(K.KList.class, new K.TernaryOperator(0), new K.UnaryPrimitive(-1), new K.UnaryPrimitive(-1))), "'[;]", "'[;]");
-
+        //output from +/:[1;]
+        check(new K.Projection((K.KList)vector(K.KList.class, new K.FEachRight(new K.BinaryPrimitive(1)), new K.KLong(1), new K.UnaryPrimitive(-1)  ) ),"+/:[1;]", "+/:[1;]");
+        //output from enlist[1;]
+        check(new K.Projection((K.KList)vector(K.KList.class, new K.UnaryPrimitive(41), new K.KLong(1), new K.UnaryPrimitive(-1)  ) ),"enlist[1;]", "enlist[1;]");
     }
 
 
