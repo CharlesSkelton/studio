@@ -19,6 +19,8 @@ dependencies {
 //    compile group: 'org.jfree', name: 'jfreechart', version: '1.0.13'
     compile group: 'org.jfree', name: 'jfreechart', version: '1.0.14'
     runtime files ('lib/images.jar')
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.3.1'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.3.1'
 }
 
 sourceSets {
@@ -32,6 +34,15 @@ sourceSets {
             include 'org/netbeans/editor/Bundle*.properties'
         }
     }
+    test {
+        java {
+            srcDirs 'test'
+        }
+    }
+}
+
+test {
+    useJUnitPlatform()
 }
 
 application {

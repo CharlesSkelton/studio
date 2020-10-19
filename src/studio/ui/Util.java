@@ -2,6 +2,7 @@ package studio.ui;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.datatransfer.StringSelection;
 import java.awt.event.KeyEvent;
 import java.net.URL;
 
@@ -84,6 +85,19 @@ public class Util {
     public static String getAcceleratorString(KeyStroke keyStroke) {
         return KeyEvent.getKeyModifiersText(keyStroke.getModifiers()) + (MAC_OS_X ? "": "+") +
                 KeyEvent.getKeyText(keyStroke.getKeyCode());
+    }
+
+    public static String limitString(String text, int limit) {
+        if (text.length() <= limit) return text;
+        return text.substring(0, limit)  + " ...";
+    }
+
+    public static void copyTextToClipboard(String text) {
+        Toolkit.getDefaultToolkit().getSystemClipboard().setContents(new StringSelection(text.replace((char)0,' ')), null);
+    }
+
+    public static void copyHtmlToClipboard(String html) {
+        Toolkit.getDefaultToolkit().getSystemClipboard().setContents(new HtmlSelection(html.replace((char)0,' ')), null);
     }
 
 }

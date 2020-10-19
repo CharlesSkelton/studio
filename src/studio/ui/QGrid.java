@@ -1,6 +1,5 @@
 package studio.ui;
 
-import studio.kdb.Config;
 import studio.kdb.K;
 import studio.kdb.TableHeaderRenderer;
 import studio.kdb.TableRowHeader;
@@ -253,8 +252,7 @@ public class QGrid extends JPanel {
                             sb.append("\t");
                     }
                 }
-                StringSelection ss = new StringSelection(sb.toString());
-                Toolkit.getDefaultToolkit().getSystemClipboard().setContents(ss, null);
+                Util.copyTextToClipboard(sb.toString());
             }
         };
 
@@ -304,7 +302,7 @@ public class QGrid extends JPanel {
                 }
 
                 sb.append("</table>");
-                Toolkit.getDefaultToolkit().getSystemClipboard().setContents(new HtmlSelection(sb.toString()), null);
+                Util.copyHtmlToClipboard(sb.toString());
             }
         };
 
@@ -324,6 +322,14 @@ public class QGrid extends JPanel {
                 if (e.isPopupTrigger())
                     popupMenu.show(e.getComponent(),
                             e.getX(), e.getY());
+            }
+
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (e.getClickCount() != 2) return;
+                K.KBase b = (K.KBase) table.getValueAt(table.getSelectedRow(), table.getSelectedColumn());
+                Util.copyTextToClipboard(b.toString(b instanceof K.KBaseVector));
+
             }
         });
     }

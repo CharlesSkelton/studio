@@ -3,12 +3,10 @@ package studio.ui;
 import studio.kdb.Config;
 import studio.kdb.K;
 import studio.kdb.KTableModel;
-import studio.kdb.LimitedWriter;
 import java.awt.Color;
 import java.awt.Component;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.io.IOException;
 import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
 
@@ -58,18 +56,9 @@ class CellRenderer extends DefaultTableCellRenderer {
 
         if (value instanceof K.KBase) {
             K.KBase kb = (K.KBase) value;
-            LimitedWriter w = new LimitedWriter(Config.getInstance().getMaxCharsInTableCell());
-
-            try {
-                kb.toString(w,kb instanceof K.KBaseVector);
-            }
-            catch (IOException e) {
-                e.printStackTrace();
-            }
-            catch (LimitedWriter.LimitException ex) {
-            }
-
-            setText(w.toString());
+            String text = kb.toString(kb instanceof K.KBaseVector);
+            text = Util.limitString(text, Config.getInstance().getMaxCharsInTableCell());
+            setText(text);
             setForeground(kb.isNull() ? nullColor : fgColor);
         }
         else {
